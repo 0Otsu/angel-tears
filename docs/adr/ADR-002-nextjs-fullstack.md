@@ -1,34 +1,45 @@
-# ADR-002: propuesta de Next.js full-stack
+# ADR-002: Next.js full-stack, TypeScript y PostgreSQL
 
-**Estado: PROPUESTO - PENDIENTE DE VALIDACIÓN DEL EQUIPO**
+**Estado: ACEPTADO**
+
+Aceptación humana explícita: 16/10/2026, tarea UI FOUNDATION + APPLICATION BOOTSTRAP. Esta decisión sustituye el estado propuesto anterior; no implica que las integraciones futuras estén implementadas.
 
 ## Contexto
 
-El MVP combina sitio público con SEO/indexabilidad y administración. La dirección inicial es un monolito modular. Se propone evaluar Next.js full-stack, TypeScript y PostgreSQL; aún no se validaron grupalmente ni se instalaron.
+Angel Tears combina un sitio público con requisito de indexabilidad y administración interna para un negocio pequeño. La dirección aprobada es un monolito modular. Existe una UI revisada exportada desde v0 y adaptada sobre Boty; se necesita comenzar la aplicación sin rediseñarla y mantener una operación comprensible para el MVP.
 
-## Alternativas
+## Alternativas consideradas
 
 | Criterio | React SPA + backend separado | Next.js full-stack |
 | --- | --- | --- |
-| SEO | Evaluar cómo entregar contenido público rastreable e indexable; una SPA no resuelve por sí sola todos los objetivos. | Evaluar las opciones de entrega de contenido público para cumplir SEO; no garantiza resultados por sí solo. |
-| Simplicidad operativa | Requiere coordinar frontend, backend y sus contratos/configuración. | Puede concentrar interfaz y lógica de servidor en una aplicación, cuidando límites internos. |
-| Única aplicación | Evaluar si la separación elegida se ajusta a la dirección de una aplicación o requiere revisarla. | Se alinea con la propuesta de monolito modular full-stack. |
-| Experiencia del equipo | Contrastar conocimientos reales de React, backend y coordinación entre componentes. | Contrastar conocimientos reales de Next.js, TypeScript y trabajo del lado servidor. |
-| Mantenibilidad | Límites explícitos por API, con coordinación de cambios entre componentes. | Menos separación operativa, pero exige disciplina para no mezclar dominio e interfaz. |
-| Deployment | Evaluar operación y despliegue de frontend y backend separados. | Evaluar un despliegue full-stack compatible con las necesidades; hosting aún pendiente. |
+| Público indexable | Requiere resolver entrega de HTML público y coordinarla con la SPA. | Permite prerenderizado o renderizado de servidor según el contenido. |
+| Operación | Frontend y backend con configuración y contratos coordinados. | Una aplicación para público, administración y servidor. |
+| Mantenibilidad | Límites por API; mayor coordinación operativa inicial. | Límites internos por dominio sin distribuir el sistema. |
+| UI existente | Requiere adaptar las convenciones del export. | Compatible con la UI revisada de v0/Next, con limpieza de código exportado. |
 
-Esta comparación expresa criterios para evaluar, no mediciones ni garantías de rendimiento, costo o facilidad. No se presupone experiencia concreta del equipo.
+Son compromisos cualitativos, no garantías de SEO, rendimiento, costos ni experiencia del equipo.
 
-## Decisión propuesta
+## Decisión
 
-Evaluar **Next.js full-stack + TypeScript + PostgreSQL** para una aplicación monolítica modular full-stack. **No es una decisión definitiva.** El equipo debe comparar alternativas y validar la propuesta antes de adoptarla y hacer bootstrap.
+Adoptar **Next.js full-stack + TypeScript + PostgreSQL** en una arquitectura monolítica modular: una aplicación y una base de datos. Tailwind se conserva como base visual de la UI aprobada. PostgreSQL es la persistencia elegida y **todavía no se conecta**.
 
-## Razones a considerar
+## Razones
 
-SEO/indexabilidad, simplicidad operativa, una única aplicación, experiencia real del equipo, mantenibilidad y deployment. La selección debe atender requisitos y capacidad del equipo, sin elegir tecnologías solo por sugerencia de IA.
+- El sitio público requiere indexabilidad y una entrega de HTML adecuada para su contenido.
+- Next permite elegir renderizado/prerenderizado adecuado sin convertir SEO en una garantía automática.
+- Público y administración pertenecen a una sola aplicación del MVP.
+- La integración entre frontend y servidor reduce coordinación entre proyectos separados.
+- Menor complejidad operativa para este negocio y esta etapa del MVP.
+- Compatibilidad con la UI exportada desde v0 y revisada: evita un traslado visual innecesario, pero **no es la única razón de la elección**.
+- TypeScript en todo el proyecto permite contratos y comprobaciones comunes.
+- La aplicación puede evolucionar por módulos y vertical slices sin requerir microservicios.
 
-## Consecuencias si se acepta
+## Consecuencias y límites
 
-Habrá que definir límites del dominio, persistencia y acceso al servidor, y documentar herramientas complementarias mediante ADR. ORM, autenticación, validación, CSS/UI, imágenes, hosting, error tracking, analytics y CI definitivo siguen pendientes.
+La primera entrega contiene UI y mocks: no hay API/Server Actions de negocio, persistencia, sesiones ni CRUD real. El detalle público se prerenderiza desde fixtures; los datos no fijan disponibilidad real. No se crean módulos de dominio vacíos.
 
-Mientras no se valide, no instalar Next.js ni paquetes, crear código de producción o presentar TypeScript/PostgreSQL como decisiones cerradas.
+ORM/acceso a datos, autenticación, validación, framework de testing, almacenamiento de imágenes, hosting, error tracking, analytics y CI definitivo siguen pendientes de decisiones posteriores. No se instala ninguna de esas soluciones por inferencia.
+
+El servidor deberá aplicar autorización, validación y transacciones cuando se implementen los casos de negocio. La navegación mock actual no satisface esos requisitos. El equipo todavía debe incorporar SRS/RUP validados, completar trazabilidad y revisar el PR antes del merge.
+
+Versiones efectivas, dependencias, limpieza y evidencia del bootstrap: [MIGRACION_UI.md](../MIGRACION_UI.md).

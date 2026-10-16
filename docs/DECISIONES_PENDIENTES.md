@@ -6,16 +6,16 @@ Este registro separa direcciones iniciales, propuestas y vacíos de definición.
 
 | Tema | Estado / siguiente paso |
 | --- | --- |
-| Monolito modular: una aplicación y una base de datos | ACEPTADO COMO DIRECCIÓN INICIAL - PENDIENTE DE REVISIÓN DEL EQUIPO. Ver ADR-001. |
-| Next.js full-stack, TypeScript, PostgreSQL | PROPUESTO - PENDIENTE DE VALIDACIÓN DEL EQUIPO. Ver ADR-002; comparar alternativas. |
-| Rutas públicas y administrativas, acceso por URL/favorito y sin enlace destacado | Propuesta revisable durante UX/UI. No sustituye autenticación y autorización. |
+| Monolito modular: una aplicación y una base de datos | ACEPTADO por autorización humana del 16/10/2026. Ver ADR-001. |
+| Next.js full-stack, TypeScript, PostgreSQL | ACEPTADO por autorización humana del 16/10/2026. PostgreSQL aún sin integración. Ver ADR-002. |
+| Rutas públicas y administrativas, acceso por URL/favorito y sin enlace destacado | UI foundation aprobada y migrada; no sustituye autenticación y autorización. |
 | Estrategia de pruebas | Propuesta por validar y concretar con las herramientas elegidas. |
 
 ## Fuentes y producto
 
 - Incorporar SRS corregida/validada y artefactos RUP corregidos por la cátedra; verificar consistencia y completar trazabilidad RF/CU. No inventar sus identificadores.
 - Confirmar detalles de requisitos y criterios de aceptación que esas fuentes definan.
-- Aportar información real del negocio: horarios, ubicación, WhatsApp, Instagram, identidad visual, textos e imágenes.
+- Confirmar horarios, logo y datos comerciales finales. Dirección, Instagram, WhatsApp (+54 9 3454 26-6760), tres historias reales e imagen del acceso ya fueron aportados; constan en la UI. La imagen del acceso es una edición de Street View con atribución, no una fotografía directa nueva del comercio.
 - Validar UX/UI, campos, navegación y comportamiento de pantallas.
 - Precisar disponibilidad pública, stock bajo (`<` o `<=`), cantidades y sus validaciones.
 - Precisar moneda, redondeo, fechas y períodos de consultas/resultados.
@@ -29,7 +29,8 @@ Estas preguntas identifican vacíos para revisar con las fuentes; no son nuevos 
 - ORM / acceso a datos.
 - Librería o solución madura de autenticación; sesiones y cookies seguras.
 - Librería de validación.
-- CSS/UI.
+- Framework concreto de testing.
+- Branding futuro y evolución de la UI; Tailwind y Boty adaptado ya son la base aprobada.
 - Almacenamiento de imágenes.
 - Hosting y deployment.
 - Error tracking.
@@ -41,7 +42,7 @@ No hay selección de estas herramientas. Tampoco se implementa un banner de cook
 ## Diseño y colaboración
 
 - Concretar estructura del código, contratos entre módulos, esquema de datos y estrategia de transacciones/concurrencia después de validar arquitectura y fuentes.
-- Elegir herramientas y comandos de testing, desarrollo y compilación.
+- Elegir framework y comandos de testing. Los comandos de desarrollo/lint/typecheck/build ya están configurados.
 - Revisar protecciones de ramas, estrategia de merge y controles de GitHub; no hay automatizaciones complejas configuradas.
 - Revisar y ajustar el orden general de implementación según prioridades grupales.
 

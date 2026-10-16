@@ -4,8 +4,8 @@ Orden técnico general para trabajo futuro. No asigna integrantes, fechas ni com
 
 | Etapa | Propósito |
 | --- | --- |
-| 0. Decisiones técnicas y bootstrap | Contrastar SRS/RUP, validar arquitectura y stack, resolver decisiones necesarias y preparar la aplicación en una tarea posterior. |
-| 1. Walking skeleton | Validar un recorrido técnico mínimo de la aplicación hasta la persistencia con el stack aprobado, sin ampliar el MVP. |
+| 0. UI foundation / bootstrap | Implementado en feature/ui-foundation para revisión humana: público, shell admin y mocks. Stack aceptado; SRS/RUP y trazabilidad aún pendientes. |
+| 1. Walking skeleton con persistencia | FUTURO: elegir acceso a datos mediante ADR y validar recorrido mínimo hasta PostgreSQL. No iniciado ni autorizado por esta entrega. |
 | 2. Autenticación | Implementar inicio/cierre de sesión y protección administrativa con la solución elegida. |
 | 3. Sitio público / catálogo | Home, información del negocio, catálogo y detalle, contactos y objetivos de SEO. Coordinar con productos/inventario para disponibilidad pública. |
 | 4. Productos / inventario | Gestión de productos, visibilidad, stock y mínimo opcional; consolidar reglas compartidas. |
@@ -19,3 +19,6 @@ Orden técnico general para trabajo futuro. No asigna integrantes, fechas ni com
 Las etapas pueden tener dependencias y ajustes: el catálogo depende de productos, visibilidad e inventario, por lo que las etapas 3 y 4 requieren coordinación. No asumir esquema de datos ni APIs definitivos antes de su validación.
 
 Cada entrega concreta requiere una tarea con criterios de aceptación y la [definición de terminado](DEFINICION_TERMINADO.md).
+
+
+La navegación y los gráficos actuales son UI de demostración. No marcar como implementadas las etapas 2–9 por la existencia de pantallas. La siguiente tarea debe elegirse explícitamente; no iniciar auth, ORM, BD o CRUD después de este bootstrap.

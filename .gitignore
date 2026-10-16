@@ -27,3 +27,7 @@ Desktop.ini
 .vscode/
 *.swp
 *.swo
+
+# Evidencias locales y caché del gestor
+work/
+.pnpm-store/

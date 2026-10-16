@@ -1,8 +1,8 @@
 # UX/UI
 
-## Propuesta revisable de rutas
+## Rutas de la UI foundation
 
-| Superficie | Ruta propuesta | Uso |
+| Superficie | Ruta | Uso |
 | --- | --- | --- |
 | Pública | `/` | Home e información pública. |
 | Pública | `/catalogo` | Catálogo público. |
@@ -10,13 +10,13 @@
 | Administración | `/admin` | Acceso al área administrativa. |
 | Administración | `/admin/login` | Inicio de sesión. |
 
-Estado: propuesta de UX/arquitectura; puede revisarse durante UX/UI. La ubicación concreta de información del negocio, horarios, ubicación y contactos se diseñará sin inventar nuevas rutas obligatorias.
+Estado: base visual aprobada, migrada desde staging y con ajustes puntuales del local aprobados durante la revisión humana. Home incluye #el-local (FeatureSection / Vení a conocernos), #de-ustedes (Testimonials con tres historias reales) y #contacto (Instagram y WhatsApp). Admin incluye Resumen, Productos, Stock, Proveedores, Compras, Ventas, Egresos, Reportes y Configuración; todos son mocks.
 
 No mostrar un enlace destacado a Administración en la navegación pública. La responsable puede acceder por URL directa o favorito. **Ocultar el enlace NO es un mecanismo de seguridad.** Todo acceso administrativo debe protegerse mediante autenticación y autorización del servidor, incluidas operaciones y accesos directos.
 
 ## Objetivos de experiencia
 
-Uso desde celular y computadora. Flujos comprensibles para consultar productos y registrar operaciones. Contemplar errores, cargas, estados vacíos y confirmaciones que ayuden a comprender el resultado de una acción. Los detalles visuales y de interacción siguen pendientes.
+Uso desde celular y computadora. Flujos comprensibles para consultar productos y registrar operaciones. Contemplar errores, cargas, estados vacíos y confirmaciones que ayuden a comprender el resultado de una acción. Se preservan tipografías, tokens, radios, espaciados, animaciones y responsive de Boty adaptado. Los campos y flujos definitivos requieren validar SRS/RUP.
 
 ## SEO/indexabilidad
 
@@ -31,8 +31,13 @@ Es un requisito explícito del sitio público. Objetivos:
 - Textos alternativos de imágenes.
 - Sitemap y robots cuando se implemente.
 
-No se define todavía cómo implementar estos objetivos ni se fija una estrategia de renderizado. El tratamiento SEO de productos ocultos o sin disponibilidad requiere validación específica.
+La base usa metadata, HTML semántico, alt y rutas canónicas. Home se prerenderiza, catálogo filtra en cliente con HTML inicial y las PDP se prerenderizan desde mocks. No se agregan analytics, schema complejo, Search Console o campañas. Sitemap/robots globales quedan para una tarea específica. El tratamiento SEO de productos ocultos o sin disponibilidad requiere validación específica.
 
 ## Accesibilidad y contenido
 
-Considerar navegación por teclado, foco visible, etiquetas comprensibles, contraste y estructura semántica en la revisión básica. La identidad visual, textos finales, imágenes, horarios, dirección y enlaces reales de WhatsApp e Instagram están pendientes de aportes y validación. No incorporar un CMS ni productos destacados administrables.
+Considerar navegación por teclado, foco visible, etiquetas comprensibles, contraste y estructura semántica en la revisión básica. La UI aprobada conserva los placeholders de productos/hero. El local usa la imagen aportada de Street View con controles retirados, atribución y acercamiento CSS al acceso; «Cómo llegar» está integrado en Ubicación con un pin. Historias, dirección y enlaces Instagram/Maps/WhatsApp están aportados y el teléfono está confirmado. Horarios, logo limpio y contenido comercial definitivo siguen pendientes. No incorporar un CMS ni productos destacados administrables.
+
+
+## Límite de seguridad de esta iteración
+
+/admin/login → submit → /admin y Cerrar sesión → /admin/login son solo navegación mock. Admin no está protegido ni crea cookies/tokens. Las páginas muestran DATOS DE DEMOSTRACIÓN y metadata noindex. El gráfico circular de Reportes está marcado CANDIDATO VISUAL - REQUIERE VALIDACIÓN, fuera de la pantalla principal. Las reglas de seguridad del MVP deberán implementarse con la auth elegida.

@@ -24,4 +24,4 @@ Cubrir flujos críticos: login, productos, compra, venta y anulaciones. Verifica
 
 Revisar responsive, accesibilidad básica y objetivos de SEO cuando corresponda. Mantener los tests existentes funcionando. No desactivar pruebas para hacer pasar una entrega.
 
-Cada tarea debe indicar pruebas esperadas, comandos ejecutados, resultados y limitaciones. Los comandos se documentarán cuando se elijan herramientas; no hay comandos de aplicación ejecutables en esta etapa documental.
+Cada tarea debe indicar pruebas esperadas, comandos ejecutados, resultados y limitaciones. Los comandos se documentarán cuando se elijan herramientas; la UI foundation tiene `pnpm lint`, `pnpm typecheck` y `pnpm build`. La revisión responsive, rutas y mocks es manual; la evidencia está descrita en MIGRACION_UI.md. No se instaló un framework de testing ni se consideran probadas las reglas futuras de dominio.

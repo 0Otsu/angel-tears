@@ -37,6 +37,6 @@ Las reglas se detallan en [REGLAS_DOMINIO.md](REGLAS_DOMINIO.md). Este listado n
 
 Pueden evaluarse como evolución futura, pero no implementarse en el MVP sin revisión explícita del alcance por el equipo.
 
-## Límite de la preparación actual
+## Límite de la iteración actual
 
-Solo documentación, reglas de colaboración, Git local y preparación de GitHub. No crear aplicación, `src/`, paquetes ni bootstrap. El [plan](PLAN_IMPLEMENTACION.md) describe trabajo futuro y no autoriza comenzarlo automáticamente.
+UI foundation / application bootstrap autorizado: público navegable y administración visual con mocks. No incluye persistencia, autenticación real, API/Server Actions de negocio ni CRUD. Las capacidades del MVP listadas arriba siguen siendo objetivos futuros, no funciones terminadas. El [plan](PLAN_IMPLEMENTACION.md) no autoriza comenzar las siguientes etapas automáticamente.
