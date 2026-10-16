@@ -5,7 +5,7 @@ import { ArrowLeft } from "lucide-react"
 import { FormularioLogin } from "@/components/admin/formulario-login"
 
 export const metadata: Metadata = {
-  title: "Panel de administración | Angel Tears",
+  title: "Panel de administración",
   robots: { index: false, follow: false },
 }
 
