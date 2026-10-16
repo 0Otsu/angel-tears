@@ -38,6 +38,6 @@ Estructura física de código, esquema de datos, contratos, manejo de concurrenc
 
 ## Estructura ejecutable actual
 
-`app/` contiene Home, `/catalogo`, `/catalogo/[slug]` y Admin con grupo de layout `(panel)` separado del login. `components/` aloja UI pública, Boty, admin y los componentes shadcn usados. `lib/mock/` centraliza fixtures; `lib/negocio-publico.ts` los datos de contacto; `public/` solo los seis assets alcanzables. No existen ORM, conexión de BD, rutas legacy ni módulos vacíos.
+`app/` contiene Home, `/catalogo`, `/catalogo/[slug]` y Admin con grupo de layout `(panel)` separado del login. `components/` aloja UI pública, Boty, admin y los componentes shadcn usados. `lib/mock/` centraliza fixtures; `lib/negocio-publico.ts` los datos de contacto; `public/` contiene siete assets alcanzables: seis migrados y la imagen del acceso incorporada durante la revisión. No existen ORM, conexión de BD, rutas legacy ni módulos vacíos.
 
 Las rutas públicas tienen metadata y HTML inicial; las siete PDP de muestra se prerenderizan. Admin es solo una superficie visual accesible sin auth, con robots noindex; no constituye un límite de seguridad. Los módulos previstos de la tabla se crearán al implementar cada vertical slice, no durante esta base.

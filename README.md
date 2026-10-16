@@ -48,7 +48,7 @@ El build comprueba tipos; no tiene ignoreBuildErrors. Todavía no se eligió un 
 - `/catalogo`
 - `/catalogo/collar-aura` (patrón `/catalogo/[slug]`)
 
-Home incluye `/#el-local`, `/#de-ustedes` y `/#contacto`. Se conservan los enlaces reales de Instagram y Maps; WhatsApp queda pendiente. Imágenes y precios de catálogo son demostrativos. Las historias aportadas son reales.
+Home incluye `/#el-local`, `/#de-ustedes` y `/#contacto`. Instagram, Maps y WhatsApp están activos; el teléfono confirmado es +54 9 3454 26-6760. El local muestra una imagen de Google Street View aportada por el usuario, editada para retirar controles, con atribución conservada y encuadre centrado en el acceso. No es una foto nueva del comercio. Imágenes y precios de catálogo son demostrativos. Las historias aportadas son reales; los horarios siguen pendientes de confirmar.
 
 ## Administración
 

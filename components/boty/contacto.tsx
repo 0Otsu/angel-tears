@@ -1,4 +1,4 @@
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, MessageCircle } from "lucide-react"
 import { negocioPublico } from "@/lib/negocio-publico"
 import identidad from "@/components/publico/identidad.module.css"
 
@@ -20,8 +20,12 @@ export function Contacto() {
               Ver Instagram
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 boty-transition" aria-hidden="true" />
             </a>
+            <a href={negocioPublico.whatsapp} target="_blank" rel="noopener noreferrer" className="group inline-flex items-center justify-center gap-2 bg-primary-foreground text-primary px-8 py-4 rounded-full text-sm tracking-wide boty-transition hover:bg-primary-foreground/90">
+              Ver WhatsApp
+              <MessageCircle className="w-4 h-4" aria-hidden="true" />
+            </a>
           </div>
-          <p className="text-sm text-primary-foreground/60 mt-6">WhatsApp · canal pendiente de confirmar</p>
+          <p className="text-sm text-primary-foreground/60 mt-6">WhatsApp · {negocioPublico.telefonoWhatsApp}</p>
         </div>
       </div>
     </section>

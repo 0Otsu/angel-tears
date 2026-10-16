@@ -228,8 +228,11 @@
   "notas": [
     "Los manifiestos de staging solo se inspeccionaron; se construyó un manifiesto mínimo nuevo.",
     "Los alias /shop y /product se reemplazaron por /catalogo y /catalogo/[slug].",
-    "Newsletter se migró como Contacto: solo Instagram, sin formulario de suscripción.",
+    "Newsletter se migró como Contacto: Instagram y WhatsApp confirmado durante la revisión humana, sin formulario de suscripción.",
     "No se seleccionó Zod para la aplicación; ESLint react-hooks lo utiliza como dependencia transitiva de desarrollo."
+  ],
+  "assetsAgregadosEnRevision": [
+    "public/images/local/entre-rios-924-street-view.png"
   ],
   "assetsMigrados": [
     "public/images/products/angel-tears-gold-jewelry.png",

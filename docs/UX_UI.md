@@ -10,7 +10,7 @@
 | Administración | `/admin` | Acceso al área administrativa. |
 | Administración | `/admin/login` | Inicio de sesión. |
 
-Estado: base visual aprobada, migrada desde staging sin rediseño. Home incluye #el-local (FeatureSection / Vení a conocernos), #de-ustedes (Testimonials con tres historias reales) y #contacto (cierre de Instagram). Admin incluye Resumen, Productos, Stock, Proveedores, Compras, Ventas, Egresos, Reportes y Configuración; todos son mocks.
+Estado: base visual aprobada, migrada desde staging y con ajustes puntuales del local aprobados durante la revisión humana. Home incluye #el-local (FeatureSection / Vení a conocernos), #de-ustedes (Testimonials con tres historias reales) y #contacto (Instagram y WhatsApp). Admin incluye Resumen, Productos, Stock, Proveedores, Compras, Ventas, Egresos, Reportes y Configuración; todos son mocks.
 
 No mostrar un enlace destacado a Administración en la navegación pública. La responsable puede acceder por URL directa o favorito. **Ocultar el enlace NO es un mecanismo de seguridad.** Todo acceso administrativo debe protegerse mediante autenticación y autorización del servidor, incluidas operaciones y accesos directos.
 
@@ -35,7 +35,7 @@ La base usa metadata, HTML semántico, alt y rutas canónicas. Home se prerender
 
 ## Accesibilidad y contenido
 
-Considerar navegación por teclado, foco visible, etiquetas comprensibles, contraste y estructura semántica en la revisión básica. La UI aprobada conserva los placeholders de productos/hero y local. Las historias de Instagram, dirección y enlaces de Instagram/Maps están aportados; horarios, WhatsApp y fotos finales siguen pendientes. No incorporar un CMS ni productos destacados administrables.
+Considerar navegación por teclado, foco visible, etiquetas comprensibles, contraste y estructura semántica en la revisión básica. La UI aprobada conserva los placeholders de productos/hero. El local usa la imagen aportada de Street View con controles retirados, atribución y acercamiento CSS al acceso; «Cómo llegar» está integrado en Ubicación con un pin. Historias, dirección y enlaces Instagram/Maps/WhatsApp están aportados y el teléfono está confirmado. Horarios, logo limpio y contenido comercial definitivo siguen pendientes. No incorporar un CMS ni productos destacados administrables.
 
 
 ## Límite de seguridad de esta iteración

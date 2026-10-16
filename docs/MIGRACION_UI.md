@@ -22,13 +22,13 @@ Solo rutas públicas canónicas y admin, siete componentes Boty montados, compon
 
 ## Verificación
 
-Los resultados finales, diferencias y pendientes se completan al cerrar esta tarea. Evidencia local en work/ui-foundation, excluida de Git. La revisión humana y la trazabilidad RF/CU siguen pendientes.
+Evidencia inicial en work/ui-foundation y de cierre en work/cierre-ui, excluida de Git. La revisión humana de UI y los ajustes finales fueron aprobados por el responsable, quien autorizó el cierre condicional del PR #1 el 16/10/2026. La trazabilidad RF/CU sigue pendiente; no se registra una revisión de otro integrante en GitHub ni se atribuye al agente esa aprobación.
 
 La primera instalación de pnpm 11 bloqueó scripts de sharp 0.34.5 (dependencia nativa de Next) y unrs-resolver 1.12.2 (resolución de ESLint). Se aprobarán exclusivamente esos paquetes conocidos con pnpm approve-builds sharp unrs-resolver, sin permitir todos los scripts ni desactivar strictDepBuilds. El gestor informa deprecación de Recharts 2 y ESLint 9; se conservan por compatibilidad de esta entrega, documentando la actualización como tarea posterior.
 
 ## Inventario final reproducible
 
-[Inventario completo](migracion-ui-inventario.json): fuentes de referencia utilizadas, archivos no copiados y dependencias excluidas. Se migraron siete composiciones Boty, diez componentes administrativos y trece fuentes UI compartidas, con seis imágenes alcanzables. No hay paquetes de Motion, formularios RHF, Zod como dependencia directa, cart, checkout, cuentas ni hooks muertos.
+[Inventario completo](migracion-ui-inventario.json): fuentes de referencia utilizadas, archivos no copiados y dependencias excluidas. Se migraron siete composiciones Boty, diez componentes administrativos y trece fuentes UI compartidas. Hay siete imágenes alcanzables: seis migradas y una incorporada durante la revisión. No hay paquetes de Motion, formularios RHF, Zod como dependencia directa, cart, checkout, cuentas ni hooks muertos.
 
 | Paquete | Versión exacta | Uso |
 | --- | --- | --- |
@@ -77,10 +77,21 @@ Las 13 rutas pedidas se visitaron en navegador a 1440×900 y 390×844; se captur
 
 Se probaron login → /admin, drawer que abre/navega/cierra, logout → /admin/login, filtro Anillos, navegación a PDP canónica, Cuidados y ancla El local. Se verificaron los destinos de Instagram/Maps. HTTP: 13 respuestas 200; /shop, /product/collar-aura y slug inexistente devuelven 404. Las respuestas no crean cookies; la PDP contiene su h1 en el HTML inicial. Títulos de Admin corregidos para evitar doble sufijo Angel Tears y distinguir pantallas.
 
-Evidencia local excluida de Git: work/ui-foundation/rutas-navegador.json, http.json, flujos.json, comparacion.json, capturas y logs. Las capturas no se copian al runtime ni se versionan. No se configuró una suite de testing ni CI definitivo. El PR queda para revisión humana; esta verificación no sustituye SRS/RUP ni la Definition of Done.
+Evidencia local excluida de Git: work/ui-foundation/rutas-navegador.json, http.json, flujos.json, comparacion.json, capturas y logs. Las capturas de QA no se copian al runtime ni se versionan. La imagen de Street View editada es un asset de contenido del local, no una captura de QA. No se configuró una suite de testing ni CI definitivo. Esta verificación no sustituye SRS/RUP ni la Definition of Done.
+
+## Cierre de revisión humana, 16/10/2026
+
+- Se incorpora `public/images/local/entre-rios-924-street-view.png`, derivada de la captura aportada, con controles retirados y atribuciones conservadas. Es una edición de Street View, no una foto nueva ni evidencia del estado actual del comercio. El encuadre CSS aproxima el acceso sin reescribir el asset. Detalle en [FOTO_LOCAL](features/FOTO_LOCAL.md).
+- Se reducen los espacios duplicados del local, se adapta la altura de la imagen, se modera el título y se integra «Cómo llegar» con pin en Ubicación. Se elimina la dependencia de observers para mostrar el contenido de esta sección.
+- Se confirma WhatsApp +54 9 3454 26-6760 (`https://wa.me/5493454266760`) en header, Contacto y footer, sin mensaje predefinido ni envío automático. Detalle en [CONTACTO_WHATSAPP](features/CONTACTO_WHATSAPP.md).
+- `pnpm lint`, `pnpm typecheck` y `pnpm build`: código 0. El aviso de datos antiguos de baseline-browser-mapping sigue presente; no se cambian dependencias en este cierre.
+- Build de producción iniciado en `0.0.0.0:3200`, manteniendo acceso LAN. `/`, `/catalogo`, `/catalogo/collar-aura`, `/admin/login` y `/admin`: HTTP 200 y sin Set-Cookie; revisadas a 1440×900 y 390×844, sin desborde, imágenes rotas, errores de consola o hidratación. La imagen del local carga a 1882×836.
+- WhatsApp abre su página oficial con el número correcto en escritorio y viewport móvil, sin enviar mensajes. Instagram abre el perfil angeltears.ac (puede pedir iniciar sesión). Maps abre la URL de Entre Ríos 924 y la fachada aportada; el panel de Street View rotula 922, diferencia del proveedor que se conserva sin cambiar el enlace aprobado.
+- Verificación SHA-256 de los 161 archivos de staging: sin cambios ni agregados; 24 documentos sin enlaces locales rotos. Evidencia local del cierre en `work/cierre-ui/`, no versionada.
+- El responsable autoriza commit, push y merge normal del PR #1 si las comprobaciones pasan. No hay checks CI configurados ni aprobaciones de otro integrante registradas; se documenta la autorización humana expresa de esta integración. No se inicia una nueva feature.
 
 ## Diferencias y pendientes
 
-Diferencias técnicas aceptadas: dependencias mínimas con versiones fijadas, fuentes de mocks centralizadas, SSR/SSG y metadata, URLs canónicas, 404 real, eliminación de Analytics y corrección de montaje de gráficos para lint. Sin rediseño. Home tiene idéntica presentación salvo variaciones mínimas del scroll indicator animado al capturar. Admin muestra la etiqueta de demostración pedida.
+Diferencias técnicas aceptadas: dependencias mínimas con versiones fijadas, fuentes de mocks centralizadas, SSR/SSG y metadata, URLs canónicas, 404 real, eliminación de Analytics y corrección de montaje de gráficos para lint. La comparación inicial con staging conservaba su presentación; el cierre incorpora únicamente los ajustes de local/contacto aprobados arriba. Admin mantiene la etiqueta de demostración pedida.
 
-PostgreSQL está elegido y sin conexión. Siguen pendientes ORM, auth, validación, testing framework, almacenamiento de imágenes, hosting, error tracking, analytics y CI definitivo. También SRS/RUP, RF/CU, datos comerciales finales, WhatsApp/horarios, fotos del local y revisión humana. No se comenzó ninguna vertical slice ni se desplegó la aplicación. Los avisos de deprecación de Recharts 2/ESLint 9 y datos antiguos de baseline-browser-mapping quedan documentados; revisar mantenimiento de dependencias en una tarea propia antes de un despliegue real.
+PostgreSQL está elegido y sin conexión. Siguen pendientes ORM, auth, validación, testing framework, almacenamiento de imágenes, hosting, error tracking, analytics y CI definitivo. También SRS/RUP, RF/CU, datos comerciales finales, logo y horarios. La UI y sus ajustes tienen aprobación del responsable; la trazabilidad formal y una revisión de otro integrante no se dan por completadas. No se comenzó ninguna vertical slice ni se desplegó la aplicación. Los avisos de deprecación de Recharts 2/ESLint 9 y datos antiguos de baseline-browser-mapping quedan documentados; revisar mantenimiento de dependencias en una tarea propia antes de un despliegue real.

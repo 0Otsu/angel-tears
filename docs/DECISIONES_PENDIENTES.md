@@ -15,7 +15,7 @@ Este registro separa direcciones iniciales, propuestas y vacíos de definición.
 
 - Incorporar SRS corregida/validada y artefactos RUP corregidos por la cátedra; verificar consistencia y completar trazabilidad RF/CU. No inventar sus identificadores.
 - Confirmar detalles de requisitos y criterios de aceptación que esas fuentes definan.
-- Confirmar horarios y WhatsApp, fotos limpias del local, logo y datos comerciales finales. Dirección, Instagram y tres historias reales ya fueron aportados; sus datos constan en la UI.
+- Confirmar horarios, logo y datos comerciales finales. Dirección, Instagram, WhatsApp (+54 9 3454 26-6760), tres historias reales e imagen del acceso ya fueron aportados; constan en la UI. La imagen del acceso es una edición de Street View con atribución, no una fotografía directa nueva del comercio.
 - Validar UX/UI, campos, navegación y comportamiento de pantallas.
 - Precisar disponibilidad pública, stock bajo (`<` o `<=`), cantidades y sus validaciones.
 - Precisar moneda, redondeo, fechas y períodos de consultas/resultados.

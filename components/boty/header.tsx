@@ -26,7 +26,7 @@ export function Header() {
           <Link href="/" onClick={() => setAbierto(false)} aria-label="Angel Tears, inicio" className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap font-serif text-[26px] tracking-wider text-foreground sm:text-3xl">Angel Tears</Link>
           <div className="flex items-center gap-2 sm:gap-4">
             <a href={negocioPublico.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram de Angel Tears (abre otra pestaña)" className="hidden p-2 text-foreground/70 boty-transition hover:text-foreground sm:block"><Instagram className="size-5" /></a>
-            <button type="button" disabled title="WhatsApp: canal pendiente de confirmar" aria-label="WhatsApp no disponible por el momento" className="cursor-not-allowed p-2 text-foreground/40"><MessageCircle className="size-5" /></button>
+            <a href={negocioPublico.whatsapp} target="_blank" rel="noopener noreferrer" title={`WhatsApp: ${negocioPublico.telefonoWhatsApp}`} aria-label="WhatsApp de Angel Tears (abre otra pestaña)" className="p-2 text-foreground/70 boty-transition hover:text-foreground"><MessageCircle className="size-5" aria-hidden="true" /></a>
           </div>
         </div>
         {abierto && <div id="menu-publico-movil" className="pb-6 lg:hidden"><div className="flex flex-col gap-4 border-t border-border/50 pt-4">
