@@ -1,0 +1,6 @@
+allowBuilds:
+  sharp: true
+  unrs-resolver: true
+# Misma resolución transitiva que el prototipo aprobado.
+overrides:
+  node-releases: 2.0.58
