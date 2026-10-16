@@ -2,9 +2,9 @@
 
 ## Estado y preparación
 
-La implementación no comenzó. No hay aplicación, `src/`, manifiestos de paquetes ni dependencias. No ejecutar generadores o instalaciones como continuación automática de esta base.
+Existe una UI foundation ejecutable en App Router con público y administración visual. Los mocks no guardan información. El acceso administrativo solo navega; no autentica.
 
-Antes del bootstrap, el equipo debe incorporar la SRS validada y los artefactos RUP corregidos, resolver contradicciones y validar las decisiones técnicas necesarias. El stack Next.js/TypeScript/PostgreSQL sigue propuesto.
+El bootstrap fue autorizado por la tarea humana del 16/10/2026 y ADR-002 está aceptado: Next.js full-stack, TypeScript y PostgreSQL futuro. Siguen pendientes SRS/RUP validados, trazabilidad y herramientas para las siguientes etapas.
 
 ## Trabajo de humanos y agentes
 
@@ -31,6 +31,10 @@ Son ejemplos de nomenclatura; no son archivos o funciones a crear ahora. `.edito
 
 ## Dependencias y decisiones
 
-Justificar necesidad, alternativas e impacto antes de agregar dependencias; validar la decisión con el equipo y registrar ADR cuando corresponda. No elegir por cuenta propia ORM, autenticación, validación, CSS/UI, imágenes, hosting, seguimiento o CI definitivo.
+Justificar necesidad, alternativas e impacto antes de agregar dependencias; validar la decisión con el equipo y registrar ADR cuando corresponda. Tailwind y la UI Boty adaptada son la base aprobada. No elegir por cuenta propia ORM, autenticación, validación, testing framework, imágenes, hosting, seguimiento o CI definitivo.
 
-Los comandos de instalación, desarrollo, pruebas y compilación se incorporarán después del bootstrap aprobado. No se documentan comandos ficticios.
+## Ejecución local
+
+Node 24.15.0 y pnpm 11.25.0. `pnpm install --frozen-lockfile`, `pnpm dev`, `pnpm lint`, `pnpm typecheck`, `pnpm build`, `pnpm start`. El script dev usa webpack; build usa Next con validación de tipos activa. ESLint flat config hereda Next core-web-vitals y TypeScript, sin desactivar reglas. No hay suite de testing todavía.
+
+Los scripts nativos permitidos de pnpm están limitados a sharp y unrs-resolver. Ver la auditoría y versiones en [MIGRACION_UI.md](MIGRACION_UI.md). `work/` contiene evidencia local y no se versiona. No se necesitan secretos para la UI foundation.

@@ -17,7 +17,7 @@ Los ADR no pueden contradecir unilateralmente la SRS validada, los artefactos RU
 
 | ADR | Estado |
 | --- | --- |
-| [ADR-001: monolito modular](ADR-001-monolito-modular.md) | ACEPTADO COMO DIRECCIÓN INICIAL - PENDIENTE DE REVISIÓN DEL EQUIPO |
-| [ADR-002: Next.js full-stack](ADR-002-nextjs-fullstack.md) | PROPUESTO - PENDIENTE DE VALIDACIÓN DEL EQUIPO |
+| [ADR-001: monolito modular](ADR-001-monolito-modular.md) | ACEPTADO |
+| [ADR-002: Next.js full-stack](ADR-002-nextjs-fullstack.md) | ACEPTADO |
 
-No hay todavía validación grupal definitiva del stack. No interpretar la dirección inicial del monolito como aprobación de herramientas concretas.
+Monolito modular y Next.js/TypeScript/PostgreSQL aceptados por autorización humana del 16/10/2026. La revisión del PR sigue pendiente; herramientas complementarias no se consideran aceptadas por asociación.

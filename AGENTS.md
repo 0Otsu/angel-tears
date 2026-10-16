@@ -30,7 +30,7 @@ No cambiar por cuenta propia alcance, reglas de negocio ni decisiones arquitect�
 
 ## Límites de esta etapa
 
-El repositorio está en planificación/arquitectura. No crear `src/`, código de producción, bootstrap de Next.js ni instalar paquetes como continuación automática de esta preparación. La implementación requiere una tarea posterior y las decisiones previas que correspondan.
+Existe una UI foundation aprobada: Next.js/TypeScript con público y administración visual, sin persistencia ni autenticación real. El bootstrap fue autorizado en la tarea UI FOUNDATION + APPLICATION BOOTSTRAP. Staging es referencia de solo lectura. No comenzar ORM, BD, auth, APIs de negocio ni CRUD como continuación automática; cada vertical slice requiere su tarea y decisiones pendientes.
 
 ## Reglas de trabajo
 

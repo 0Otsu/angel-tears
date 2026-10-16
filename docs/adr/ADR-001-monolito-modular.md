@@ -1,6 +1,6 @@
 # ADR-001: monolito modular
 
-**Estado: ACEPTADO COMO DIRECCIÓN INICIAL - PENDIENTE DE REVISIÓN DEL EQUIPO**
+**Estado: ACEPTADO**
 
 ## Contexto
 
@@ -16,7 +16,7 @@ Angel Tears es un sistema para un negocio pequeño con sitio público y administ
 
 Adoptar como dirección inicial un **monolito modular**, con una aplicación y una base de datos. Módulos previstos: autenticacion, productos, inventario, proveedores, compras, ventas, egresos y reportes.
 
-La dirección está aceptada inicialmente y debe ser revisada por el equipo. No constituye selección de framework, lenguaje, motor de base de datos ni estructura física de archivos.
+La arquitectura monolítica modular fue confirmada por autorización humana del 16/10/2026 en la tarea UI FOUNDATION + APPLICATION BOOTSTRAP. El framework, lenguaje y persistencia se aceptan en ADR-002; esto no implica una implementación de dominio o BD en esta entrega.
 
 ## Razones
 
