@@ -1,0 +1,9 @@
+/* Alcance público y accesibilidad. Todos los colores provienen de Boty. */
+.sitio { color: var(--foreground); }
+.sitio a:focus-visible,
+.sitio button:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; }
+.ancla { scroll-margin-top: 120px; }
+@media (prefers-reduced-motion: reduce) {
+  .sitio * { animation: none !important; transition: none !important; }
+  .sitio [class*="animate-"] { opacity: 1 !important; }
+}
