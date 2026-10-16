@@ -133,15 +133,9 @@
     "public/images/bento-skin-model.jpg",
     "public/images/bf965cf4-e728-4e72-ab1b-16b1cd8f1822.png",
     "public/images/hero-model.jpg",
-    "public/images/historias/accesorios-compartidos.jpg",
-    "public/images/historias/anillos-y-pulsera.jpg",
-    "public/images/historias/pedido-y-packaging.jpg",
     "public/images/natural-leaf.jpg",
     "public/images/products/0ed61900-dd29-4dd2-bc2d-abc2db54c352.png",
     "public/images/products/amber-dropper-bottles.png",
-    "public/images/products/angel-tears-charms.png",
-    "public/images/products/angel-tears-gold-jewelry.png",
-    "public/images/products/angel-tears-rings.png",
     "public/images/products/cleanser.jpg",
     "public/images/products/cream-jars-colored.png",
     "public/images/products/eye-serum-bottles.png",
@@ -236,5 +230,13 @@
     "Los alias /shop y /product se reemplazaron por /catalogo y /catalogo/[slug].",
     "Newsletter se migró como Contacto: solo Instagram, sin formulario de suscripción.",
     "No se seleccionó Zod para la aplicación; ESLint react-hooks lo utiliza como dependencia transitiva de desarrollo."
+  ],
+  "assetsMigrados": [
+    "public/images/products/angel-tears-gold-jewelry.png",
+    "public/images/products/angel-tears-charms.png",
+    "public/images/products/angel-tears-rings.png",
+    "public/images/historias/accesorios-compartidos.jpg",
+    "public/images/historias/anillos-y-pulsera.jpg",
+    "public/images/historias/pedido-y-packaging.jpg"
   ]
 }
