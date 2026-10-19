@@ -1,0 +1,52 @@
+schema: spec-driven
+
+context: |
+  Angel Tears: negocio pequeno de accesorios/bijouterie en Concordia.
+  Artefactos en espanol; conservar headings de OpenSpec y SHALL/MUST en ingles.
+  Monolito modular Next.js 16 / TypeScript / PostgreSQL. Stack aprobado:
+  Drizzle, Better Auth, Resend, Zod, Vitest/RTL/Playwright; Cloudinary ADR-007.
+  Leer AGENTS.md y docs/DECISIONES_PRODUCTO_MVP.md, REGLAS_DOMINIO.md,
+  BLUEPRINT_IMPLEMENTACION_MVP.md, TRAZABILIDAD_MVP.md y ADR aplicables.
+  Autoridad: SRS > RUP > producto/reglas > ADR > blueprint > OpenSpec > codigo.
+  SRS/RUP canonicos ausentes: RF-01..21 son referencia humana, no crear RF/CU.
+  R1: Emi Auth/Cuenta; Claudio Inventario/Proveedores/Compras;
+  Augusto Productos/Publico/SEO. Producto unico; contratos y ownership del blueprint.
+  El template no define requisitos. No ampliar MVP ni implementar funciones nuevas
+  sin propuesta y evaluacion de fuentes. No carrito/pedidos/pagos/reservas, roles,
+  multiadmin, clientes, sucursales, CMS general, ERP/contabilidad o IA.
+  Esta preparacion deja solo tres changes activos, sin ejecutar sus tareas.
+rules:
+  proposal:
+    - Indicar owner, ronda, alcance, fuera de alcance, dependencias y trazabilidad.
+    - Reutilizar fuentes por enlace; no copiar SRS/RUP ni inventar RF/CU.
+  design:
+    - Respetar blueprint/ADR, Producto unico, fronteras y ownership de archivos.
+    - Documentar transacciones, concurrencia, fallos y pendientes que bloquean un recorrido.
+  specs:
+    - Describir conducta verificable con SHALL/MUST, sin imponer librerias como RF.
+    - Vincular decisiones humanas y referencia academica provisional; no ampliar alcance.
+  tasks:
+    - Todas las tareas de implementacion permanecen sin marcar en esta preparacion.
+    - Cada bloque incluye pruebas y documentacion; coordinar migraciones/archivos compartidos.
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always state what is out of scope
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing

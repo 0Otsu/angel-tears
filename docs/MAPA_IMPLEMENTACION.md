@@ -2,6 +2,8 @@
 
 Auditoría de análisis y documentación del **16/10/2026**, sobre `main`, commit `9a6677dd1fa243138dd47f9b34077394529b87f4` (UI Foundation integrada mediante PR #1). Referencia para planificar y verificar trabajo futuro; no autoriza implementarlo ni sustituye requisitos o ADR aceptados.
 
+**Arquitectura global — 19/10/2026:** la [sección 31](#31-mapa-vigente-tras-arquitectura-global) es la referencia de planificación vigente para módulos/owners/stack. Las secciones anteriores conservan la auditoría y sus actualizaciones históricas; sus alternativas técnicas antiguas no reabren ADR-003..008 ni sustituyen las nuevas decisiones explícitas. No hay implementación funcional nueva. Modelo/contratos centralizados en [blueprint](BLUEPRINT_IMPLEMENTACION_MVP.md), gaps en [trazabilidad](TRAZABILIDAD_MVP.md).
+
 **Actualización de decisiones — 19/10/2026:** el responsable aprobó [DECISIONES_PRODUCTO_MVP.md](DECISIONES_PRODUCTO_MVP.md), bloques A–M. Clasificación: «Decisión de producto aprobada por responsable, pendiente de alineación/formalización con SRS/RUP cuando corresponda.» Esta actualización puntual resuelve elecciones de producto en las secciones 27/29 y condiciones relacionadas de recuperación, Configuración y épicos; no reescribe el análisis histórico ni cambia la evidencia de implementación. Las menciones anteriores a decisiones de producto pendientes/propuestas se consultan junto con ese documento. Las alternativas técnicas, fuentes definitivas y vacíos allí identificados siguen pendientes. Ninguna capacidad de negocio pasa a implementada por esta aprobación.
 
 ## Lectura rápida y conclusión
@@ -958,3 +960,43 @@ Los siguientes **13 épicos** agrupan trabajo futuro; sus identificadores son de
 - **Criterio general de terminado:** entorno autorizado comprobado con datos/configuración adecuados, controles y CI acordados, recuperación/rollback probados y procedimiento operable por el responsable; MVP aceptado contra criterios validados, sin confundir servidor LAN con producción.
 
 El backlog no autoriza comenzar ninguno de estos épicos. Actualización del 19/10: recuperación por email permanece dentro de Auth como capacidad aprobada por responsable y no implementada, pendiente de alineación con SRS/RUP; Configuración queda limitada a cuenta y no se convierte en épico de gestión. Esta actualización sigue siendo exclusivamente documental.
+
+## 31. Mapa vigente tras arquitectura global
+
+**19/10/2026**, tarea de preparación global aprobada expresamente. Los PR #2/#3 ya están integrados; la evidencia de aplicación sigue siendo UI Foundation. Aquí se actualiza planificación, sin reescribir el análisis del template ni marcar negocio como implementado. «Cuenta en Configuración», exclusión de destacado y herramientas pendientes de secciones anteriores quedaron sustituidos por decisiones/ADR actuales, solo en los puntos explícitos.
+
+| Área funcional / destino | Estado real | Diseño/owner y siguiente trabajo |
+| --- | --- | --- |
+| Auth / Cuenta | 🟣 UI/MOCK de login; ❌ NO IMPLEMENTADO en sesión/guard/reset/Cuenta | Emi R1, Better Auth/Resend/Drizzle. Cuenta separada de Configuración; provisión controlada, sin signup público. |
+| Productos | 🟣 UI/MOCK | Augusto R1, Producto único/categorías/imagen/slug/visibilidad/destacado; no borrar historia. |
+| Stock | 🟣 UI/MOCK | Claudio R1, saldo/mínimo `<=`/ajustes/historia/contrato transaccional; no saldo duplicado en Producto. |
+| Proveedores | 🟣 UI/MOCK | Claudio R1, datos mínimos/inactivación; baja sin historia pendiente. |
+| Compras | 🟣 UI/MOCK | Claudio R1, múltiples líneas/costos históricos/tx/reversión única sin negativos. |
+| Ventas | 🟣 UI/MOCK | R2 sin owner, diseño completo en blueprint; sin change activo. |
+| Finanzas — Egresos | 🟣 UI/MOCK en ruta actual `/admin/egresos` | R2; agrupar navegación bajo Finanzas, conservar historia y no duplicar compras. |
+| Finanzas — Resultado económico | 🟣 UI/MOCK en `/admin/reportes` y Resumen | R2; fórmula/fechas reales y lectura consistente, sin Reportes paralelo ni tabla de resultado. |
+| Experiencia pública | 🟡 PARCIAL en contenido/contactos; 🟣 UI/MOCK en catálogo | Augusto R1; Home/destacados/categorías/PDP con proyección real, conservar identidad y contactos. |
+| SEO | 🟡 PARCIAL | Augusto R1; metadata/OG/canonical/JSON-LD/sitemap/robots veraces, sin datos comerciales inventados. |
+| Configuración admin | 🟣 UI/MOCK de reserva; ❌ NO IMPLEMENTADO en preferencia | R3 sin owner, solo claro/oscuro persistente por cuenta y exclusivo de admin; no Cuenta/CMS. |
+| Dashboard | 🟣 UI/MOCK | R2 sin owner, operativo y derivado de módulos reales, sin widgets/analytics avanzados. |
+
+Diseño y herramientas aprobados no cambian las columnas de persistencia/auth/lógica/tests de la matriz histórica a ✅. Falta implementar y probar. El modelo, ownership de schemas, protocolos de migración y tres changes de R1 están en el blueprint/OpenSpec; no hay más changes activos ni responsables R2/R3.
+
+### Decisiones técnicas cerradas / pendientes reales
+
+Drizzle, Better Auth, Resend, Zod, Vitest/RTL/Playwright aprobados; Cloudinary elegido por ADR-007 y estrategias de modelo/dinero/transacciones/Next en ADR-003/008. Por tanto, los ⚪ históricos de esas elecciones **quedan resueltos como diseño**, manteniendo ❌ su implementación. No instalar esas dependencias por ejecutar OpenSpec.
+
+Siguen pendientes SRS/RUP canónicos/RF-CU formales, políticas comerciales no respondidas, sesiones tras cambio autenticado, edición email, baja proveedor sin historia, horarios/contenido final, dominio/hosting/DB administrada, cuentas/secretos de servicios, observabilidad final y CI/CD avanzado. [DECISIONES_PENDIENTES](DECISIONES_PENDIENTES.md) es el registro vigente; [TRAZABILIDAD_MVP](TRAZABILIDAD_MVP.md) contiene RF-01..21 **aportados por el responsable como referencia**, sin afirmar texto canónico disponible ni inventar IDs.
+
+### Contradicciones revisadas y resueltas
+
+| Fuente anterior | Resolución explícita actual |
+| --- | --- |
+| ALCANCE/UX excluían destacado administrable | Flag booleano aprobado, sin ranking/campañas; formalización académica pendiente. |
+| K1 situaba Cuenta en Configuración y excluía tema | Cuenta/Auth separada; Configuración solo apariencia admin-only persistente. |
+| Template separa Egresos/Reportes y usa gráficos | Finanzas agrupa Egresos/Resultado; dashboard operativo. UI actual no cambia en esta tarea. |
+| ARQUITECTURA/TESTING/ADR-002/pendientes no elegían herramientas | ADR-003..008 y documentos vigentes registran aprobación; MIGRACION_UI/features anteriores siguen como historia fechada del bootstrap. |
+| PLAN/DESARROLLO no asignaban integrantes | Solo R1 asignada expresamente en nueva tarea; R2/R3 mantienen owners sin definir. |
+| Mocks usan categorías/datos/saldos independientes | No autoridad de requisitos. Un solo Producto/Categoria/Inventario diseñados; no migrar fixtures como productos reales. |
+
+No se modifican fuentes académicas externas ausentes. No se ejecuta ningún change, no tablas ni migraciones, no auth/CRUD/SEO real. Esta preparación termina tras validación y merge autorizado.

@@ -2,6 +2,8 @@
 
 Fecha de aprobación: **19/10/2026**.
 
+**Vigencia:** los bloques A–M conservan el registro del cierre previo. La sección 8 registra las ampliaciones/sustituciones explícitas posteriores de la tarea de arquitectura del mismo día; prevalece únicamente en los puntos allí indicados. No se reescriben otras elecciones ni se declara formalización académica inexistente.
+
 ## 1. Contexto, aprobación y autoridad
 
 Este documento registra las elecciones funcionales del responsable para cerrar ambigüedades detectadas en el [mapa de implementación](MAPA_IMPLEMENTACION.md). Las respuestas de los bloques A–M, incluida A1 acordada previamente, se consolidaron en un resumen por módulo. El responsable respondió **«si»** a la pregunta: «¿Confirmás que estas decisiones reflejan lo que querés para el MVP?». Esa aprobación autoriza esta entrega documental, su commit, push y PR hacia main; no autoriza implementación ni merge.
@@ -201,6 +203,8 @@ Las reglas aquí aprobadas no convierten los mocks en funciones reales. La aplic
 
 ### K. Configuración de cuenta
 
+**Registro histórico sustituido parcialmente por sección 8:** Cuenta/Auth se separa de Configuración, que ahora contiene solo apariencia admin.
+
 | Código | Decisión aprobada |
 | --- | --- |
 | K1 | Conservar `/admin/configuracion` únicamente para mostrar nombre/email de la cuenta y permitir cambio de contraseña estando autenticada. Sin temas, roles, sucursales, impuestos, CMS, configuraciones técnicas ni preferencias inventadas. Si editar email implica complejidad adicional de seguridad, dejarlo solo visible y gestionar su cambio fuera del panel. No se da por autorizada automáticamente su edición. |
@@ -288,7 +292,9 @@ La auditoría describe UI Foundation, no un MVP operativo. Este documento resuel
 
 El mapa se incorporó originalmente mediante el commit `14c515cc36b2d39ac9ba4a4054d6799f9dcb400e`, aún en el [PR #2](https://github.com/0Otsu/angel-tears/pull/2) al iniciar esta entrega. La rama documental nace de main e incorpora ese commit existente como antecedente para poder modificar el mapa sin reescribirlo. No se modifica main ni se mergea/cierra ese PR automáticamente; mientras siga abierto, el PR de decisiones contiene ese antecedente documental.
 
-## 6. Decisiones técnicas deliberadamente no tomadas
+## 6. Decisiones técnicas no tomadas en el cierre previo
+
+Este apartado conserva el alcance de aquella entrega. La tarea posterior aprueba herramientas y autoriza decisiones técnicas en ADR-003..008; ver [blueprint](BLUEPRINT_IMPLEMENTACION_MVP.md). No interpretar este registro histórico como una selección todavía abierta de ORM/auth/testing/imágenes.
 
 - ORM/acceso a datos, esquema físico, tipos SQL, migraciones y conexión a PostgreSQL.
 - Librería de autenticación, sesiones, cookies/tokens, hashing y controles técnicos concretos.
@@ -301,3 +307,21 @@ Los ADR de arquitectura ya aceptados conservan su autoridad. Las preferencias fu
 ## 7. Límite de cierre
 
 Esta aprobación permite **documentar y abrir un PR sin mergearlo**. No inicia Persistencia ni ningún otro épico, no elige ORM/auth y no autoriza código, CRUD, rutas, UI o infraestructura. La revisión de otro integrante y la alineación con fuentes definitivas permanecen pendientes según el flujo del repositorio.
+
+## 8. Actualización expresa de arquitectura y producto — 19/10/2026
+
+La nueva tarea autoriza preparación global/OpenSpec y merge sin PR, **no implementación**. Conserva A–M salvo los cambios siguientes. Misma clasificación de aprobación por responsable, pendiente de alineación/formalización SRS/RUP cuando corresponda.
+
+| Punto explícito | Decisión vigente / sustitución |
+| --- | --- |
+| Destacados | Sí entra un flag booleano simple. Home solo muestra destacado + publicado + stock>0. Sin ranking, campañas, banners, reordenado o recomendaciones. Sustituye la exclusión previa de destacados administrables. |
+| Responsables R1 | Augusto Productos/Público/SEO; Claudio Inventario/Proveedores/Compras; Emi Auth/Cuenta. No asigna responsables de R2/R3. |
+| Finanzas | Agrupa resultado aproximado y egresos. Sin Reportes paralelo si Finanzas satisface el alcance. Fórmula/fechas/períodos H permanecen. |
+| Configuración | Solo claro/oscuro, persistentes y exclusivos de `/admin/*`; nunca altera el sitio público. Sustituye la prohibición previa de tema y el contenido de cuenta en K1. |
+| Cuenta/Auth | Nombre/email visibles, contraseña/logout y recuperación pertenecen a Cuenta/Auth, fuera de Configuración. No autoriza edición de email/nombre ni resuelve la política de sesiones del cambio autenticado. |
+| Dashboard | Operativo, simple, derivado de módulos reales; sin widgets configurables, personalización ni analytics avanzado. Métricas propuestas se concretan sin convertir el template en requisito. |
+| Categorías | La tarea ratifica las siete iniciales como aprobadas: Collares, Pulseras, Anillos, Aros/Piercings, Tobilleras, Llaveros, Flores eternas. Sustituye el pendiente de validación de esa lista inicial en C4/sección 3. Cambios futuros requieren decisión explícita; sin CRUD. |
+
+Imagen principal, campos, URL estable, publicado/oculto, agotados, stock, proveedores, compras, ventas, egresos y fórmula económica conservan sus reglas previas. Stock inicial sigue sin compra ficticia ni efecto económico. Datos del negocio M no cambian; horarios todavía pendientes.
+
+La representación de datos, herramientas, Cloudinary, seguridad y mecanismos de Next son decisiones técnicas justificadas en ADR, no nuevos RF. Los gaps académicos se registran en [TRAZABILIDAD_MVP](TRAZABILIDAD_MVP.md), sin modificar fuentes externas ausentes.

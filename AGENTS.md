@@ -48,3 +48,17 @@ Existe una UI foundation aprobada: Next.js/TypeScript con público y administrac
 ## Informe de entrega
 
 Indicar qué cambió y por qué, supuestos, archivos modificados, tests ejecutados y resultados, checks no ejecutados con motivo y pendientes. La afirmación de un agente no reemplaza la definición de terminado ni la revisión humana. El responsable debe poder explicar lo implementado.
+
+## Arquitectura y OpenSpec — actualización autorizada del 19/10/2026
+
+Se preservan las instrucciones anteriores. El orden inicial de fuentes se detalla, por instrucción expresa del responsable, de esta forma: **SRS → RUP → decisiones de producto aprobadas + reglas de dominio → ADR aceptados → blueprint técnico → OpenSpec → código**. La tarea concreta opera dentro de esos límites; una sugerencia de IA nunca adquiere autoridad de fuente. OpenSpec no reemplaza ni copia SRS/RUP. RF-01..21 son referencia suministrada, no documentos canónicos; no inventar RF/CU adicionales.
+
+Antes de un slice leer también [decisiones de producto](docs/DECISIONES_PRODUCTO_MVP.md), [blueprint](docs/BLUEPRINT_IMPLEMENTACION_MVP.md), [trazabilidad](docs/TRAZABILIDAD_MVP.md), [flujo OpenSpec](docs/OPENSPEC.md), ADR aplicables y su change completo. Las skills generadas en `.agents/skills` no autorizan por sí mismas aplicar/archivar un change. Usar OpenSpec como especificación concreta de la tarea junto con los criterios de la plantilla de feature; no duplicar artefactos completos si el change ya contiene esas secciones.
+
+Control de alcance: una nueva capacidad para Sofía o el público, comportamiento/caso de uso/regla comercial nuevo o flujo significativamente distinto se marca primero como propuesta. Evaluar impacto en SRS, RUP/CU/actividades, prototipos, decisiones, ADR y OpenSpec antes de implementar. Decisión solo técnica: normalmente ADR + OpenSpec; refactor sin cambio funcional no crea RF/CU artificiales. El template no gobierna requisitos.
+
+Stack aprobado: Drizzle, Better Auth, Resend, Zod, Vitest/RTL/Playwright y monolito Next/TS/PostgreSQL; Cloudinary elegido y justificado en ADR-007 bajo autorización técnica. Aprobación no equivale a instalación/implementación. No reabrir elecciones salvo incompatibilidad demostrada; no instalar herramientas/crear infraestructura fuera del slice autorizado.
+
+Ronda 1: **Emi Auth/Cuenta; Claudio Inventario/Proveedores/Compras; Augusto Productos/Público/SEO**. Producto tiene un único owner/modelo. Cambios a contratos compartidos, schema, package/lock, arnés y migraciones se coordinan como indica el blueprint. Rondas 2/3 sin owners todavía; solo tres changes activos y ningún task implementado por esta preparación.
+
+La tarea de arquitectura autoriza excepcionalmente un commit de preparación y merge/push directo a main después de validar, sin PR/revisión cruzada; esa excepción no se extiende a implementaciones futuras. El flujo de colaboración normal continúa vigente. Al cerrar esta preparación detenerse: no ejecutar ninguno de los changes.

@@ -43,3 +43,5 @@ ORM/acceso a datos, autenticación, validación, framework de testing, almacenam
 El servidor deberá aplicar autorización, validación y transacciones cuando se implementen los casos de negocio. La navegación mock actual no satisface esos requisitos. El equipo todavía debe incorporar SRS/RUP validados, completar trazabilidad y revisar el PR antes del merge.
 
 Versiones efectivas, dependencias, limpieza y evidencia del bootstrap: [MIGRACION_UI.md](../MIGRACION_UI.md).
+
+**Actualización de vigencia, 19/10/2026:** los pendientes de herramientas del registro anterior se resuelven en ADR-003..008 por aprobación/autorización expresa del responsable. Ver [índice](README.md) y [blueprint](../BLUEPRINT_IMPLEMENTACION_MVP.md); la arquitectura base de este ADR no cambia ni se da por implementada la integración.

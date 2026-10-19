@@ -19,5 +19,11 @@ Los ADR no pueden contradecir unilateralmente la SRS validada, los artefactos RU
 | --- | --- |
 | [ADR-001: monolito modular](ADR-001-monolito-modular.md) | ACEPTADO |
 | [ADR-002: Next.js full-stack](ADR-002-nextjs-fullstack.md) | ACEPTADO |
+| [ADR-003: Drizzle, modelo y transacciones](ADR-003-drizzle-modelo-transacciones.md) | ACEPTADO 19/10/2026 |
+| [ADR-004: Better Auth y Resend](ADR-004-better-auth-resend.md) | ACEPTADO 19/10/2026 |
+| [ADR-005: Zod](ADR-005-zod-validacion.md) | ACEPTADO 19/10/2026 |
+| [ADR-006: testing](ADR-006-testing.md) | ACEPTADO 19/10/2026 |
+| [ADR-007: Cloudinary](ADR-007-cloudinary-imagenes.md) | ACEPTADO 19/10/2026, autorización técnica |
+| [ADR-008: fronteras Next.js](ADR-008-nextjs-fronteras.md) | ACEPTADO 19/10/2026, autorización técnica |
 
-Monolito modular y Next.js/TypeScript/PostgreSQL aceptados por autorización humana del 16/10/2026. La revisión del PR sigue pendiente; herramientas complementarias no se consideran aceptadas por asociación.
+Monolito/Next/TS/PostgreSQL aceptados el 16/10/2026; UI Foundation y cierre documental integrados. El 19/10 el responsable aprueba expresamente el stack complementario y autoriza elegir decisiones técnicas necesarias del blueprint, incluida Cloudinary. Son decisiones de arquitectura, no instalación ni implementación. Los ADR-001/002 conservan su registro histórico; los complementarios resuelven los pendientes técnicos de aquella etapa, sin modificar SRS/RUP.
