@@ -68,3 +68,7 @@ Home incluye `/#el-local`, `/#de-ustedes` y `/#contacto`. Instagram, Maps y What
 ## Documentación
 
 Consultar [docs/](docs/), [AGENTS.md](AGENTS.md), [arquitectura](docs/ARQUITECTURA.md), [ADR-002 aceptado](docs/adr/ADR-002-nextjs-fullstack.md), [desarrollo](docs/DESARROLLO.md), [migración y validación](docs/MIGRACION_UI.md) y [decisiones pendientes](docs/DECISIONES_PENDIENTES.md). SRS/RUP validados y trazabilidad RF/CU siguen pendientes; no se inventan identificadores.
+
+Para planificar el trabajo: [mapa de implementación](docs/MAPA_IMPLEMENTACION.md) y [decisiones de producto del MVP](docs/DECISIONES_PRODUCTO_MVP.md).
+
+Antes de implementar una funcionalidad, revisar el mapa de implementación, las decisiones de producto y las fuentes de mayor prioridad definidas en AGENTS.md.
