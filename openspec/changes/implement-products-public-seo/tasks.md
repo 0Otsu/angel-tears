@@ -33,7 +33,7 @@
 
 - [ ] 5.1 Ejecutar E2E alta → imagen → publicar → compra/ajuste → Home/catálogo/PDP → agotar/ocultar/reponer con dependencias reales.
 - [ ] 5.2 Ejecutar tests/lint/typecheck/build y OpenSpec estricto; actualizar mapa/docs y registrar dominio/contenido o RF/CU aún pendientes.
-- [ ] 5.3 Integrar por flujo Git normal y revisar con owners; ninguna task se marca por el solo hecho de planificar y no se archiva antes de aceptación.
+- [ ] 5.3 Integrar por [flujo Git vigente](../../../docs/GIT_WORKFLOW.md), coordinando contratos/archivos con owners sin PR/aprobación cruzada obligatorios; revisión adicional recomendable. Ninguna task se marca por el solo hecho de planificar y no se archiva antes de aceptación técnica con evidencia.
 
 ## Workflow follow-up
 

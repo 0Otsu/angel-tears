@@ -37,4 +37,4 @@
 
 ## Workflow follow-up
 
-- Sincronizar y archivar tras revisión/aceptación, nunca en esta preparación.
+- Sincronizar y archivar tras aceptación técnica con evidencia según el [workflow vigente](../../../docs/GIT_WORKFLOW.md), sin PR/aprobación cruzada obligatorios; revisión adicional recomendable. Nunca en esta preparación.

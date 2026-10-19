@@ -4,6 +4,8 @@ Auditoría de análisis y documentación del **16/10/2026**, sobre `main`, commi
 
 **Arquitectura global — 19/10/2026:** la [sección 31](#31-mapa-vigente-tras-arquitectura-global) es la referencia de planificación vigente para módulos/owners/stack. Las secciones anteriores conservan la auditoría y sus actualizaciones históricas; sus alternativas técnicas antiguas no reabren ADR-003..008 ni sustituyen las nuevas decisiones explícitas. No hay implementación funcional nueva. Modelo/contratos centralizados en [blueprint](BLUEPRINT_IMPLEMENTACION_MVP.md), gaps en [trazabilidad](TRAZABILIDAD_MVP.md).
 
+**Corrección documental final — 19/10/2026:** sesión con máximo absoluto de 30 días desde login, sin extensión por uso diario; recovery de 1 hora, neutro incluso ante fallo de entrega, un uso y revocación global sin auto-login. Cuenta identidad/contraseña/logout en `/admin/cuenta`, Configuración únicamente tema persistente admin-only. Se corrigen referencias puntuales heredadas; no se reescribe la auditoría ni cambia evidencia funcional. Workflow vigente en [GIT_WORKFLOW](GIT_WORKFLOW.md), sin PR/revisión cruzada obligatorios.
+
 **Actualización de decisiones — 19/10/2026:** el responsable aprobó [DECISIONES_PRODUCTO_MVP.md](DECISIONES_PRODUCTO_MVP.md), bloques A–M. Clasificación: «Decisión de producto aprobada por responsable, pendiente de alineación/formalización con SRS/RUP cuando corresponda.» Esta actualización puntual resuelve elecciones de producto en las secciones 27/29 y condiciones relacionadas de recuperación, Configuración y épicos; no reescribe el análisis histórico ni cambia la evidencia de implementación. Las menciones anteriores a decisiones de producto pendientes/propuestas se consultan junto con ese documento. Las alternativas técnicas, fuentes definitivas y vacíos allí identificados siguen pendientes. Ninguna capacidad de negocio pasa a implementada por esta aprobación.
 
 ## Lectura rápida y conclusión
@@ -162,7 +164,7 @@ Regla transversal para las fichas: lectura y escritura administrativas requieren
 | Dominio/persistencia | Una administradora inicial; sin alta pública ni multiadmin. Sesión verificable y revocable; almacenamiento según ADR, no esquema decidido. |
 | Validaciones/permisos | Credenciales en servidor, usuario habilitado, límites de intentos y destino interno seguro; verificar cada lectura y mutación privada. |
 | UX/errores | Submitting, error neutro, sesión expirada, redirecciones, acceso denegado y fallo inesperado sin filtrar secretos. |
-| Tests/dependencias | Login correcto/incorrecto, expiración, reapertura, renovación, revocación/logout y acceso directo. ADR auth, política de sesiones y provisión inicial. |
+| Tests/dependencias | Login correcto/incorrecto, reapertura, expiración absoluta a 30 días incluso con uso diario, revocación/logout y acceso directo. ADR-004 y provisión inicial segura. |
 | Terminado | Identidad validada en servidor; persistencia razonable acordada; rutas/datos y mutaciones protegidos; logout invalida; pruebas positivas y negativas pasan. Recuperación solo si se aprueba su alcance. |
 
 ### 5.2 Productos
@@ -278,12 +280,12 @@ Regla transversal para las fichas: lectura y escritura administrativas requieren
 | Aspecto | Mapa |
 | --- | --- |
 | Estado/evidencia | 🟣 UI/MOCK de reserva; `ConfiguracionDemo` E04. Sin formulario ni botón Guardar. |
-| Operaciones/datos | ❌ NO IMPLEMENTADO; K1 aprobado el 19/10: conservar la ruta para nombre/email visibles y cambio autenticado de contraseña, sin CMS ni preferencias genéricas. Edición de email condicionada y política de sesiones de este cambio pendientes; ver DECISIONES_PRODUCTO_MVP. |
+| Operaciones/datos | ❌ NO IMPLEMENTADO; corrección 19/10, producto 8/9: `/admin/configuracion` únicamente tema claro/oscuro persistente de admin, sin efectos en Home/catálogo/PDP. Nombre/email solo lectura, contraseña/logout pertenecen a `/admin/cuenta`; sin edición de identidad ni CMS. Otras sesiones del cambio autenticado pendientes, único bloqueo de ese subflujo. |
 | Dominio/persistencia | Ninguna entidad «Configuración» ni tabla genérica obligatoria derivada del alcance actual. Los contactos están en código; un CMS está fuera del MVP. |
 | Validaciones/permisos | Si se aprueba una operación, especificar campos y autorización; no exponer secretos de infraestructura en este panel. |
 | UX/errores | El vacío explicativo existe. Estados remotos no aplican hasta definir capacidad; no simular guardado. |
 | Tests/dependencias | Hoy revisar navegación y aviso. Si se aprueba capacidad, derivar pruebas de su tarea y módulo propietario. |
-| Terminado | Para cerrar MVP, decidir explícitamente si se mantiene como reserva o no forma parte de navegación final. No exigir implementar preferencias, temas, multiusuario o parámetros fiscales no aprobados. |
+| Terminado | Preferencia claro/oscuro persistente exclusiva de admin implementada/probada en R3, conforme a actualización 8; no multiusuario, CMS o parámetros fiscales. Cuenta se acepta por separado dentro de Auth. |
 
 ## 6. Autenticación, sesiones persistentes y autorización
 
@@ -308,13 +310,13 @@ Nueva apertura del administrador
 
 | Tema | Comportamiento objetivo y pendiente |
 | --- | --- |
-| Persistencia | Conservar acceso entre aperturas del navegador durante un plazo acordado. No significa sesión perpetua ni contraseña guardada por la aplicación. |
-| Expiración | Definir duración absoluta y por inactividad, con control servidor; plazos exactos PENDIENTES, sin inventar días/minutos. |
-| Renovación | Renovar solo sesión todavía válida según política; rotación y límites acordados. Una sesión expirada o revocada no revive con actividad cliente. |
+| Persistencia | Conservar acceso entre aperturas dentro del máximo absoluto de 30 días desde login. No sesión perpetua ni contraseña guardada por la aplicación. |
+| Expiración | Máximo absoluto de 30 días desde login aprobado en producto 9, control servidor y nuevo login al vencer; formalización SRS/RUP pendiente. Verificar configuración de la versión fijada de Better Auth al implementar. |
+| Renovación | La actividad diaria no renueva ni extiende el máximo absoluto. Ya no es decisión de producto pendiente. Una sesión vencida/revocada no revive con actividad cliente. |
 | Cookie | Evaluar `HttpOnly`, `Secure` en HTTPS, `SameSite` adecuado y ámbito mínimo; expiración del navegador coherente con la del servidor. No guardar credenciales o tokens de sesión en localStorage. |
 | Estrategia | Comparar en ADR sesiones respaldadas en servidor y alternativas de la solución elegida; exigir revocación y persistencia deseadas. No fijar JWT o tabla de sesión en esta auditoría. |
 | Logout | Comando seguro que invalida la sesión en servidor y elimina la cookie; redirige a login. Volver atrás no debe recuperar datos privados desde caché. |
-| Invalidación | Logout, vencimiento y cuenta inhabilitada; tras cambio/recuperación de contraseña definir revocación de sesiones existentes. Revocar una sesión comprometida no puede depender de borrar solo la cookie local. |
+| Invalidación | Logout/vencimiento y recuperación: reset invalida todas las sesiones previas y exige login. Otras sesiones tras cambio autenticado siguen pendientes, único bloqueo de ese subflujo. Revocar no puede depender de borrar solo la cookie local. |
 | Acceso directo | Toda entrada a `/admin` y rutas hijas verifica identidad/autorización servidor; si falta sesión, redirige a login sin cargar datos privados. |
 | Login ya autenticado | Sesión válida: redirigir al panel. Sesión inválida: mostrar formulario. No confundir tener una cookie con sesión válida. |
 | Retorno tras login | Si se conserva destino original, admitir únicamente rutas internas autorizadas; evitar redirección a URL externa inyectada. |
@@ -570,7 +572,7 @@ Referencia de requisitos: [SEGURIDAD.md](SEGURIDAD.md). Hoy existen exclusiones 
 | Control | Estado actual | Necesario para MVP operativo / criterio pendiente |
 | --- | --- | --- |
 | Autenticación y autorización servidor | ❌ | Necesario antes de datos reales; cada lectura/comando administrativo y acceso directo protegido. |
-| Sesiones persistentes, expiración, renovación y revocación | ❌ / ⚪ política | Necesario; parámetros acordados y pruebas de invalidación. |
+| Sesiones persistentes, expiración absoluta y revocación | ❌ NO IMPLEMENTADO | Máximo absoluto de 30 días desde login, sin extensión por uso diario; otras sesiones del cambio autenticado pendientes solo para ese subflujo. |
 | Cookies y HTTPS | ❌ sesión; HTTPS productivo no configurado | Necesario para auth real; atributos/ámbito según solución y entorno. El servidor LAN HTTP no acredita despliegue seguro. |
 | Contraseñas | ❌ | Hash/mecanismo seguro de solución madura; provisión y cambio seguros, sin credenciales de muestra en producción. |
 | Protección frente a CSRF | ❌ operaciones reales | Necesario según mecanismo elegido; evaluar controles de origen/tokens y comportamiento del framework. SameSite por sí solo no sustituye el análisis; no mutar mediante GET. |
@@ -601,7 +603,7 @@ CSRF depende de credenciales, cookies y mecanismo de mutación; se debe comproba
 | INTEGRACIÓN / anulaciones | Venta reintegra una vez; compra revierte una vez y se bloquea si negativo; egreso conserva historial y deja de contar | Repetir y ejecutar en paralelo; cero efectos parciales. |
 | INTEGRACIÓN / concurrencia | Dos ventas de la última unidad; anulación de compra con venta concurrente; dos anulaciones del mismo registro | No negatividad y reversión única sin depender del orden del navegador. |
 | INTEGRACIÓN / reportes | Mezcla de vigentes/anulados, fechas de borde, período vacío/cero/negativo, moneda/redondeo aprobados | Reconciliar fuentes históricas y resumen; sin doble conteo. |
-| INTEGRACIÓN / auth | Credenciales, revocación, persistencia, expiración/renovación, cookie manipulada, cuenta inhabilitada | Rutas/consultas/comandos rechazan accesos sin permiso; sin fuga de privados. |
+| INTEGRACIÓN / auth | Credenciales, revocación, persistencia, máximo absoluto de 30 días aun con actividad diaria, cookie manipulada, cuenta inhabilitada | Rutas/consultas/comandos rechazan accesos sin permiso; sin fuga de privados. |
 | INTEGRACIÓN / recuperación* | Respuesta neutra, token expirado/usado/concurrente, reemisión, fallo de correo y revocación acordada | Ningún reset sin prueba válida; consumo único; sin exponer secretos. |
 | INTEGRACIÓN / imágenes | Sustitución fallida, referencia inválida, formato/tamaño, limpieza segura | Producto conserva imagen anterior si falla; no quedan referencias rotas. |
 | E2E | Login persistente → alta producto → compra → venta → consultas → anular → reporte → logout; elegir los pasos aprobados | Recorrido con datos de prueba reproducibles y comprobación persistida. |
@@ -788,11 +790,11 @@ Actualización puntual del **19/10/2026** según [DECISIONES_PRODUCTO_MVP](DECIS
 | Stock y mínimo | ❌ NO IMPLEMENTADO | B aprobado: `<=`, mínimo opcional y 0 real, enteros, ajustes explícitos con motivo/fecha/historia y sin negativos; saldo inicial sin compra ni efecto económico. Falta implementación y alineación con fuentes definitivas. |
 | Operaciones e historia | ❌ NO IMPLEMENTADO | A–G aprueban campos mínimos, múltiples líneas, fechas real/carga, historia y corrección mediante anulación/recreación de confirmados. No autorizan anulaciones parciales; validaciones/estados no resueltos, categorías finales y baja de proveedor sin historial permanecen pendientes. |
 | Moneda, precisión, redondeo y período | ❌ NO IMPLEMENTADO | H aprobado: ARS, hasta dos decimales rechazando mayor precisión, fórmula sin anulados, mes actual/otro mes/rango, fecha real. Límites restantes de valores/fechas y representación técnica pendientes. |
-| Email/login/sesión y recuperación | ❌ NO IMPLEMENTADO | I/J aprobados: email único + contraseña, sesión hasta 30 días/cierre manual, recuperación por email de un uso con respuesta neutra, revocación global y nuevo login. Provisión, soporte, plazo exacto del enlace, reemisión y solución técnica pendientes; sin registro público, roles o multiadmin. |
+| Email/login/sesión y recuperación | ❌ NO IMPLEMENTADO | I/J/cierre 9: email único + contraseña, máximo absoluto de 30 días desde login no extensible por uso diario, cierre manual; recovery de 1 hora/un uso, neutral aun si falla entrega, revoca enlace y todas las sesiones previas sin auto-login. Better Auth/Resend y setup controlado diseñados en ADR-004. Reemisión según soporte real, soporte/operación y formalización pendientes; sin registro público, roles o multiadmin. |
 | ORM/acceso a datos/migraciones | ⚪ DECISIÓN PENDIENTE | ADR; PostgreSQL aceptado no elige el acceso, pooling o concurrencia. |
 | Auth, validación y testing | ⚪ | ADR/criterios antes de instalar; no elegir por aparecer en ejemplos externos. |
 | Imágenes | ⚪ DECISIÓN PENDIENTE | L/A6 aprueban una imagen principal administrable, obligatoria al publicar, guardado oculto sin imagen y conservación de la anterior ante fallo. Solo almacenamiento/optimización y detalles de carga siguen pendientes de decisión técnica. |
-| Configuración | ⚪ DECISIÓN PENDIENTE | K aprueba conservar la ruta para mostrar nombre/email y cambiar contraseña autenticada. Pendientes: condición de edición de email y sesiones en ese cambio. No hay módulo genérico de preferencias ni épico independiente. |
+| Cuenta / Configuración | ❌ NO IMPLEMENTADO | Producto 8/9: Cuenta en `/admin/cuenta` muestra nombre/email solo lectura, contraseña/logout; otras sesiones del cambio autenticado pendientes solo para ese subflujo. Configuración solo claro/oscuro persistente exclusivo de admin, R3, sin efectos públicos ni épico genérico. |
 | Contenido comercial | 🔴 BLOQUEADO POR FUENTE/REQUISITO | M reconfirma dirección Entre Ríos 924, Instagram y WhatsApp; recursos actuales aceptados para MVP sin CMS. Horarios definitivos, logo y catálogo comercial completo siguen pendientes; mantener «Consultar horarios vigentes». Street View editado no se presenta como foto nueva. |
 | Hosting, CI, observabilidad y operación | ⚪ | Entornos, HTTPS, migraciones, secretos, backups y diagnóstico; proveedor no elegido. |
 | Calidad no funcional | 🔴 objetivos pendientes | Volumen, tiempos, disponibilidad y nivel formal de accesibilidad sin métricas aprobadas; no prometer cifras. |
@@ -805,7 +807,7 @@ La [DEFINICION_TERMINADO](DEFINICION_TERMINADO.md) sigue siendo la referencia de
 
 - [ ] SRS/RUP validados incorporados; cada capacidad y tarea trazada sin RF/CU inventados; decisiones pendientes que afecten comportamiento resueltas por humanos.
 - [ ] PostgreSQL y acceso a datos reproducibles, migraciones y pruebas de rollback; datos conservados tras recarga/reinicio, no fixtures como fuente operativa.
-- [ ] Cuenta inicial segura; login/logout, sesión persistente razonable, expiración/renovación/revocación y autorización servidor verificados en páginas, consultas y comandos.
+- [ ] Cuenta inicial segura; login/logout, sesión con máximo absoluto de 30 días desde login sin extensión por actividad, revocación y autorización servidor verificados en páginas, consultas y comandos.
 - [ ] Recuperación por email implementada y probada **solo si se aprueba para MVP**; si no, decisión y procedimiento de recuperación acordados. Sin SMS o multiadmin añadidos.
 - [ ] Productos/proveedores gestionables según alcance validado; visibilidad y stock/mínimo correctos, identidad estable e historia conservada.
 - [ ] Compras/ventas/egresos registrables, consultables y anulables; atomicidad, no negatividad, importes históricos y efectos únicos probados también ante reintentos/concurrencia.
@@ -827,7 +829,7 @@ La siguiente tarea sugerida es validar fuentes y decisiones prioritarias y prepa
 
 ### Mantenimiento de esta referencia
 
-Cada futuro PR deberá actualizar el estado del módulo, evidencia de código/pruebas, fuentes y decisiones que cambien; conservar distinción entre mocks, propuestas y capacidades reales. No cerrar una casilla por agregar un botón ni dar por aprobada una decisión por aparecer aquí. El mapa se evalúa contra el commit auditado; si cambia main, revisar su vigencia.
+Cada futura integración deberá actualizar el estado del módulo, evidencia de código/pruebas, fuentes y decisiones que cambien; conservar distinción entre mocks, propuestas y capacidades reales. PR y revisión cruzada son opcionales según el workflow vigente; checks técnicos y ownership se mantienen. No cerrar una casilla por agregar un botón ni dar por aprobada una decisión por aparecer aquí. El mapa se evalúa contra el commit auditado; si cambia main, revisar su vigencia.
 
 ### Referencias técnicas externas consultadas
 
@@ -839,7 +841,7 @@ Ampliación documental solicitada el **17/10/2026**. Se conservan las secciones 
 
 La tabla resume el estado actual sobre el mismo commit auditado. Solo utiliza los seis estados de la sección 2. **UI implementada no significa operación de negocio implementada.** Persistencia significa acceso a datos de negocio persistidos, no existencia de archivos en Git. Validación parcial puede ser solo HTML o comprobación de un fixture; no acredita validación completa del servidor. Tests parcial refiere a la revisión manual previa de UI, no a una suite funcional. Documentación parcial distingue el mapa y documentos técnicos existentes de la trazabilidad formal pendiente.
 
-La ausencia de una capacidad no implica que deba agregarse en todas las filas: por ejemplo, Home estática y contactos no necesitan escritura en BD, y el público no debe requerir autenticación. Las columnas indican qué existe, mientras las secciones 4–28 definen qué aplica y qué requiere validación. Actualización de producto del 19/10: Configuración sigue siendo visual, con capacidad de cuenta aprobada en K; recuperación por email está incluida por J y no implementada. Formalización SRS/RUP pendiente.
+La ausencia de una capacidad no implica que deba agregarse en todas las filas: por ejemplo, Home estática y contactos no necesitan escritura en BD, y el público no debe requerir autenticación. Las columnas indican qué existe, mientras las secciones 4–28 definen qué aplica y qué requiere validación. Producto 8/9: Configuración sigue visual, solo tema admin-only futuro; Cuenta/Auth separado y recovery incluido por J, no implementados. Formalización SRS/RUP pendiente.
 
 **Punto previo a Inventario:** “Validar contra SRS/reglas definitivas si el administrador puede realizar ajustes manuales de stock y bajo qué restricciones.” El 19/10 el responsable aprobó explícitamente B3/B4: ajustes de incremento/decremento con cantidad, motivo obligatorio, fecha automática, historial y sin negativos; saldo inicial identificado sin compra ficticia ni efecto económico. Se resolvió la elección de producto, no por inferencia; sigue pendiente su alineación con SRS/reglas definitivas antes de implementar.
 
@@ -884,7 +886,7 @@ Los siguientes **13 épicos** agrupan trabajo futuro; sus identificadores son de
 
 - **Objetivo:** convertir login/logout mock en acceso administrativo real con sesión persistente razonable y autorización servidor.
 - **Dependencias:** EPIC-01 para cuenta/políticas y EPIC-02 según la solución; ADR de auth y estrategia de sesión pendientes de validación humana.
-- **Tareas principales:** evaluar solución madura y provisión inicial; implementar en tarea futura I/J: email único + contraseña, sesión hasta 30 días con cierre manual y expiración, autorización servidor y acceso directo protegido. Recuperación por email incluida por responsable: respuesta neutra, enlace temporal de un uso, nueva contraseña, invalidación del enlace y todas las sesiones, vuelta al login. Alinear con SRS/RUP y resolver detalles pendientes de seguridad. K limita Configuración a cuenta; no elegir proveedor ni librería aquí.
+- **Tareas principales:** implementar en tarea futura I/J/cierre 9 con ADR-004: provisión única segura, email + contraseña, sesión de máximo absoluto de 30 días desde login sin extensión por uso diario, cierre manual y autorización servidor. Recovery de 1 hora/un uso con respuesta neutra aun ante fallo de entrega, nueva contraseña, invalida enlace y todas las sesiones previas, sin auto-login. Cuenta en `/admin/cuenta` con identidad solo lectura/contraseña/logout; Configuración únicamente tema admin-only, R3. Resolver reemisión según soporte nativo y otras sesiones del cambio autenticado (solo bloquea ese subflujo), alinear SRS/RUP; sin reelegir herramientas aprobadas.
 - **Criterio general de terminado:** identidad/sesión/autorización, persistencia, logout y expiración verificados; recuperación aprobada implementada con revocación global y pruebas negativas. Capacidad de cuenta K cubierta con sus pendientes resueltos; sin SMS, registro público, roles o multiadmin añadidos.
 
 ### EPIC-04 Productos
@@ -986,7 +988,7 @@ Diseño y herramientas aprobados no cambian las columnas de persistencia/auth/l�
 
 Drizzle, Better Auth, Resend, Zod, Vitest/RTL/Playwright aprobados; Cloudinary elegido por ADR-007 y estrategias de modelo/dinero/transacciones/Next en ADR-003/008. Por tanto, los ⚪ históricos de esas elecciones **quedan resueltos como diseño**, manteniendo ❌ su implementación. No instalar esas dependencias por ejecutar OpenSpec.
 
-Siguen pendientes SRS/RUP canónicos/RF-CU formales, políticas comerciales no respondidas, sesiones tras cambio autenticado, edición email, baja proveedor sin historia, horarios/contenido final, dominio/hosting/DB administrada, cuentas/secretos de servicios, observabilidad final y CI/CD avanzado. [DECISIONES_PENDIENTES](DECISIONES_PENDIENTES.md) es el registro vigente; [TRAZABILIDAD_MVP](TRAZABILIDAD_MVP.md) contiene RF-01..21 **aportados por el responsable como referencia**, sin afirmar texto canónico disponible ni inventar IDs.
+Siguen pendientes SRS/RUP canónicos/RF-CU formales, políticas comerciales no respondidas, otras sesiones tras cambio autenticado (único bloqueo de ese subflujo), reemisión de recovery según soporte nativo, baja proveedor sin historia, horarios/contenido final, dominio/hosting/DB administrada, cuentas/secretos de servicios, observabilidad final y CI/CD avanzado. Sesión absoluta de 30 días y recovery de 1 hora ya aprobados; nombre/email solo lectura, edición fuera del alcance autorizado. [DECISIONES_PENDIENTES](DECISIONES_PENDIENTES.md) es el registro vigente; [TRAZABILIDAD_MVP](TRAZABILIDAD_MVP.md) contiene RF-01..21 **aportados por el responsable como referencia**, sin afirmar texto canónico disponible ni inventar IDs.
 
 ### Contradicciones revisadas y resueltas
 

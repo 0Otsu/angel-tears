@@ -4,7 +4,7 @@
 
 ## 1. Fuentes y clasificación
 
-Orden: SRS → RUP → decisiones de producto/reglas → ADR → blueprint → OpenSpec → código. Una herramienta técnica no es un caso de uso. Las decisiones nuevas aprobadas figuran en [producto, sección 8](DECISIONES_PRODUCTO_MVP.md#8-actualización-expresa-de-arquitectura-y-producto--19102026); diseño en [blueprint](BLUEPRINT_IMPLEMENTACION_MVP.md).
+Orden: SRS → RUP → decisiones de producto/reglas → ADR → blueprint → OpenSpec → código. Una herramienta técnica no es un caso de uso. Las decisiones nuevas aprobadas figuran en [producto, sección 8](DECISIONES_PRODUCTO_MVP.md#8-actualización-expresa-de-arquitectura-y-producto--19102026) y [cierre final de Auth, sección 9](DECISIONES_PRODUCTO_MVP.md#9-cierre-final-de-auth-y-cuenta--19102026); diseño en [blueprint](BLUEPRINT_IMPLEMENTACION_MVP.md).
 
 Clasificación de análisis solicitada: **A** cobertura candidata por RF/RNF existente; **B** conviene ampliar RF existente; **C** probablemente requiere nuevo RF (sin asignar número); **D** afecta prototipo/interfaz; **E** afecta RUP/CU/actividad; **F** técnica, no requisito SRS por sí misma. A/B/C son hipótesis hasta contrastar fuentes; pueden coexistir D/E. «RNF acceso», etc., son temas suministrados, no IDs inventados.
 
@@ -40,9 +40,9 @@ RNF temáticos aportados: acceso restringido, protección de información, separ
 
 | Capacidad aprobada / fuente | Clasificación candidata | Acción SRS pendiente | Impacto RUP/prototipo y evidencia |
 | --- | --- | --- | --- |
-| Recuperación email J | C + E + D; RNF protección también aplica | Verificar si ya existe; si falta, proponer requisito nuevo sin número, con respuesta neutra/enlace de un uso | CU recuperación y especificación de éxito/expirado/usado, actividad y prototipo; E2E + consumo concurrente. |
-| Cambio autenticado de contraseña K/actualización 8 | C/B + E + D | Confirmar cobertura de gestión de cuenta; definir política de sesiones antes de cerrar recorrido | CU/flujo autenticado con contraseña actual, error y éxito; no confundir con recuperación. |
-| Sesión persistente I4 | B/A(RNF acceso) + E | Ampliar criterios de RF-01/02 o RNF de acceso con plazo aprobado | Flujos alternativos de sesión válida/vencida; casos negativos. |
+| Recuperación email J / cierre 9 | C + E + D; RNF protección también aplica | Verificar si ya existe; si falta, proponer requisito nuevo sin número: enlace de 1 hora/un uso, neutral aun ante fallo de envío, invalida enlace y todas las sesiones previas, sin auto-login. Decisión aprobada pendiente de formalización SRS/RUP | CU recuperación y especificación de éxito/expirado/usado, actividad y prototipo; E2E + consumo concurrente. Reemisión pendiente según soporte nativo antes de cierre. |
+| Cambio autenticado de contraseña K/actualizaciones 8/9 | C/B + E + D | Confirmar cobertura de gestión de Cuenta en `/admin/cuenta`; definir otras sesiones, único bloqueo de ese subflujo, no de todo Auth | CU/flujo con contraseña actual, error y éxito; identidad solo lectura, sin edición de nombre/email autorizada. No confundir con reset global ni Configuración, que solo contiene tema admin-only. |
+| Sesión persistente I4 / cierre 9 | B/A(RNF acceso) + E | Ampliar criterios de RF-01/02 o RNF: máximo absoluto de 30 días desde login, no extensible por uso diario y nuevo login al vencer. Decisión aprobada pendiente de formalización SRS/RUP | Flujos válida/vencida; reloj controlado y uso diario hasta el límite, no renovación de producto pendiente. |
 | Invalidación de sesiones J3 | B/A(RNF protección) + E | Agregar criterios a recuperación/logout si falta | Actividad de reset y pruebas de revocación; política del cambio autenticado sigue abierta. |
 | Provisión controlada de administradora | F y posible RNF operación | Documentar operación segura, no crear RF público de registro | Procedimiento de despliegue; modelo User/Account; no CU «usar Drizzle». |
 | Ajustes manuales B3 y saldo inicial B4 | C/B + E + D | Contrastar si RF-08/gestión stock ya cubre ajustes; ampliar o proponer RF sin número | CU/actividad de ajuste con motivo/historia/no negativo; carga inicial; prototipo y CRC Inventario/Ajuste. |
