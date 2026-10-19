@@ -15,8 +15,8 @@ Leer AGENTS, decisiones, ADR y blueprint antes del change. `openspec/config.yaml
 1. Explorar y verificar alcance/contradicciones; nueva funcionalidad para Sofía/público se propone y analiza en fuentes.
 2. Leer propuesta, diseño, specs/deltas y tareas del change asignado; confirmar autorización para implementarlo.
 3. Implementar una parte verificable con tests/docs de esa parte y respetar ownership/contratos. Marcar tareas solo con evidencia real, no por escribir el plan.
-4. Revisar/validar y seguir flujo Git normal. La excepción sin PR de esta preparación no se extiende a los slices.
-5. Sincronizar/archivar únicamente tras implementación y aceptación. `openspec/specs` permanece sin specs principales en esta preparación; los deltas futuros están dentro de cada change activo.
+4. Seguir el [workflow Git vigente](GIT_WORKFLOW.md): rama propia desde main actualizado, sincronización/ownership, integrar main reciente y resolver conflictos entendidos antes de merge; tests aplicables, lint/typecheck/build, OpenSpec y diff. Luego merge, push y aviso al equipo. PR, aprobación de otro integrante y revisión cruzada no son gates; revisión humana adicional recomendable y responsabilidad técnica intacta.
+5. Sincronizar/archivar únicamente tras implementación y aceptación técnica del responsable con evidencia, sin gate de revisión cruzada. `openspec/specs` permanece sin specs principales en esta preparación; los deltas futuros están dentro de cada change activo.
 
 ## Ronda 1 activa
 
@@ -27,6 +27,12 @@ Leer AGENTS, decisiones, ADR y blueprint antes del change. `openspec/config.yaml
 | Augusto | `implement-products-public-seo` |
 
 Son los únicos tres activos. Rondas 2/3 solo en [blueprint](BLUEPRINT_IMPLEMENTACION_MVP.md) y [plan](PLAN_IMPLEMENTACION.md), sin changes ni responsables nuevos.
+
+### Referencia histórica de Auth discontinuada
+
+La rama `docs/auth-stack-ebenitez`, commit `027e8a90ffe20ab89e74533ae09b58d510e00cf6`, se inspeccionó como referencia desde main; no se mergeó ni cherry-pickeó. Queda **discontinuada como candidata a integración**, conservada sin tocar. Emi partirá del main actualizado y usará exclusivamente `implement-admin-auth-account`, sin segunda especificación Auth.
+
+De su `docs/features/AUTENTICACION.md`, ADR-004 histórico y ADR-006 se rescatan matriz de errores/datos seguros, contraseña nueva rechazada, reemisión pendiente, limitación de abuso sin bloqueo indefinido, setup seguro y prerrequisitos de tests. Se integran en el [diseño Auth](../openspec/changes/implement-admin-auth-account/design.md), ADR-004/006 vigentes y TESTING. ADR-003/005/006 históricos repiten herramientas ya decididas; no se copian ni duplican. Se descartan la segunda spec completa, nombres de ADR paralelos, Cuenta dentro de Configuración, ambigüedad de renovación y pendientes técnicos ya resueltos por main. Las decisiones finales de sesión/recovery y workflow prevalecen sobre esa referencia. No se ejecuta ninguna task por este rescate.
 
 ## Comandos verificados en 1.14.3
 

@@ -2,7 +2,7 @@
 
 Fecha de aprobación: **19/10/2026**.
 
-**Vigencia:** los bloques A–M conservan el registro del cierre previo. La sección 8 registra las ampliaciones/sustituciones explícitas posteriores de la tarea de arquitectura del mismo día; prevalece únicamente en los puntos allí indicados. No se reescriben otras elecciones ni se declara formalización académica inexistente.
+**Vigencia:** los bloques A–M conservan el registro del cierre previo, con correcciones puntuales de Auth/Cuenta para evitar instrucciones obsoletas. La sección 8 registra las ampliaciones de arquitectura y la sección 9 las decisiones finales de Auth del 19/10/2026; prevalecen en sus puntos explícitos. No se reescriben otras elecciones ni se declara formalización académica inexistente. Las autorizaciones de PR/merge de entregas anteriores son historia; el workflow vigente está en [GIT_WORKFLOW](GIT_WORKFLOW.md).
 
 ## 1. Contexto, aprobación y autoridad
 
@@ -172,13 +172,13 @@ Las reglas aquí aprobadas no convierten los mocks en funciones reales. La aplic
 | I1 | Una única administradora inicial. |
 | I2 | Identificador de acceso: email único + contraseña. |
 | I3 | El teléfono comercial no es identificador de acceso. |
-| I4 | Experiencia deseada: sesión persistente **hasta 30 días** en dispositivo propio, cierre manual disponible y nueva autenticación al expirar. Es una decisión de producto/UX, no una tecnología. |
+| I4 | Sesión administrativa con máximo **absoluto de 30 días desde el login**, aun con uso diario; la actividad no extiende ese máximo. Cierre manual disponible y nuevo login obligatorio al vencer. Decisión final de producto/seguridad, no configuración implementada. |
 | I5 | Sin registro público de administradores. |
 | I6 | Multiadministrador y roles fuera del MVP. |
 
 **Razón:** facilitar el acceso cotidiano de la responsable con un alcance administrativo acotado.
 
-**Consecuencias:** la solución futura debe permitir persistencia limitada, cierre y expiración efectivos, con autorización en servidor. No se fijan cookies, tokens, librería ni reglas técnicas de renovación/inactividad por deducción del plazo UX.
+**Consecuencias:** persistencia limitada, cierre y expiración efectivos, con autorización en servidor. La renovación ya no es una decisión de producto pendiente: ninguna actividad extiende el máximo absoluto. Al implementar se comprobarán las opciones de la versión fijada de Better Auth para representar y probar esa política; no se configura ahora.
 
 **Alternativas descartadas:** teléfono como login, pedir autenticación en cada apertura pese a sesión vigente, sesión indefinida, registro abierto y múltiples administradores/roles.
 
@@ -189,29 +189,29 @@ Las reglas aquí aprobadas no convierten los mocks en funciones reales. La aplic
 | Código | Decisión aprobada |
 | --- | --- |
 | J1 | **Recuperación por email incluida formalmente en el MVP por decisión del responsable.** Ya no es una mera propuesta de inclusión, aunque falta alineación con SRS/RUP. |
-| J2 | Email → respuesta neutra → enlace temporal de un solo uso → nueva contraseña → invalidación del enlace → volver al login. |
+| J2 | Email → respuesta neutra incluso ante fallo interno de envío → enlace temporal de **1 hora** y un solo uso → nueva contraseña → invalidación del enlace → volver al login sin autenticación automática. |
 | J3 | Después de recuperar/cambiar la contraseña mediante recuperación, invalidar **todas** las sesiones anteriores y exigir nuevo login. |
 | J4 | Recuperación únicamente mediante email. Sin SMS, teléfono ni preguntas secretas. |
 
 **Razón:** recuperar el acceso a la única cuenta sin mantener sesiones anteriores después del restablecimiento.
 
-**Consecuencias:** recuperación y revocación global pasan a ser capacidades futuras requeridas por esta decisión. Deben probarse expiración, uso único, respuesta neutra y revocación. No se fijan duración exacta del enlace, política de reemisión, proveedor de correo ni mecanismo técnico.
+**Consecuencias:** recuperación y revocación global son capacidades futuras requeridas. Probar vencimiento a la hora, uso único, neutralidad aun ante fallo de entrega y revocación de todas las sesiones previas. La reemisión continúa pendiente según soporte real de Better Auth: preferir invalidar el anterior si existe soporte nativo maduro; no crear infraestructura propia compleja. Documentar comportamiento de la versión elegida y decidir antes de cerrar recuperación. Resend entrega correo según ADR-004.
 
 **Alternativas descartadas:** dejar recuperación fuera del MVP, conservar sesiones tras recuperar contraseña, iniciar sesión automáticamente al terminar y usar canales alternativos.
 
 **Impacta:** alcance de Auth, recuperación, sesiones, correo y seguridad.
 
-### K. Configuración de cuenta
+### K. Cuenta separada de Configuración
 
-**Registro histórico sustituido parcialmente por sección 8:** Cuenta/Auth se separa de Configuración, que ahora contiene solo apariencia admin.
+**Corrección expresa de las secciones 8/9:** Cuenta/Auth se separa de Configuración, que contiene solo apariencia admin. Se corrige la ubicación heredada del cambio de contraseña.
 
 | Código | Decisión aprobada |
 | --- | --- |
-| K1 | Conservar `/admin/configuracion` únicamente para mostrar nombre/email de la cuenta y permitir cambio de contraseña estando autenticada. Sin temas, roles, sucursales, impuestos, CMS, configuraciones técnicas ni preferencias inventadas. Si editar email implica complejidad adicional de seguridad, dejarlo solo visible y gestionar su cambio fuera del panel. No se da por autorizada automáticamente su edición. |
+| K1 | `/admin/cuenta` muestra nombre/email de solo lectura, permite cambiar contraseña autenticada verificando la actual y acceder a logout. No editar nombre/email, roles ni perfil complejo. `/admin/configuracion` contiene únicamente claro/oscuro persistente, exclusivo de `/admin/*`; no cambia Home, catálogo, PDP ni identidad pública. |
 
 **Razón:** mantener funciones reales de cuenta sin convertir una reserva visual en un módulo genérico de configuración.
 
-**Consecuencias:** nombre/email visibles no implican edición de nombre aprobada. La condición sobre edición de email sigue pendiente de resolución; tampoco se definió la política de sesiones al cambiar contraseña desde Configuración. J3 se refiere expresamente a recuperación, no se extiende silenciosamente a este flujo.
+**Consecuencias:** no se habilita edición de nombre/email. El tratamiento de otras sesiones al cambiar contraseña desde Cuenta sigue pendiente y es el único bloqueo de ese subflujo; no bloquea todo Auth. J3 solo resuelve recuperación. El tema pertenece a R3, fuera del change Auth de R1.
 
 **Alternativas descartadas:** quitar la navegación, mantener únicamente un placeholder como solución final y añadir preferencias sin necesidad.
 
@@ -257,8 +257,9 @@ Las reglas aquí aprobadas no convierten los mocks en funciones reales. La aplic
 | SRS/RUP y trazabilidad | Incorporar fuentes definitivas, contrastar estas decisiones y resolver contradicciones con intervención humana. No asignar RF/CU inventados. |
 | Categorías iniciales | Validar con la propietaria si falta o sobra alguna de las siete propuestas. La estrategia de lista fija sí está aprobada. |
 | Horarios | Obtener confirmación definitiva. Mantener el texto aprobado mientras tanto. |
-| Edición de email | Resolver la condición de K1 al evaluar seguridad; no asumir que el panel permite editarlo. |
-| Cambio autenticado de contraseña | Definir tratamiento de sesiones para el flujo de Configuración. No extender automáticamente J3 fuera de recuperación. |
+| Identidad de cuenta | Nombre/email de solo lectura; su edición no está autorizada y no bloquea Auth. |
+| Cambio autenticado de contraseña | Definir qué sucede con las otras sesiones desde Cuenta. Único bloqueo de ese subflujo; no extender J3 ni bloquear todo Auth. |
+| Reemisión de recovery | Comprobar soporte nativo maduro para invalidar el enlace anterior al solicitar otro; documentar comportamiento real de la versión fijada y decidir antes de cerrar el flujo, sin infraestructura propia compleja. |
 | Proveedores sin historial | Su eliminación no se definió. D3 resuelve únicamente la conservación de proveedores utilizados y su inactivación para nuevas compras. |
 | Detalles restantes de validación y estados | Límites de campos/importes/fechas, límites exactos del rango temporal y estados no resueltos expresamente siguen sujetos a fuentes y a la tarea correspondiente. No inferirlos de fixtures. |
 | Contenido comercial restante | La aprobación de contactos/recursos no aporta por sí sola un logo limpio ni un catálogo real completo. Conservar esos vacíos del registro previo; el reemplazo fotográfico futuro no se vuelve obligatorio por M3. |
@@ -304,9 +305,9 @@ Este apartado conserva el alcance de aquella entrega. La tarea posterior aprueba
 
 Los ADR de arquitectura ya aceptados conservan su autoridad. Las preferencias funcionales no seleccionan herramientas por implicación. No se instalan dependencias ni se crean ADR nuevos en esta entrega.
 
-## 7. Límite de cierre
+## 7. Límite de cierre histórico
 
-Esta aprobación permite **documentar y abrir un PR sin mergearlo**. No inicia Persistencia ni ningún otro épico, no elige ORM/auth y no autoriza código, CRUD, rutas, UI o infraestructura. La revisión de otro integrante y la alineación con fuentes definitivas permanecen pendientes según el flujo del repositorio.
+Aquella aprobación permitió documentar y abrir un PR sin mergearlo; no autorizó implementación. Su entrega y sus condiciones son antecedentes, no el workflow vigente. La arquitectura posterior eligió herramientas y la corrección final autoriza commit/merge/push documental; para contribuciones actuales rige [GIT_WORKFLOW](GIT_WORKFLOW.md), sin PR ni revisión cruzada obligatorios. La alineación con fuentes definitivas sigue pendiente.
 
 ## 8. Actualización expresa de arquitectura y producto — 19/10/2026
 
@@ -325,3 +326,14 @@ La nueva tarea autoriza preparación global/OpenSpec y merge sin PR, **no implem
 Imagen principal, campos, URL estable, publicado/oculto, agotados, stock, proveedores, compras, ventas, egresos y fórmula económica conservan sus reglas previas. Stock inicial sigue sin compra ficticia ni efecto económico. Datos del negocio M no cambian; horarios todavía pendientes.
 
 La representación de datos, herramientas, Cloudinary, seguridad y mecanismos de Next son decisiones técnicas justificadas en ADR, no nuevos RF. Los gaps académicos se registran en [TRAZABILIDAD_MVP](TRAZABILIDAD_MVP.md), sin modificar fuentes externas ausentes.
+
+## 9. Cierre final de Auth y Cuenta — 19/10/2026
+
+Decisión humana **APROBADA** de producto/seguridad, pendiente de alineación/formalización con SRS/RUP canónicos cuando corresponda:
+
+- **Sesión:** máximo absoluto de 30 días desde login, sin extensión por uso diario. Vencida: nuevo login obligatorio. Comprobar representación y límites con la versión fijada de Better Auth durante implementación, sin configurar ahora.
+- **Recovery:** enlace de 1 hora, temporal y de un solo uso; respuesta pública neutra aun si falla la entrega. Restablecer invalida enlace y todas las sesiones previas, sin login automático. Este plazo sustituye cualquier TTL previo.
+- **Cuenta/Configuración:** K1 corregido arriba; identidad de solo lectura y contraseña/logout en `/admin/cuenta`; únicamente tema persistente admin-only en `/admin/configuracion`, sin cambios públicos.
+- **Pendientes acotados:** otras sesiones tras cambio autenticado (único bloqueo de ese subflujo) y reemisión de recovery según soporte nativo/versionado. No extender revocación global del reset al cambio autenticado ni inventar valores exactos de rate limiting; impedir bloqueo indefinido de la única administradora. Operación/soporte/remitente y formalización siguen pendientes según su alcance.
+
+Ninguna decisión implementa Auth, instala herramientas ni habilita edición de perfil. La rama histórica de Emi queda discontinuada como candidata de integración tras el rescate selectivo documentado en [OPENSPEC](OPENSPEC.md); el change vigente es `implement-admin-auth-account`.

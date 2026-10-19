@@ -16,6 +16,8 @@ Los comandos actuales lint/typecheck/build no prueban negocio. No se reabre la s
 
 ## Consecuencias
 
-Emi coordina el arnés compartido; Augusto y Claudio son responsables de pruebas de sus slices. BD de prueba con guard de nombre/entorno para no limpiar datos reales, limpieza y fixtures deterministas. Ver [TESTING](../TESTING.md) para matriz concreta y comandos actuales.
+Emi coordina el arnés compartido; Augusto y Claudio son responsables de pruebas de sus slices. PostgreSQL de prueba aislado, con guard de nombre/entorno para no limpiar datos reales, limpieza y fixtures deterministas; correo mediante doble/fake, sin servicios ni datos productivos.
+
+Al implementar el arnés, verificar compatibilidad/peers y configurar un entorno DOM si RTL lo requiere; no elegirlo ni instalarlo por esta corrección. Documentar también instalación de browsers de Playwright para ejecutar E2E en el entorno de pruebas. Son prerrequisitos futuros, no comandos ejecutados ni suite existente. Ver [TESTING](../TESTING.md) para matriz concreta y comandos actuales.
 
 Fuentes: [Vitest](https://vitest.dev/guide/), [RTL](https://testing-library.com/docs/react-testing-library/intro/), [Playwright](https://playwright.dev/docs/intro). Consultadas el 19/10/2026.

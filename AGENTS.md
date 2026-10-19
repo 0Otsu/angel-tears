@@ -42,12 +42,12 @@ Existe una UI foundation aprobada: Next.js/TypeScript con público y administrac
 - No desactivar tests, omitir validaciones ni debilitar criterios para hacer pasar una tarea.
 - Indicar supuestos y vacíos; no convertirlos en requisitos.
 - Mantener documentación interna en español. Usar español sin tildes ni ñ en identificadores futuros; respetar nombres obligatorios de herramientas y frameworks.
-- Proteger secretos y cumplir el flujo de revisión humana de Git.
+- Proteger secretos y cumplir el [flujo Git vigente](docs/GIT_WORKFLOW.md), con revisión del diff y checks técnicos; revisión humana adicional recomendable, sin gate de PR/aprobación cruzada en esta etapa.
 - Basar cada tarea de implementación en `docs/features/TEMPLATE.md`, con requisitos y criterios verificables.
 
 ## Informe de entrega
 
-Indicar qué cambió y por qué, supuestos, archivos modificados, tests ejecutados y resultados, checks no ejecutados con motivo y pendientes. La afirmación de un agente no reemplaza la definición de terminado ni la revisión humana. El responsable debe poder explicar lo implementado.
+Indicar qué cambió y por qué, supuestos, archivos modificados, tests ejecutados y resultados, checks no ejecutados con motivo y pendientes. La afirmación de un agente no reemplaza la definición de terminado ni la responsabilidad humana. El responsable debe poder explicar lo implementado; una revisión adicional es recomendable, no obligatoria para integrar en esta etapa.
 
 ## Arquitectura y OpenSpec — actualización autorizada del 19/10/2026
 
@@ -61,4 +61,4 @@ Stack aprobado: Drizzle, Better Auth, Resend, Zod, Vitest/RTL/Playwright y monol
 
 Ronda 1: **Emi Auth/Cuenta; Claudio Inventario/Proveedores/Compras; Augusto Productos/Público/SEO**. Producto tiene un único owner/modelo. Cambios a contratos compartidos, schema, package/lock, arnés y migraciones se coordinan como indica el blueprint. Rondas 2/3 sin owners todavía; solo tres changes activos y ningún task implementado por esta preparación.
 
-La tarea de arquitectura autoriza excepcionalmente un commit de preparación y merge/push directo a main después de validar, sin PR/revisión cruzada; esa excepción no se extiende a implementaciones futuras. El flujo de colaboración normal continúa vigente. Al cerrar esta preparación detenerse: no ejecutar ninguno de los changes.
+Decisión humana final del 19/10/2026 para esta etapa: actualizar main, crear rama propia desde main, trabajar dentro del change/ownership y mantener sincronización. Antes de merge integrar main reciente de forma segura, resolver solo conflictos entendidos, ejecutar tests aplicables, lint/typecheck/build y validación OpenSpec, y revisar el diff. Si todo está correcto, mergear a main, push y avisar al equipo qué se integró. PR, aprobación de otro integrante y revisión cruzada no son gates obligatorios; la revisión humana adicional sigue siendo recomendable. Mantener coordinación de archivos compartidos, trazabilidad y Definition of Done técnica. Ver [GIT_WORKFLOW](docs/GIT_WORKFLOW.md). Esta corrección es solo documental: detenerse tras su cierre, sin ejecutar ningún change.

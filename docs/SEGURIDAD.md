@@ -5,10 +5,11 @@
 - No implementar autenticación criptográfica desde cero. Better Auth con Drizzle/PostgreSQL y Resend para entrega están aprobados: [ADR-004](adr/ADR-004-better-auth-resend.md). Hashing, credenciales y reset se delegan a auth; no recrearlos.
 - Nunca almacenar contraseñas en texto plano.
 - Verificar autorización siempre en servidor y proteger todo acceso administrativo mediante autenticación y autorización.
-- Sesión persistida en BD, hasta 30 días, cookie HttpOnly/Secure en HTTPS/SameSite Lax con origen confiable, sin tokens en localStorage ni cookieCache que demore revocación. Sin refresh indefinido. Logout real; reset temporal/de un uso invalida sesiones y requiere login.
+- Sesión persistida en BD con máximo absoluto de 30 días desde login: el uso diario no extiende el máximo; al vencer exige nuevo login. Verificar configuración/versionado de Better Auth al implementar. Cookie HttpOnly/Secure en HTTPS/SameSite Lax con origen confiable, sin tokens en localStorage ni cookieCache que demore revocación. Logout real; reset de 1 hora/de un uso invalida enlace y todas las sesiones previas, sin auto-login. Solicitud pública de recuperación neutra incluso ante fallo de entrega.
 - Ocultar enlaces administrativos no es un mecanismo de seguridad.
-- Signup público deshabilitado; provisión de una sola cuenta mediante proceso controlado y secreto no versionado. No roles, OAuth, magic links, SMS o 2FA. Cuenta y preferencias de apariencia son capacidades diferentes.
-- Protección de origen/CSRF de Better Auth y Actions conservada: no desactivarla para solucionar integración; Handlers multipart verifican sesión y origen. No mutaciones por GET. Rate limiting de flujos sensibles con almacenamiento y política verificados en el slice; no solo memoria de una instancia como garantía productiva.
+- Signup público deshabilitado; provisión de una sola cuenta mediante proceso controlado, idempotente/seguro y secreto no versionado. No contraseña en argumentos CLI, salida o logs; rechazar segunda cuenta, preservar credenciales existentes y documentar procedimiento. No roles, OAuth, magic links, SMS o 2FA. `/admin/cuenta`: nombre/email de solo lectura, contraseña/logout. `/admin/configuracion`: solo tema persistente admin-only, sin efectos públicos.
+- Protección de origen/CSRF de Better Auth y Actions conservada: no desactivarla para solucionar integración; Handlers multipart verifican sesión y origen. No mutaciones por GET. Rate limiting de flujos sensibles con almacenamiento y política verificados en el slice; no solo memoria de una instancia como garantía productiva. Evitar bloqueo indefinido de la única administradora; valores exactos de intentos/ventana/bloqueo pendientes de implementación/operación.
+- Otras sesiones tras cambio autenticado: pendiente, único bloqueo de ese subflujo; no extrapolar reset. Reemisión: preferir invalidar el anterior con soporte nativo maduro, documentar versión/comportamiento y decidir antes de cerrar recovery, sin infraestructura propia compleja. Contraseña nueva rechazada antes de completar reset conserva enlace sin consumir si la versión fijada lo soporta; verificar, no asumir garantía. Ver ADR-004 y matriz de errores del change Auth.
 
 ## Entradas e integridad
 
@@ -24,7 +25,7 @@
 - Mantener secretos fuera del repositorio.
 - `.env` nunca se versiona. Los archivos de entorno locales también quedan excluidos por `.gitignore`.
 - Un futuro `.env.example` sí se versionará, con nombres y valores de ejemplo sin secretos reales. No se crea aún porque no se eligió la configuración de la aplicación.
-- Nunca registrar contraseñas, tokens ni secretos en logs.
+- Nunca registrar contraseñas, tokens, URLs de recovery ni secretos en logs. Tampoco exponerlos, ni SQL/stack traces, en errores de UI/respuestas; omitir SQL/stacks/detalles sensibles de registros y conservar solo diagnóstico seguro. Ante sesión vencida al enviar: rechazar sin aplicar ni duplicar operación, solicitar login y conservar solo campos no sensibles de forma segura, limpiando contraseñas.
 - Logs estructurados con correlación, módulo/operación/resultado/fecha y errores redactados; puntos de instrumentación en auth/tx/imagen/correo. Proveedor final de observabilidad pendiente, sin tracking incorporado.
 - Antes de cada commit revisar los archivos preparados; `.gitignore` no sustituye esa revisión.
 
