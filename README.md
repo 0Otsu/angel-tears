@@ -14,6 +14,8 @@ Sitio público de accesorios en Concordia y base visual para la administración 
 - Tailwind CSS 4.3.3 y componentes visuales Boty/shadcn adaptados.
 - PostgreSQL: decidido para persistencia futura, todavía no conectado.
 
+Arquitectura complementaria aprobada, todavía sin integración: Drizzle, Better Auth, Resend, Zod, Vitest/React Testing Library/Playwright y Cloudinary. Ver [blueprint del MVP](docs/BLUEPRINT_IMPLEMENTACION_MVP.md) y [ADR](docs/adr/README.md). No instalar/implementar todo automáticamente al abrir el repositorio.
+
 ## Requisitos locales
 
 Node **24.15.0** (ver `.nvmrc`) y pnpm **11.25.0** (`packageManager` en package.json). Instalar requiere acceso al registro de paquetes; next/font obtiene las fuentes durante la compilación. No se requieren credenciales ni variables de BD para esta etapa.
@@ -40,7 +42,7 @@ pnpm typecheck
 pnpm build
 ```
 
-El build comprueba tipos; no tiene ignoreBuildErrors. Todavía no se eligió un framework de testing ni se configuró CI definitivo.
+El build comprueba tipos; no tiene ignoreBuildErrors. Testing está elegido pero no instalado: aún no existe `pnpm test`. CI definitivo sigue pendiente.
 
 ## Rutas públicas
 
@@ -70,5 +72,7 @@ Home incluye `/#el-local`, `/#de-ustedes` y `/#contacto`. Instagram, Maps y What
 Consultar [docs/](docs/), [AGENTS.md](AGENTS.md), [arquitectura](docs/ARQUITECTURA.md), [ADR-002 aceptado](docs/adr/ADR-002-nextjs-fullstack.md), [desarrollo](docs/DESARROLLO.md), [migración y validación](docs/MIGRACION_UI.md) y [decisiones pendientes](docs/DECISIONES_PENDIENTES.md). SRS/RUP validados y trazabilidad RF/CU siguen pendientes; no se inventan identificadores.
 
 Para planificar el trabajo: [mapa de implementación](docs/MAPA_IMPLEMENTACION.md) y [decisiones de producto del MVP](docs/DECISIONES_PRODUCTO_MVP.md).
+
+Para Ronda 1: [blueprint y ownership](docs/BLUEPRINT_IMPLEMENTACION_MVP.md), [trazabilidad SRS/RUP](docs/TRAZABILIDAD_MVP.md) y [OpenSpec con Codex](docs/OPENSPEC.md). Emi: Auth/Cuenta; Claudio: Inventario/Proveedores/Compras; Augusto: Productos/Público/SEO. Solo tres changes activos, ninguno implementado. OpenSpec CLI global 1.14.3; seis skills del proyecto en `.agents/skills`, sin reemplazar AGENTS.
 
 Antes de implementar una funcionalidad, revisar el mapa de implementación, las decisiones de producto y las fuentes de mayor prioridad definidas en AGENTS.md.

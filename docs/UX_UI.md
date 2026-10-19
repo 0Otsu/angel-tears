@@ -35,7 +35,22 @@ La base usa metadata, HTML semántico, alt y rutas canónicas. Home se prerender
 
 ## Accesibilidad y contenido
 
-Considerar navegación por teclado, foco visible, etiquetas comprensibles, contraste y estructura semántica en la revisión básica. La UI aprobada conserva los placeholders de productos/hero. El local usa la imagen aportada de Street View con controles retirados, atribución y acercamiento CSS al acceso; «Cómo llegar» está integrado en Ubicación con un pin. Historias, dirección y enlaces Instagram/Maps/WhatsApp están aportados y el teléfono está confirmado. Horarios, logo limpio y contenido comercial definitivo siguen pendientes. No incorporar un CMS ni productos destacados administrables.
+Considerar navegación por teclado, foco visible, etiquetas comprensibles, contraste y estructura semántica en la revisión básica. La UI aprobada conserva los placeholders de productos/hero. El local usa Street View aportado con atribución y encuadre del acceso; «Cómo llegar» integrado en Ubicación con pin. Historias/dirección/Instagram/Maps/WhatsApp confirmados; horarios/logo limpio/contenido comercial definitivo pendientes. Sin CMS; destacado booleano simple aprobado expresamente el 19/10, sin ranking/campañas.
+
+## Organización objetivo aprobada — no implementada
+
+La nueva tarea de arquitectura reemplaza únicamente organización/alcance explícitos anteriores; no cambia ahora rutas, componentes o estilos. [Blueprint](BLUEPRINT_IMPLEMENTACION_MVP.md) define los mecanismos.
+
+| Superficie | Objetivo |
+| --- | --- |
+| Inicio admin | Dashboard operativo derivado de datos reales, sin analytics o widgets configurables. |
+| Productos/Stock/Proveedores/Compras/Ventas | Capacidades separadas; shell Admin solo composición. |
+| Finanzas | Resumen económico + Egresos; sin navegación Reportes paralela. |
+| Cuenta `/admin/cuenta` | Nombre/email visibles, cambio contraseña/logout; recuperación en flujo Auth. |
+| Configuración | Solo claro/oscuro persistente admin-only en R3. Nunca cambia apariencia del público. |
+| Público | Home curada con productos reales/destacados/categorías; PDP agotada accesible y oculto 404; sin CMS/checkout/reserva. |
+
+Detalles de loading/vacío/error/foco/confirmación acompañan cada slice. Las propuestas de SEO/JSON-LD de la tarea actual se concretan en ADR-008/blueprint y no alteran el hecho de que hoy solo existen metadata/fixtures básicos.
 
 
 ## Límite de seguridad de esta iteración

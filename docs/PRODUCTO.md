@@ -7,7 +7,7 @@ Angel Tears es un sistema web para un negocio pequeño de accesorios. Busca faci
 - Visitantes: consultan catálogo e información comercial desde celular o computadora y acceden a WhatsApp e Instagram.
 - Responsable del negocio: administra productos, stock, proveedores y movimientos y consulta resultados aproximados.
 
-No se incluyen cuentas de clientes, múltiples administradores ni múltiples sucursales en el MVP. Los permisos concretos y la identidad administrativa se definirán con las fuentes y la solución de autenticación.
+No se incluyen cuentas de clientes, múltiples administradores, roles ni múltiples sucursales en el MVP. Sofía utiliza una cuenta administrativa única con email/contraseña; decisiones funcionales y sus actualizaciones en [DECISIONES_PRODUCTO_MVP.md](DECISIONES_PRODUCTO_MVP.md). Auth real todavía no existe.
 
 ## Fuente de verdad
 
@@ -15,10 +15,13 @@ La IA no es la fuente de verdad. Prioridad ante contradicciones:
 
 1. SRS corregida/validada.
 2. Artefactos RUP corregidos por la cátedra.
-3. Reglas de dominio documentadas.
+3. Decisiones de producto aprobadas + reglas de dominio documentadas.
 4. ADR aceptados.
-5. Especificación de la feature/tarea.
-6. Sugerencias de agentes de IA.
+5. Blueprint técnico.
+6. OpenSpec para cambios concretos, sin reemplazar SRS/RUP.
+7. Código que implementa esas fuentes.
+
+La tarea específica respeta estos límites; sugerencias de IA no son fuentes aprobadas. Una nueva capacidad, caso de uso o regla debe proponerse y evaluar SRS/RUP/prototipos/decisiones/ADR/OpenSpec antes de implementarse. Los templates son referencia visual reutilizable, no requisitos.
 
 Esta base recoge las instrucciones iniciales. La SRS validada y los artefactos RUP corregidos no se adjuntaron. Incorporarlos y resolver diferencias con el equipo antes de afirmar trazabilidad o validación formal. No se asignan identificadores RF/CU nuevos.
 
