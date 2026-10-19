@@ -19,5 +19,11 @@ Los ADR no pueden contradecir unilateralmente la SRS validada, los artefactos RU
 | --- | --- |
 | [ADR-001: monolito modular](ADR-001-monolito-modular.md) | ACEPTADO |
 | [ADR-002: Next.js full-stack](ADR-002-nextjs-fullstack.md) | ACEPTADO |
+| [ADR-003: Drizzle ORM](ADR-003-drizzle-orm.md) | ACEPTADO |
+| [ADR-004: Better Auth (incluye Resend para recuperación y cuenta inicial)](ADR-004-better-auth.md) | ACEPTADO |
+| [ADR-005: Zod para validación](ADR-005-zod-validacion.md) | ACEPTADO |
+| [ADR-006: Testing (Vitest, React Testing Library, Playwright)](ADR-006-testing.md) | ACEPTADO |
 
 Monolito modular y Next.js/TypeScript/PostgreSQL aceptados por autorización humana del 16/10/2026. La revisión del PR sigue pendiente; herramientas complementarias no se consideran aceptadas por asociación.
+
+ADR-003 a ADR-006 documentan decisiones tecnológicas aceptadas por indicación humana del equipo del proyecto el 19/10/2026 (decisión del responsable). La revisión del PR que los incorpora sigue pendiente.

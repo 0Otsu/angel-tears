@@ -9,7 +9,11 @@ Este registro separa direcciones iniciales, propuestas y vacíos de definición.
 | Monolito modular: una aplicación y una base de datos | ACEPTADO por autorización humana del 16/10/2026. Ver ADR-001. |
 | Next.js full-stack, TypeScript, PostgreSQL | ACEPTADO por autorización humana del 16/10/2026. PostgreSQL aún sin integración. Ver ADR-002. |
 | Rutas públicas y administrativas, acceso por URL/favorito y sin enlace destacado | UI foundation aprobada y migrada; no sustituye autenticación y autorización. |
-| Estrategia de pruebas | Propuesta por validar y concretar con las herramientas elegidas. |
+| Estrategia de pruebas | Herramientas definidas en [ADR-006](adr/ADR-006-testing.md) (ACEPTADO): Vitest, React Testing Library y Playwright. Comandos, estructura y CI siguen pendientes. |
+| Acceso a datos / ORM | Definido en [ADR-003](adr/ADR-003-drizzle-orm.md) (ACEPTADO): Drizzle ORM. Falta elegir el driver de PostgreSQL y diseñar el esquema por módulo. |
+| Autenticación y sesiones | Definido en [ADR-004](adr/ADR-004-better-auth.md) (ACEPTADO): Better Auth. La feature está especificada en [AUTENTICACION](features/AUTENTICACION.md); no implementada. |
+| Validación | Definido en [ADR-005](adr/ADR-005-zod-validacion.md) (ACEPTADO): Zod. |
+| Email transaccional | Resend, únicamente para recuperación de contraseña (ver ADR-004). Dominio remitente pendiente. |
 
 ## Fuentes y producto
 
@@ -29,13 +33,13 @@ Estas preguntas identifican vacíos para revisar con las fuentes; no son nuevos 
 
 ## Tecnología: evaluar mediante ADR
 
-- ORM / acceso a datos.
-- Librería o solución madura de autenticación; sesiones y cookies seguras.
-- Librería de validación.
-- Framework concreto de testing.
+Resueltos por decisión del responsable, documentados en ADR-003 a ADR-006 (ACEPTADOS el 19/10/2026 por indicación del equipo; revisión del PR pendiente): ORM / acceso a datos (Drizzle), autenticación y sesiones (Better Auth), validación (Zod) y framework de testing (Vitest, React Testing Library y Playwright). Resend queda decidido solo para el email de recuperación de contraseña.
+
+Pendientes:
+
 - Branding futuro y evolución de la UI; Tailwind y Boty adaptado ya son la base aprobada.
 - Almacenamiento de imágenes.
-- Hosting y deployment.
+- Hosting y deployment; proveedor final de PostgreSQL.
 - Error tracking.
 - Analytics, Meta Pixel y cualquier seguimiento: evaluar junto con privacidad antes de incorporarlos.
 - CI definitivo.
@@ -45,7 +49,7 @@ No hay selección de estas herramientas. Tampoco se implementa un banner de cook
 ## Diseño y colaboración
 
 - Concretar estructura del código, contratos entre módulos, esquema de datos y estrategia de transacciones/concurrencia después de validar arquitectura y fuentes.
-- Elegir framework y comandos de testing. Los comandos de desarrollo/lint/typecheck/build ya están configurados.
+- Definir comandos y estructura de testing (el framework está en ADR-006, ACEPTADO). Los comandos de desarrollo/lint/typecheck/build ya están configurados.
 - Revisar protecciones de ramas, estrategia de merge y controles de GitHub; no hay automatizaciones complejas configuradas.
 - Revisar y ajustar el orden general de implementación según prioridades grupales.
 
