@@ -2,6 +2,8 @@
 
 Auditoría de análisis y documentación del **16/10/2026**, sobre `main`, commit `9a6677dd1fa243138dd47f9b34077394529b87f4` (UI Foundation integrada mediante PR #1). Referencia para planificar y verificar trabajo futuro; no autoriza implementarlo ni sustituye requisitos o ADR aceptados.
 
+**Actualización de decisiones — 19/10/2026:** el responsable aprobó [DECISIONES_PRODUCTO_MVP.md](DECISIONES_PRODUCTO_MVP.md), bloques A–M. Clasificación: «Decisión de producto aprobada por responsable, pendiente de alineación/formalización con SRS/RUP cuando corresponda.» Esta actualización puntual resuelve elecciones de producto en las secciones 27/29 y condiciones relacionadas de recuperación, Configuración y épicos; no reescribe el análisis histórico ni cambia la evidencia de implementación. Las menciones anteriores a decisiones de producto pendientes/propuestas se consultan junto con ese documento. Las alternativas técnicas, fuentes definitivas y vacíos allí identificados siguen pendientes. Ninguna capacidad de negocio pasa a implementada por esta aprobación.
+
 ## Lectura rápida y conclusión
 
 **Angel Tears tiene una UI Foundation terminada, pero todavía no tiene un MVP operativo.** Funcionan la navegación pública, contactos externos, presentación de información y controles locales del prototipo. Las operaciones administrativas, la disponibilidad pública y los reportes no consumen datos persistidos ni ejecutan reglas de negocio.
@@ -274,7 +276,7 @@ Regla transversal para las fichas: lectura y escritura administrativas requieren
 | Aspecto | Mapa |
 | --- | --- |
 | Estado/evidencia | 🟣 UI/MOCK de reserva; `ConfiguracionDemo` E04. Sin formulario ni botón Guardar. |
-| Operaciones/datos | ⚪ DECISIÓN PENDIENTE: no hay preferencias/configuraciones validadas. Cuenta, contraseña y contacto pueden necesitar gestión futura, pero no nacen como CRUD por existir esta pantalla. |
+| Operaciones/datos | ❌ NO IMPLEMENTADO; K1 aprobado el 19/10: conservar la ruta para nombre/email visibles y cambio autenticado de contraseña, sin CMS ni preferencias genéricas. Edición de email condicionada y política de sesiones de este cambio pendientes; ver DECISIONES_PRODUCTO_MVP. |
 | Dominio/persistencia | Ninguna entidad «Configuración» ni tabla genérica obligatoria derivada del alcance actual. Los contactos están en código; un CMS está fuera del MVP. |
 | Validaciones/permisos | Si se aprueba una operación, especificar campos y autorización; no exponer secretos de infraestructura en este panel. |
 | UX/errores | El vacío explicativo existe. Estados remotos no aplican hasta definir capacidad; no simular guardado. |
@@ -336,9 +338,9 @@ La autenticación identifica a la persona; la sesión conserva ese contexto; la 
 - Sesión expirada durante un formulario impide escritura; informar y definir recuperación de datos no sensibles sin persistir credenciales ni duplicar operación.
 - Consultas y respuestas privadas no se comparten entre usuarios/contextos mediante caché pública.
 
-## 7. Recuperación de cuenta por email: propuesta pendiente
+## 7. Recuperación de cuenta por email
 
-**Clasificación:** 🔴 BLOQUEADO POR FUENTE/REQUISITO y ⚪ DECISIÓN PENDIENTE. Es una **«decisión/product requirement propuesto pendiente de incorporar/validar en fuentes»**. El alcance vigente no incluye recuperación por email ni sus rutas. La necesidad expresada en esta auditoría permite analizarla; no la convierte en RF existente ni autoriza implementarla.
+**Clasificación actualizada el 19/10/2026:** ❌ NO IMPLEMENTADO. J1–J4 de [DECISIONES_PRODUCTO_MVP](DECISIONES_PRODUCTO_MVP.md) aprueban recuperación por email en el MVP, respuesta neutra, enlace temporal de un uso, invalidación de todas las sesiones tras recuperación y vuelta al login. Pendiente de alineación/formalización con SRS/RUP; no se declara RF existente ni se autoriza implementación. Las URLs siguientes siguen siendo propuestas de implementación. El análisis original se conserva sujeto a esta decisión; duración exacta del enlace, reemisión, soporte y solución técnica siguen pendientes.
 
 ```text
 /admin/recuperar (propuesta)
@@ -362,7 +364,7 @@ La autenticación identifica a la persona; la sesión conserva ese contexto; la 
 | URL | HTTPS en producción, origen de enlace confiable; no construir con un Host no validado. Evitar fugas de token por referencias, analytics o registro de URL completa. |
 | Rate limiting | Limitar solicitudes e intentos por cuenta/origen, con política que evite abuso de correo y bloqueo fácil de la propietaria. |
 | Errores/UX | Token ausente/expirado/usado o inválido; nueva solicitud, validación por campo, submitting y éxito claro. No filtrar estado interno del sistema. |
-| Sesiones | Definir revocación tras reset y aviso a la titular, sin enviarle su contraseña. Si se adopta invalidación global, probarla. |
+| Sesiones | J3 aprobado: invalidar todas las sesiones anteriores tras recuperar contraseña y requerir nuevo login; probarlo. Aviso adicional a la titular no queda aprobado por inferencia. La política del cambio autenticado desde Configuración sigue pendiente. |
 | Operación | Correo no entregado o indisponible necesita tratamiento recuperable y logs redactados; decidir procedimiento de soporte seguro para la única cuenta. |
 
 Referencia técnica para respuesta neutra, tokens temporales y uso único: [OWASP Forgot Password](https://cheatsheetseries.owasp.org/cheatsheets/Forgot_Password_Cheat_Sheet.html). No existe hoy ninguno de estos pasos. Si se aprueba como parte del MVP, pasa a ser criterio de cierre y exige pruebas de expiración, reutilización, concurrencia y fallos de correo; si no, registrar la decisión y la alternativa de recuperación operativa acordada.
@@ -775,19 +777,21 @@ No convertir esta secuencia en diez PR gigantes: cada paso puede requerir slices
 
 ## 27. Decisiones bloqueantes y preguntas que deben resolverse
 
+Actualización puntual del **19/10/2026** según [DECISIONES_PRODUCTO_MVP](DECISIONES_PRODUCTO_MVP.md). ❌ en una elección ya resuelta significa capacidad pendiente de implementar, no falta de aprobación de producto. La alineación con SRS/RUP sigue abierta y no se asignan RF/CU.
+
 | Tema | Estado | Qué falta y qué bloquea |
 | --- | --- | --- |
 | SRS/RUP, campos y RF/CU | 🔴 BLOQUEADO POR FUENTE/REQUISITO | Incorporar fuentes validadas y resolver contradicciones; impide declarar trazabilidad y aceptación formal definitivas. |
-| Disponibilidad pública/ocultos | 🔴 | Definición de elegibilidad y acceso directo/SEO; bloquea consulta final de catálogo/PDP. |
-| Stock y mínimo | 🔴 | `<` o `<=`, unidades/cantidades, saldo inicial y correcciones permitidas; bloquea regla y tests definitivos. |
-| Operaciones e historia | 🔴 | Estados, campos, fechas y política de cambios/anulaciones; no añadir parciales o borrar historia sin fuente. |
-| Moneda, precisión, redondeo y período | 🔴 | Validar representación/importes y consulta económica, sin usar formato del mock como decisión. |
-| Email/login/sesión y recuperación | ⚪ / 🔴 formalización | Confirmar experiencia y políticas; recuperación por email es propuesta, no RF existente. Duración de sesión y mecanismo de soporte pendientes. |
+| Disponibilidad pública/ocultos | ❌ NO IMPLEMENTADO | A/C aprobados: listado publicado + stock > 0; PDP publicada agotada accesible con «Sin stock»; oculto con 404; venta interna permitida con stock; URL estable. Faltan implementación y políticas técnicas de SEO/caché. |
+| Stock y mínimo | ❌ NO IMPLEMENTADO | B aprobado: `<=`, mínimo opcional y 0 real, enteros, ajustes explícitos con motivo/fecha/historia y sin negativos; saldo inicial sin compra ni efecto económico. Falta implementación y alineación con fuentes definitivas. |
+| Operaciones e historia | ❌ NO IMPLEMENTADO | A–G aprueban campos mínimos, múltiples líneas, fechas real/carga, historia y corrección mediante anulación/recreación de confirmados. No autorizan anulaciones parciales; validaciones/estados no resueltos, categorías finales y baja de proveedor sin historial permanecen pendientes. |
+| Moneda, precisión, redondeo y período | ❌ NO IMPLEMENTADO | H aprobado: ARS, hasta dos decimales rechazando mayor precisión, fórmula sin anulados, mes actual/otro mes/rango, fecha real. Límites restantes de valores/fechas y representación técnica pendientes. |
+| Email/login/sesión y recuperación | ❌ NO IMPLEMENTADO | I/J aprobados: email único + contraseña, sesión hasta 30 días/cierre manual, recuperación por email de un uso con respuesta neutra, revocación global y nuevo login. Provisión, soporte, plazo exacto del enlace, reemisión y solución técnica pendientes; sin registro público, roles o multiadmin. |
 | ORM/acceso a datos/migraciones | ⚪ DECISIÓN PENDIENTE | ADR; PostgreSQL aceptado no elige el acceso, pooling o concurrencia. |
 | Auth, validación y testing | ⚪ | ADR/criterios antes de instalar; no elegir por aparecer en ejemplos externos. |
-| Imágenes | ⚪ | Requisito de edición/carga y estrategia de almacenamiento/optimización, coherente con hosting. |
-| Configuración | ⚪ | Decidir presencia final y capacidad mínima o ausencia de módulo; no justifica inventar preferencias. |
-| Contenido comercial | 🔴 datos pendientes | Horarios, logo y catálogo definitivo; imagen del local es Street View editado. Verificar detalle de etiqueta 922/URL 924 de Maps con responsable. |
+| Imágenes | ⚪ DECISIÓN PENDIENTE | L/A6 aprueban una imagen principal administrable, obligatoria al publicar, guardado oculto sin imagen y conservación de la anterior ante fallo. Solo almacenamiento/optimización y detalles de carga siguen pendientes de decisión técnica. |
+| Configuración | ⚪ DECISIÓN PENDIENTE | K aprueba conservar la ruta para mostrar nombre/email y cambiar contraseña autenticada. Pendientes: condición de edición de email y sesiones en ese cambio. No hay módulo genérico de preferencias ni épico independiente. |
+| Contenido comercial | 🔴 BLOQUEADO POR FUENTE/REQUISITO | M reconfirma dirección Entre Ríos 924, Instagram y WhatsApp; recursos actuales aceptados para MVP sin CMS. Horarios definitivos, logo y catálogo comercial completo siguen pendientes; mantener «Consultar horarios vigentes». Street View editado no se presenta como foto nueva. |
 | Hosting, CI, observabilidad y operación | ⚪ | Entornos, HTTPS, migraciones, secretos, backups y diagnóstico; proveedor no elegido. |
 | Calidad no funcional | 🔴 objetivos pendientes | Volumen, tiempos, disponibilidad y nivel formal de accesibilidad sin métricas aprobadas; no prometer cifras. |
 
@@ -833,9 +837,9 @@ Ampliación documental solicitada el **17/10/2026**. Se conservan las secciones 
 
 La tabla resume el estado actual sobre el mismo commit auditado. Solo utiliza los seis estados de la sección 2. **UI implementada no significa operación de negocio implementada.** Persistencia significa acceso a datos de negocio persistidos, no existencia de archivos en Git. Validación parcial puede ser solo HTML o comprobación de un fixture; no acredita validación completa del servidor. Tests parcial refiere a la revisión manual previa de UI, no a una suite funcional. Documentación parcial distingue el mapa y documentos técnicos existentes de la trazabilidad formal pendiente.
 
-La ausencia de una capacidad no implica que deba agregarse en todas las filas: por ejemplo, Home estática y contactos no necesitan escritura en BD, y el público no debe requerir autenticación. Las columnas indican qué existe, mientras las secciones 4–28 definen qué aplica y qué requiere validación. Configuración sigue siendo una reserva visual; recuperación por email sigue siendo una propuesta.
+La ausencia de una capacidad no implica que deba agregarse en todas las filas: por ejemplo, Home estática y contactos no necesitan escritura en BD, y el público no debe requerir autenticación. Las columnas indican qué existe, mientras las secciones 4–28 definen qué aplica y qué requiere validación. Actualización de producto del 19/10: Configuración sigue siendo visual, con capacidad de cuenta aprobada en K; recuperación por email está incluida por J y no implementada. Formalización SRS/RUP pendiente.
 
-**Punto previo a Inventario:** “Validar contra SRS/reglas definitivas si el administrador puede realizar ajustes manuales de stock y bajo qué restricciones.” No se confirma esa capacidad por inferencia ni se altera su clasificación en el mapa original.
+**Punto previo a Inventario:** “Validar contra SRS/reglas definitivas si el administrador puede realizar ajustes manuales de stock y bajo qué restricciones.” El 19/10 el responsable aprobó explícitamente B3/B4: ajustes de incremento/decremento con cantidad, motivo obligatorio, fecha automática, historial y sin negativos; saldo inicial identificado sin compra ficticia ni efecto económico. Se resolvió la elección de producto, no por inferencia; sigue pendiente su alineación con SRS/reglas definitivas antes de implementar.
 
 | Área | Ruta / feature | UI | Persistencia | Lógica de negocio | Validación | Auth/autorización | Loading | Empty | Errors | Tests | Documentación | Estado general |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -844,7 +848,7 @@ La ausencia de una capacidad no implica que deba agregarse en todas las filas: p
 | Público | PDP `/catalogo/[slug]` | ✅ IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | 🟡 PARCIAL | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | 🟡 PARCIAL | 🟡 PARCIAL | 🟡 PARCIAL | 🟣 UI/MOCK |
 | Auth | Login `/admin/login` | ✅ IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | 🟡 PARCIAL | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | 🟡 PARCIAL | 🟡 PARCIAL | 🟣 UI/MOCK |
 | Auth | Sesiones y logout real | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | 🟡 PARCIAL | ❌ NO IMPLEMENTADO |
-| Auth | Recuperación de cuenta propuesta; rutas de sección 7 | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | 🟡 PARCIAL | 🔴 BLOQUEADO POR FUENTE/REQUISITO |
+| Auth | Recuperación de cuenta aprobada en producto; rutas propuestas de sección 7 | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | 🟡 PARCIAL | ❌ NO IMPLEMENTADO |
 | Admin | Productos `/admin/productos` | ✅ IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | 🟡 PARCIAL | ❌ NO IMPLEMENTADO | 🟡 PARCIAL | 🟡 PARCIAL | 🟣 UI/MOCK |
 | Admin | Stock `/admin/stock` | ✅ IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | 🟡 PARCIAL | ❌ NO IMPLEMENTADO | 🟡 PARCIAL | 🟡 PARCIAL | 🟣 UI/MOCK |
 | Admin | Proveedores `/admin/proveedores` | ✅ IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | 🟡 PARCIAL | ❌ NO IMPLEMENTADO | 🟡 PARCIAL | 🟡 PARCIAL | 🟣 UI/MOCK |
@@ -852,7 +856,7 @@ La ausencia de una capacidad no implica que deba agregarse en todas las filas: p
 | Admin | Ventas `/admin/ventas` | ✅ IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | 🟡 PARCIAL | ❌ NO IMPLEMENTADO | 🟡 PARCIAL | 🟡 PARCIAL | 🟣 UI/MOCK |
 | Admin | Egresos `/admin/egresos` | ✅ IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | 🟡 PARCIAL | ❌ NO IMPLEMENTADO | 🟡 PARCIAL | 🟡 PARCIAL | 🟣 UI/MOCK |
 | Admin | Reportes `/admin/reportes` y Resumen `/admin` | ✅ IMPLEMENTADO | ❌ NO IMPLEMENTADO | 🟣 UI/MOCK | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | 🟡 PARCIAL | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | 🟡 PARCIAL | 🟡 PARCIAL | 🟣 UI/MOCK |
-| Admin | Configuración `/admin/configuracion` | 🟣 UI/MOCK | ❌ NO IMPLEMENTADO | ⚪ DECISIÓN PENDIENTE | ⚪ DECISIÓN PENDIENTE | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ✅ IMPLEMENTADO | ❌ NO IMPLEMENTADO | 🟡 PARCIAL | 🟡 PARCIAL | 🟣 UI/MOCK |
+| Admin | Configuración `/admin/configuracion` | 🟣 UI/MOCK | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ❌ NO IMPLEMENTADO | ✅ IMPLEMENTADO | ❌ NO IMPLEMENTADO | 🟡 PARCIAL | 🟡 PARCIAL | 🟣 UI/MOCK |
 
 La matriz tiene **14 filas de áreas/features**, sin contar encabezado y separador. Empty parcial en listados es únicamente «sin coincidencias» de la muestra local. Loading parcial de reportes es el montaje del gráfico, no una consulta remota. La lógica de reportes es la resta visual sobre series mock; no se presenta como cumplimiento de las reglas de operaciones reales. Empty implementado de Configuración es el mensaje explicativo de reserva, no evidencia de un módulo funcional.
 
@@ -864,7 +868,7 @@ Los siguientes **13 épicos** agrupan trabajo futuro; sus identificadores son de
 
 - **Objetivo:** contar con una definición verificable del MVP sin convertir mocks o propuestas en requisitos.
 - **Dependencias:** acceso humano a SRS corregida y artefactos RUP validados; jerarquía de AGENTS.md.
-- **Tareas principales:** incorporar/contrastar fuentes; relacionar capacidades con RF/CU reales; resolver disponibilidad pública, campos, estados, cantidades, stock inicial, importes y períodos; validar si existen ajustes manuales de stock y sus restricciones. Registrar recuperación por email como propuesta y resolver el alcance de Configuración sin inventar funciones.
+- **Tareas principales:** incorporar/contrastar fuentes y relacionar capacidades con RF/CU reales; alinear decisiones A–M aprobadas el 19/10 y resolver vacíos que permanecen. Ajustes B, recuperación J y cuenta K ya tienen decisión explícita de producto; falta formalización con SRS/RUP, no repetir su inclusión como pregunta sin resolver ni inventar funciones.
 - **Criterio general de terminado:** fuentes incorporadas y contradicciones resueltas por el equipo; trazabilidad y criterios de aceptación disponibles para cada capacidad que se vaya a implementar; propuestas y exclusiones explícitas.
 
 ### EPIC-02 Persistencia
@@ -878,8 +882,8 @@ Los siguientes **13 épicos** agrupan trabajo futuro; sus identificadores son de
 
 - **Objetivo:** convertir login/logout mock en acceso administrativo real con sesión persistente razonable y autorización servidor.
 - **Dependencias:** EPIC-01 para cuenta/políticas y EPIC-02 según la solución; ADR de auth y estrategia de sesión pendientes de validación humana.
-- **Tareas principales:** evaluar solución madura; definir provisión de una administradora, credenciales y errores neutros; login/logout, cookie segura, expiración, renovación, revocación, acceso directo y redirecciones. Proteger lecturas/comandos, limitar intentos y probar sesiones entre aperturas. **Recuperación por email: PROPUESTA pendiente de incorporar/validar en fuentes**; únicamente si se aprueba, abordar token temporal de un uso, envío de correo, reset e invalidación de sesiones según política. No elegir proveedor ni librería aquí.
-- **Criterio general de terminado:** identidad/sesión/autorización verificadas en servidor, logout y expiración efectivos, persistencia de sesión acordada y pruebas negativas aprobadas. Recuperación condicionada a decisión explícita; sin SMS, registro público o multiadmin añadidos.
+- **Tareas principales:** evaluar solución madura y provisión inicial; implementar en tarea futura I/J: email único + contraseña, sesión hasta 30 días con cierre manual y expiración, autorización servidor y acceso directo protegido. Recuperación por email incluida por responsable: respuesta neutra, enlace temporal de un uso, nueva contraseña, invalidación del enlace y todas las sesiones, vuelta al login. Alinear con SRS/RUP y resolver detalles pendientes de seguridad. K limita Configuración a cuenta; no elegir proveedor ni librería aquí.
+- **Criterio general de terminado:** identidad/sesión/autorización, persistencia, logout y expiración verificados; recuperación aprobada implementada con revocación global y pruebas negativas. Capacidad de cuenta K cubierta con sus pendientes resueltos; sin SMS, registro público, roles o multiadmin añadidos.
 
 ### EPIC-04 Productos
 
@@ -890,11 +894,11 @@ Los siguientes **13 épicos** agrupan trabajo futuro; sus identificadores son de
 
 ### EPIC-05 Inventario
 
-**Punto a resolver antes de implementar este módulo:** “Validar contra SRS/reglas definitivas si el administrador puede realizar ajustes manuales de stock y bajo qué restricciones.” La existencia de esta pregunta no confirma una edición libre de stock ni la excluye definitivamente.
+**Punto previo a implementar este módulo:** “Validar contra SRS/reglas definitivas si el administrador puede realizar ajustes manuales de stock y bajo qué restricciones.” B3/B4 aprobados el 19/10 resuelven ajustes explícitos trazables y saldo inicial; resta alineación/formalización con fuentes definitivas, no permiso para edición libre ni reemplazo silencioso del saldo.
 
 - **Objetivo:** consultar y conservar existencias válidas y mínimos opcionales con reglas compartidas por las operaciones.
-- **Dependencias:** EPIC-01/02/03/04; definición de cantidades/unidades, comparación de stock bajo, saldo inicial y resolución explícita del punto anterior.
-- **Tareas principales:** definir/implementar consulta de saldo y mínimo opcional, consulta de stock bajo excluyendo productos sin mínimo, carga inicial aprobada y contratos de efectos/reversiones con Compras/Ventas. Resolver atomicidad, concurrencia e historia; ajustes manuales solo si las fuentes los confirman, con las restricciones que definan.
+- **Dependencias:** EPIC-01/02/03/04; B aprobado en producto y alineación con fuentes definitivas; reglas técnicas de integridad aún pendientes.
+- **Tareas principales:** consulta de saldo/mínimo opcional y alerta `<=` excluyendo mínimo ausente; unidades enteras, saldo inicial identificado sin efecto económico y ajustes explícitos con cantidad, motivo obligatorio, fecha automática e historial según B. Contratos de efectos/reversiones con Compras/Ventas, atomicidad, concurrencia y no negatividad; sin reemplazos silenciosos.
 - **Criterio general de terminado:** stock persistido nunca negativo, mínimo opcional tratado correctamente y umbral aprobado probado; efectos de operaciones coherentes bajo concurrencia y decisión de ajustes manuales documentada, sin inferencias.
 
 ### EPIC-06 Catálogo público
@@ -953,4 +957,4 @@ Los siguientes **13 épicos** agrupan trabajo futuro; sus identificadores son de
 - **Tareas principales:** definir entornos, secretos, HTTPS, permisos, migraciones de release, CI mínimo, backups/restauración, logs seguros, diagnóstico y rollback. Decidir almacenamiento/entrega de imágenes y correo únicamente si el flujo aprobado lo necesita; verificar indexabilidad pública y protección administrativa. Ningún deployment se ejecuta en esta tarea.
 - **Criterio general de terminado:** entorno autorizado comprobado con datos/configuración adecuados, controles y CI acordados, recuperación/rollback probados y procedimiento operable por el responsable; MVP aceptado contra criterios validados, sin confundir servidor LAN con producción.
 
-El backlog no autoriza comenzar ninguno de estos épicos. La recuperación por email permanece dentro de Auth como propuesta; Configuración no se convierte en épico de gestión. La presente ampliación se limita al cierre y versionado documental solicitado.
+El backlog no autoriza comenzar ninguno de estos épicos. Actualización del 19/10: recuperación por email permanece dentro de Auth como capacidad aprobada por responsable y no implementada, pendiente de alineación con SRS/RUP; Configuración queda limitada a cuenta y no se convierte en épico de gestión. Esta actualización sigue siendo exclusivamente documental.
