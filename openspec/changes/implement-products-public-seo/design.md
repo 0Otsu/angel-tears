@@ -32,3 +32,11 @@ P0 temprano y migración en turno; después alta+saldo C0/guard E0, imagen/publi
 ## Open Questions
 
 Dominio final, credenciales/cuotas de Cloudinary y contenido comercial real. Política de precio cero/signos/límites se resuelve con responsable antes de cerrar su validación. No están pendientes modelo único, categorías iniciales, proveedor de imágenes, visibilidad o tratamiento de agotados/ocultos.
+
+## P0 local — 20/10/2026
+
+Base real revisada `17dbb44`; trabajo exclusivamente en rama local `feature/productos-publico-seo`, sin merge/push/PR por instrucción humana. Evidencia/alcance/gaps en [revisión local P0](../../../docs/REVISION_LOCAL_P0.md). No interpretar el estado histórico del blueprint como ausencia de E0 o reglas ya presentes.
+
+Schema Producto/Categoría y semilla explícita preparados, sin ejecutarlos ni generar migración definitiva: Auth todavía no tiene schema/migración y conserva el primer turno. No referencias a User ni tablas ajenas ausentes. DTO/consulta privada batched con `exigirAdministradora` de E0 (instancia actual falla cerrada), sin stock dentro de Producto. Se comparte como `consultarProductosInternos(headers, ids)`; IDs UUID deduplicados, ocultos incluidos, inexistentes omitidos, errores técnicos propagados, precio decimal string/ARS y campos de identidad/categoría/publicación/imagenValida únicamente. La coordinación humana del DTO continúa pendiente; no se atribuye aprobación a Emi/Claudio.
+
+`insertarProductoOcultoConSaldo` recibe tx del llamador y `CrearSaldoCero` existente; no duplica C0 ni conecta su doble a runtime. Test de transporte comprueba mismo handle y solicitud de rollback; atomicidad/concurrencia real quedan pendientes de Inventario SQL y PostgreSQL de prueba. Cero/signos de precio solo se representan técnicamente, sin decidir su aceptación comercial ni exponer alta/edición de usuario. No se avanzó a tareas de UI, Cloudinary, público o SEO.
