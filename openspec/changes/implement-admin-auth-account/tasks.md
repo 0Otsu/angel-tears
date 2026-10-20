@@ -3,7 +3,7 @@
 ## 1. E0: infraestructura compartida y trazabilidad
 
 - [ ] 1.1 Leer fuentes/gaps y confirmar pendientes específicos de Cuenta; entregar nota de límites sin inventar RF/CU.
-- [ ] 1.2 Coordinar package/lock/config con Augusto y Claudio; fijar dependencias aprobadas compatibles y verificar instalación reproducible.
+- [ ] 1.2 Coordinar package/lock/config con Augusto y Claudio; fijar dependencias aprobadas compatibles y verificar instalación reproducible. _Nota 20/10/2026 (Emi): la coordinación previa se omite por ahora; se instalan solo las dependencias de Auth y se avisa al equipo al integrar a main. Retomarla antes de generar migraciones compartidas. Tarea sin completar._
 - [ ] 1.3 Crear conexión Drizzle/pg server-only, migraciones y arnés de PostgreSQL aislado; probar conexión/rollback sin apuntar a datos reales y documentar variables sin secretos.
 - [ ] 1.4 Configurar Vitest/RTL/Playwright y scripts reales coordinados; comprobar test mínimo útil del boundary de identidad, DOM si RTL lo requiere y browsers Playwright instalados; documentar comandos/entorno con PostgreSQL aislado y mail fake, sin servicios/datos productivos.
 - [ ] 1.5 Publicar contrato exigirAdministradora y protocolo de migraciones; verificar consumidor de prueba sin duplicar negocio.

@@ -24,7 +24,7 @@
 
 - Mantener secretos fuera del repositorio.
 - `.env` nunca se versiona. Los archivos de entorno locales también quedan excluidos por `.gitignore`.
-- Un futuro `.env.example` sí se versionará, con nombres y valores de ejemplo sin secretos reales. No se crea aún porque no se eligió la configuración de la aplicación.
+- `.env.example` se versiona con nombres y valores de ejemplo sin secretos reales (hoy: `DATABASE_URL` y `DATABASE_URL_TEST`); se amplía a medida que cada slice incorpora variables. Las pruebas de integración solo corren contra una base local terminada en `_test`.
 - Nunca registrar contraseñas, tokens, URLs de recovery ni secretos en logs. Tampoco exponerlos, ni SQL/stack traces, en errores de UI/respuestas; omitir SQL/stacks/detalles sensibles de registros y conservar solo diagnóstico seguro. Ante sesión vencida al enviar: rechazar sin aplicar ni duplicar operación, solicitar login y conservar solo campos no sensibles de forma segura, limpiando contraseñas.
 - Logs estructurados con correlación, módulo/operación/resultado/fecha y errores redactados; puntos de instrumentación en auth/tx/imagen/correo. Proveedor final de observabilidad pendiente, sin tracking incorporado.
 - Antes de cada commit revisar los archivos preparados; `.gitignore` no sustituye esa revisión.

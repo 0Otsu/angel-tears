@@ -1,4 +1,7 @@
 allowBuilds:
+  # Dependencia transitiva de Vitest y drizzle-kit. Su script de instalacion solo
+  # optimiza el binario; el paquete funciona con el binario de su dependencia opcional.
+  esbuild: false
   sharp: true
   unrs-resolver: true
 # Misma resolución transitiva que el prototipo aprobado.
