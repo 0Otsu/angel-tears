@@ -25,7 +25,7 @@ Resend/Cloudinary con dobles/fakes; no servicios, datos, correo o uploads produc
 
 RTL comprueba comportamiento de formularios y foco/errores/conservación de entradas donde aporte valor; no snapshots de clases o tests que repitan implementación. RSC async se verifica mediante integración/E2E apropiada.
 
-Prerrequisitos del arnés futuro: PostgreSQL aislado y limpieza protegida; entorno DOM compatible si RTL lo requiere; instalación de browsers de Playwright en el entorno de pruebas, con comandos documentados al fijar versiones. No se instala ni configura nada durante esta corrección documental; ver ADR-006.
+Prerrequisitos del arnés: PostgreSQL aislado y limpieza protegida (guard de nombre/entorno); jsdom para los tests de componentes; browsers de Playwright instalados (`pnpm exec playwright install chromium`). El arnés, las versiones y los comandos están configurados y documentados en [DESARROLLO](DESARROLLO.md#pruebas); ver ADR-006.
 
 ## Pruebas E2E
 
@@ -35,4 +35,4 @@ Playwright contra Next real: login/protección/logout/reset, producto/imagen/pub
 
 Revisar responsive, accesibilidad básica y objetivos de SEO cuando corresponda. Mantener los tests existentes funcionando. No desactivar pruebas para hacer pasar una entrega.
 
-Cada bloque de tareas OpenSpec incluye sus tests/docs; no acumular toda la calidad al final. Actualmente existen `pnpm lint`, `pnpm typecheck` y `pnpm build`; **no existe script test**, ni arnés/suite funcional. Emi coordina scripts/arnés compartidos en R1; cada owner prueba su dominio. Evidencia manual histórica en MIGRACION_UI.md no prueba el negocio futuro. No usar un comando inexistente ni marcar test PASS por este plan.
+Cada bloque de tareas OpenSpec incluye sus tests/docs; no acumular toda la calidad al final. Existen `pnpm lint`, `pnpm typecheck`, `pnpm build` y el arnés `pnpm test`, `pnpm test:integration` y `pnpm test:e2e` (ver [DESARROLLO](DESARROLLO.md#pruebas)). Hoy las pruebas cubren infraestructura de base de datos, el guard de la base de pruebas, el formulario de acceso y un humo E2E de la página de login: **todavía no hay pruebas de las reglas de negocio** ni de autenticación real. Emi coordina scripts/arnés compartidos en R1; cada owner prueba su dominio. Evidencia manual histórica en MIGRACION_UI.md no prueba el negocio futuro. No marcar test PASS por este plan.
