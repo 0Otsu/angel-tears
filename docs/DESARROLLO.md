@@ -47,8 +47,18 @@ Requiere una instancia de PostgreSQL local. Crear el rol `angel_tears` y las bas
 | --- | --- |
 | `DATABASE_URL` | Base de desarrollo de la aplicación y de `drizzle-kit`. |
 | `DATABASE_URL_TEST` | Base aislada para pruebas de integración. Debe ser local, terminar en `_test` y ser distinta de `DATABASE_URL`; el guard (`pruebas/guardia-url-bd.ts`) se niega a ejecutar contra otra. |
+| `BETTER_AUTH_SECRET` | Secreto con el que Better Auth firma cookies y tokens. Largo y aleatorio, distinto en cada entorno, nunca versionado (el comando para generar uno está en `.env.example`). |
+| `BETTER_AUTH_URL` | URL pública de la aplicación; en desarrollo, `http://localhost:3000`. |
 
-`pnpm db:generate` y `pnpm db:migrate` usan Drizzle Kit; los schemas viven en `lib/infraestructura/esquemas/*.ts` y todavía no existen (el primero llega con Better Auth), por lo que `db:generate` falla con «No schema files found» hasta entonces. La conexión es `lib/infraestructura/db.ts`, solo servidor.
+`pnpm db:generate`, `pnpm db:migrate` y `pnpm db:check` usan Drizzle Kit; los schemas viven en `lib/infraestructura/esquemas/*.ts` y las migraciones en `drizzle/`. La conexión es `lib/infraestructura/db.ts`, solo servidor. Tras clonar o actualizar `main`: `pnpm db:migrate` aplica las migraciones pendientes a tu base de desarrollo.
+
+**Autenticación (migración `0000_auth-base`).** Crea las tablas de Better Auth (`user`, `session`, `account`, `verification`, `rate_limit`) a partir de `lib/infraestructura/esquemas/auth.ts`. La configuración de Better Auth está en `lib/infraestructura/auth-config.ts` y la instancia de la aplicación en `lib/infraestructura/auth.ts` (solo servidor). El schema se generó con la CLI de Better Auth 1.7.11 y se ajustó a mano (fechas `timestamptz`, índices de vencimiento, unicidad de cuenta por proveedor); el encabezado del archivo lista los ajustes. Para regenerarlo al actualizar Better Auth o sumar plugins:
+
+```
+pnpm dlx auth@1.7.11 generate --config scripts/auth/config-generar-schema.ts --output lib/infraestructura/esquemas/auth.ts --yes
+```
+
+y volver a aplicar los ajustes, revisar el diff y generar una migración nueva (nunca editar la `0000`).
 
 ### Pruebas
 
@@ -57,7 +67,7 @@ Stack de [ADR-006](adr/ADR-006-testing.md). Una vez: `pnpm install --frozen-lock
 | Comando | Qué ejecuta | Requiere |
 | --- | --- | --- |
 | `pnpm test` | Vitest, proyectos `unitarias` (`*.test.ts`) y `componentes` (`*.test.tsx`, React Testing Library con jsdom). | Nada externo. |
-| `pnpm test:integration` | Vitest, proyecto `integracion` (`*.integracion.test.ts`) contra PostgreSQL real. Falla de forma explícita si falta `DATABASE_URL_TEST`; no se da por pasada una prueba que no pudo ejecutarse. | Base `_test` local. |
+| `pnpm test:integration` | Vitest, proyecto `integracion` (`*.integracion.test.ts`) contra PostgreSQL real. Antes de las pruebas aplica las migraciones a la base `_test`, una sola vez por corrida (`pruebas/preparar-integracion.ts`). Falla de forma explícita si falta `DATABASE_URL_TEST`; no se da por pasada una prueba que no pudo ejecutarse. | Base `_test` local. |
 | `pnpm test:e2e` | Playwright (carpeta `e2e/`, `*.spec.ts`). Hace `pnpm build`, levanta `pnpm start` en el puerto 3100 y prueba en Chromium. | Navegador instalado; la base `_test` cuando los tests la usen. |
 
 Los E2E nunca usan la base de desarrollo: el servidor recibe `DATABASE_URL_TEST` validada por el guard y, si falta, una `DATABASE_URL` vacía. El correo de recuperación se probará con un doble que reemplace a Resend (tarea 3.1): ningún test envía correos reales ni usa servicios o datos productivos. No hay CI configurado; estos comandos se ejecutan en local. OpenSpec global 1.14.3 y seis skills de Codex se documentan en OPENSPEC; su instalación no modifica package/lock. Solo tres changes activos; no ejecutar apply/archivar automáticamente.
