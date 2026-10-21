@@ -1,4 +1,4 @@
-import { crearConexionBd, type ConexionBd } from "@/lib/infraestructura/db"
+import { crearConexionBd, type ConexionBd } from "@/lib/infraestructura/conexion-bd"
 import { validarUrlBdPruebas } from "@/pruebas/guardia-url-bd"
 
 // Arnes de PostgreSQL aislado para pruebas de integracion (ADR-006): abre la conexion solo si
