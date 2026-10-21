@@ -211,7 +211,7 @@ Las reglas aquí aprobadas no convierten los mocks en funciones reales. La aplic
 
 **Razón:** mantener funciones reales de cuenta sin convertir una reserva visual en un módulo genérico de configuración.
 
-**Consecuencias:** no se habilita edición de nombre/email. El tratamiento de otras sesiones al cambiar contraseña desde Cuenta sigue pendiente y es el único bloqueo de ese subflujo; no bloquea todo Auth. J3 solo resuelve recuperación. El tema pertenece a R3, fuera del change Auth de R1.
+**Consecuencias:** no se habilita edición de nombre/email. La política de otras sesiones al cambiar contraseña desde Cuenta quedó resuelta por decisión humana del 21/10/2026 en la sección 10: se conserva la sesión actual y se invalidan las demás. J3 conserva la revocación global exclusivamente para recuperación. El tema pertenece a R3, fuera del change Auth de R1.
 
 **Alternativas descartadas:** quitar la navegación, mantener únicamente un placeholder como solución final y añadir preferencias sin necesidad.
 
@@ -258,7 +258,7 @@ Las reglas aquí aprobadas no convierten los mocks en funciones reales. La aplic
 | Categorías iniciales | Validar con la propietaria si falta o sobra alguna de las siete propuestas. La estrategia de lista fija sí está aprobada. |
 | Horarios | Obtener confirmación definitiva. Mantener el texto aprobado mientras tanto. |
 | Identidad de cuenta | Nombre/email de solo lectura; su edición no está autorizada y no bloquea Auth. |
-| Cambio autenticado de contraseña | Definir qué sucede con las otras sesiones desde Cuenta. Único bloqueo de ese subflujo; no extender J3 ni bloquear todo Auth. |
+| Cambio autenticado de contraseña | Política resuelta el 21/10/2026, sección 10: verificar contraseña actual, conservar la sesión desde la que se realiza el cambio e invalidar las demás. Comprobar soporte nativo/maduro al implementar; no alterar la política ni inventar infraestructura compleja. |
 | Reemisión de recovery | Comprobar soporte nativo maduro para invalidar el enlace anterior al solicitar otro; documentar comportamiento real de la versión fijada y decidir antes de cerrar el flujo, sin infraestructura propia compleja. |
 | Proveedores sin historial | Su eliminación no se definió. D3 resuelve únicamente la conservación de proveedores utilizados y su inactivación para nuevas compras. |
 | Detalles restantes de validación y estados | Límites de campos/importes/fechas, límites exactos del rango temporal y estados no resueltos expresamente siguen sujetos a fuentes y a la tarea correspondiente. No inferirlos de fixtures. |
@@ -319,7 +319,7 @@ La nueva tarea autoriza preparación global/OpenSpec y merge sin PR, **no implem
 | Responsables R1 | Augusto Productos/Público/SEO; Claudio Inventario/Proveedores/Compras; Emi Auth/Cuenta. No asigna responsables de R2/R3. |
 | Finanzas | Agrupa resultado aproximado y egresos. Sin Reportes paralelo si Finanzas satisface el alcance. Fórmula/fechas/períodos H permanecen. |
 | Configuración | Solo claro/oscuro, persistentes y exclusivos de `/admin/*`; nunca altera el sitio público. Sustituye la prohibición previa de tema y el contenido de cuenta en K1. |
-| Cuenta/Auth | Nombre/email visibles, contraseña/logout y recuperación pertenecen a Cuenta/Auth, fuera de Configuración. No autoriza edición de email/nombre ni resuelve la política de sesiones del cambio autenticado. |
+| Cuenta/Auth | Nombre/email visibles, contraseña/logout y recuperación pertenecen a Cuenta/Auth, fuera de Configuración. No autoriza edición de email/nombre. La política de sesiones del cambio autenticado se resolvió posteriormente el 21/10/2026, sección 10. |
 | Dashboard | Operativo, simple, derivado de módulos reales; sin widgets configurables, personalización ni analytics avanzado. Métricas propuestas se concretan sin convertir el template en requisito. |
 | Categorías | La tarea ratifica las siete iniciales como aprobadas: Collares, Pulseras, Anillos, Aros/Piercings, Tobilleras, Llaveros, Flores eternas. Sustituye el pendiente de validación de esa lista inicial en C4/sección 3. Cambios futuros requieren decisión explícita; sin CRUD. |
 
@@ -334,6 +334,19 @@ Decisión humana **APROBADA** de producto/seguridad, pendiente de alineación/fo
 - **Sesión:** máximo absoluto de 30 días desde login, sin extensión por uso diario. Vencida: nuevo login obligatorio. Comprobar representación y límites con la versión fijada de Better Auth durante implementación, sin configurar ahora.
 - **Recovery:** enlace de 1 hora, temporal y de un solo uso; respuesta pública neutra aun si falla la entrega. Restablecer invalida enlace y todas las sesiones previas, sin login automático. Este plazo sustituye cualquier TTL previo.
 - **Cuenta/Configuración:** K1 corregido arriba; identidad de solo lectura y contraseña/logout en `/admin/cuenta`; únicamente tema persistente admin-only en `/admin/configuracion`, sin cambios públicos.
-- **Pendientes acotados:** otras sesiones tras cambio autenticado (único bloqueo de ese subflujo) y reemisión de recovery según soporte nativo/versionado. No extender revocación global del reset al cambio autenticado ni inventar valores exactos de rate limiting; impedir bloqueo indefinido de la única administradora. Operación/soporte/remitente y formalización siguen pendientes según su alcance.
+- **Pendientes acotados:** reemisión de recovery según soporte nativo/versionado. La política de otras sesiones tras cambio autenticado, abierta en este cierre del 19/10, quedó resuelta el 21/10/2026 en la sección 10. No extender la revocación global del reset al cambio autenticado ni inventar valores exactos de rate limiting; impedir bloqueo indefinido de la única administradora. Operación/soporte/remitente y formalización siguen pendientes según su alcance.
 
 Ninguna decisión implementa Auth, instala herramientas ni habilita edición de perfil. La rama histórica de Emi queda discontinuada como candidata de integración tras el rescate selectivo documentado en [OPENSPEC](OPENSPEC.md); el change vigente es `implement-admin-auth-account`.
+
+## 10. Política de sesiones al cambiar contraseña desde Cuenta — 21/10/2026
+
+**Decisión de producto y seguridad APROBADA expresamente por Augusto Vidoni el 21/10/2026.** Resuelve el pendiente del cambio autenticado de contraseña de K1 y de las secciones 3 y 9. No modifica la política de recuperación J3 ni acredita implementación terminada o validación académica.
+
+- Desde `/admin/cuenta`, la Administradora debe estar autenticada y verificar correctamente su contraseña actual antes de cambiarla.
+- Al completar correctamente el cambio, la sesión desde la que lo realiza continúa vigente y deben invalidarse todas las demás sesiones administrativas existentes. Conservar la sesión actual no extiende el máximo absoluto aprobado de 30 días desde su login.
+- En recuperación por email se mantiene la política diferente de J3: se invalidan todas las sesiones anteriores y se exige volver a iniciar sesión; no hay autenticación automática.
+- La implementación posterior debe comprobar si la versión elegida de Better Auth ofrece una forma nativa y madura de revocar solo las otras sesiones. Si no la ofrece, se informa la limitación al responsable antes de implementar ese flujo: no se crea infraestructura compleja ni se cambia silenciosamente la política de producto.
+
+**Fuente:** respuesta humana en la conversación de consolidación del SRS: «cerrar las demás sesiones y conservar la sesión actual»; la respuesta distingue expresamente cambio autenticado y recuperación por email.
+
+**Impacto documental:** consolidar esta regla en el SRS y revisar después las referencias de Cuenta/Auth en CU, actividades, prototipos, trazabilidad y OpenSpec. Esta actualización registra la decisión; no modifica código ni completa por sí misma tareas de implementación.
