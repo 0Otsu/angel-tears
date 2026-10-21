@@ -50,6 +50,9 @@ export default defineConfig({
           include: ["**/*.integracion.test.ts"],
           exclude: excluir,
           globalSetup: ["./pruebas/preparar-integracion.ts"],
+          // Todos los archivos comparten una sola base de pruebas y algunos necesitan tablas
+          // vacias (por ejemplo el alta de la Administradora): se ejecutan de a uno.
+          fileParallelism: false,
         },
       },
     ],
