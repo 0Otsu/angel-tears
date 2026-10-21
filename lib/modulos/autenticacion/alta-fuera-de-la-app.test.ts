@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process"
 import { readdirSync, readFileSync, statSync } from "node:fs"
-import { join, relative, sep } from "node:path"
+import { join, sep } from "node:path"
 import { describe, expect, it } from "vitest"
 
 // El alta de la Administradora es un procedimiento operativo, no una funcion de la aplicacion
@@ -51,12 +51,18 @@ describe("el alta de la Administradora queda fuera de la aplicacion", () => {
     const resultado = spawnSync(
       process.execPath,
       [join(raiz, "node_modules", "tsx", "dist", "cli.mjs"), "scripts/auth/crear-administradora.ts", `--contrasena=${secreto}`],
-      { cwd: raiz, encoding: "utf8", env: { ...process.env, DATABASE_URL: "", ADMIN_CONTRASENA: "" } },
+      {
+        cwd: raiz,
+        encoding: "utf8",
+        env: { ...process.env, DATABASE_URL: "", ADMIN_CONTRASENA: "" },
+        timeout: 25_000,
+      },
     )
 
     expect(resultado.status).toBe(1)
     expect(resultado.stderr).toContain("no acepta argumentos")
     expect(resultado.stdout + resultado.stderr).not.toContain(secreto)
-    expect(relative(raiz, join(raiz, "scripts"))).toBe("scripts")
-  })
+    // Arrancar tsx tarda: con el resto de los tests corriendo en paralelo supera el limite de 5 s
+    // por defecto de Vitest, por eso este test tiene mas margen.
+  }, 30_000)
 })
