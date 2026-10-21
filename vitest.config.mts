@@ -49,6 +49,7 @@ export default defineConfig({
           environment: "node",
           include: ["**/*.integracion.test.ts"],
           exclude: excluir,
+          globalSetup: ["./pruebas/preparar-integracion.ts"],
         },
       },
     ],

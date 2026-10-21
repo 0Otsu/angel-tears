@@ -2,15 +2,15 @@
 
 ## 1. E0: infraestructura compartida y trazabilidad
 
-- [ ] 1.1 Leer fuentes/gaps y confirmar pendientes específicos de Cuenta; entregar nota de límites sin inventar RF/CU.
-- [ ] 1.2 Coordinar package/lock/config con Augusto y Claudio; fijar dependencias aprobadas compatibles y verificar instalación reproducible. _Nota 20/10/2026 (Emi): la coordinación previa se omite por ahora; se instalan solo las dependencias de Auth y se avisa al equipo al integrar a main. Retomarla antes de generar migraciones compartidas. Tarea sin completar._
-- [ ] 1.3 Crear conexión Drizzle/pg server-only, migraciones y arnés de PostgreSQL aislado; probar conexión/rollback sin apuntar a datos reales y documentar variables sin secretos.
-- [ ] 1.4 Configurar Vitest/RTL/Playwright y scripts reales coordinados; comprobar test mínimo útil del boundary de identidad, DOM si RTL lo requiere y browsers Playwright instalados; documentar comandos/entorno con PostgreSQL aislado y mail fake, sin servicios/datos productivos.
-- [ ] 1.5 Publicar contrato exigirAdministradora y protocolo de migraciones; verificar consumidor de prueba sin duplicar negocio.
+- [x] 1.1 Leer fuentes/gaps y confirmar pendientes específicos de Cuenta; entregar nota de límites sin inventar RF/CU. _Nota de límites entregada a Emi el 20/10/2026. Pendientes confirmados que siguen abiertos: otras sesiones tras el cambio autenticado de contraseña (bloquea 3.4/3.5), reemisión de recovery, valores y almacenamiento del límite de intentos, dominio remitente y clave de Resend, soporte seguro y alta en producción._
+- [x] 1.2 Coordinar package/lock/config con Augusto y Claudio; fijar dependencias aprobadas compatibles y verificar instalación reproducible. _Nota 20/10/2026 (Emi): dependencias de Auth fijadas con versión exacta e instalación reproducible verificada (`pnpm install --frozen-lockfile`). La coordinación previa con Augusto y Claudio se omitió por decisión de Emi; queda avisar al equipo al integrar a main, en particular la migración `0000_auth-base` y el cambio en `pnpm-workspace.yaml` (`esbuild: false`)._
+- [x] 1.3 Crear conexión Drizzle/pg server-only, migraciones y arnés de PostgreSQL aislado; probar conexión/rollback sin apuntar a datos reales y documentar variables sin secretos.
+- [x] 1.4 Configurar Vitest/RTL/Playwright y scripts reales coordinados; comprobar test mínimo útil del boundary de identidad, DOM si RTL lo requiere y browsers Playwright instalados; documentar comandos/entorno con PostgreSQL aislado y mail fake, sin servicios/datos productivos. _Los scripts no se coordinaron con los otros owners (ver 1.2); el doble de correo se crea en 3.1._
+- [x] 1.5 Publicar contrato exigirAdministradora y protocolo de migraciones; verificar consumidor de prueba sin duplicar negocio. _La instancia de la aplicación rechaza toda solicitud hasta que la 2.4 conecte las sesiones reales de Better Auth._
 
 ## 2. Cuenta inicial y acceso
 
-- [ ] 2.1 Generar/revisar schema Better Auth y migración auth en turno de integración; verificar tablas/índices y tests contra PostgreSQL.
+- [x] 2.1 Generar/revisar schema Better Auth y migración auth en turno de integración; verificar tablas/índices y tests contra PostgreSQL. _Schema generado con la CLI de Better Auth 1.7.11 y ajustado (fechas `timestamptz`, índices de vencimiento, unicidad `(provider_id, account_id)`); migración `0000_auth-base` aplicada a desarrollo y pruebas; verificado con tests de integración contra PostgreSQL._
 - [ ] 2.2 Implementar signup deshabilitado y provisión controlada/idempotente; probar alta única/reintento/concurrencia, rechazo de segunda cuenta sin alterar credenciales y signup público imposible; documentar procedimiento sin contraseña en argumentos CLI, salida ni logs.
 - [ ] 2.3 Integrar login email/contraseña y matriz de errores del diseño; probar válido/inválido, entrada malformada, DB indisponible, campos seguros y ausencia de SQL/stacks/tokens/URLs/contraseñas/secretos en errores/logs. Limitar abuso sin bloqueo indefinido; concretar/documentar intentos y ventanas al implementar/operar, sin valores inventados.
 - [ ] 2.4 Proteger consultas/comandos/admin en servidor y redirigir login autenticado; probar acceso directo, mutación sin sesión y sesión vencida al enviar, sin efectos ni duplicados y con conservación solo de campos seguros.
