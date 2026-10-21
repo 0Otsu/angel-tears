@@ -87,6 +87,33 @@ const administradora = await exigirAdministradora(await headers()) // { id, nomb
 - **Estado actual:** la instancia de la aplicación rechaza toda solicitud, porque todavía no hay sesiones reales (se conectan a Better Auth en la tarea 2.4). Falla cerrado a propósito.
 - **Cómo probar un módulo propio sin esperar a Auth:** no mockear `exigir-administradora.ts`; crear una instancia con `crearExigirAdministradora(verificadorFalso)` e inyectarla en el caso de uso (ver el consumidor de prueba en `contrato.test.ts`). Eso prueba que el módulo exige la sesión y no hace nada sin ella, pero **no prueba la sesión real**: la integración con Better Auth se verifica en las pruebas de la tarea 2.4.
 
+### Alta de la Administradora
+
+No existe registro público (`/register` ni ningún endpoint de alta): la única cuenta se crea con un procedimiento controlado, desde una terminal, por una persona. Detalles de diseño en [ADR-004](adr/ADR-004-better-auth-resend.md).
+
+```
+pnpm auth:crear-administradora
+```
+
+1. Tener las migraciones aplicadas (`pnpm db:migrate`) y `DATABASE_URL`, `BETTER_AUTH_SECRET` y `BETTER_AUTH_URL` en `.env.local`. **El script actúa sobre la base de `DATABASE_URL`**: revisar a cuál apunta antes de ejecutarlo.
+2. El script pide email, nombre y contraseña (con entrada oculta y confirmación). La contraseña tiene entre 8 y 128 caracteres.
+3. **No acepta argumentos de línea de comandos** y aborta si recibe alguno: quedarían en el historial del terminal. Para un entorno sin terminal interactiva se pueden definir `ADMIN_EMAIL`, `ADMIN_NOMBRE` y `ADMIN_CONTRASENA` solo para ese comando (por ejemplo en `$env:` de la sesión de PowerShell), nunca en un archivo versionado.
+4. **Nunca imprime ni registra la contraseña.** Si algo falla muestra solo el mensaje, sin traza ni datos de la solicitud.
+5. **Es seguro repetirlo.** Si ya existe una cuenta no crea otra ni modifica la existente (ni su contraseña), con cualquier email. Un lock de PostgreSQL impide que dos ejecuciones simultáneas creen dos cuentas. Crear la cuenta no inicia ninguna sesión.
+6. **Recuperar o cambiar la contraseña** no se hace con este script: se usa el flujo de recuperación por email y el cambio autenticado en `/admin/cuenta` (tareas 3.x). Si hubiera que rehacer la cuenta en un entorno de desarrollo, se borran las filas de `user` (en cascada se borran sus cuentas y sesiones) y se vuelve a ejecutar el script.
+7. Ningún archivo de la aplicación puede importar el módulo de alta (`lib/modulos/autenticacion/aprovisionar-administradora.ts`) ni habilitar el registro: una prueba (`alta-fuera-de-la-app.test.ts`) lo verifica.
+
+Pendiente: el procedimiento en producción y el soporte seguro si se pierde el acceso al email dependen del hosting y de la base administrada, aún sin decidir.
+
+### Login de la Administradora
+
+`/admin/login` inicia sesión con Better Auth: el formulario (`components/admin/formulario-login.tsx`) usa el cliente `lib/infraestructura/auth-cliente.ts` y habla con `app/api/auth/[...all]/route.ts`, que atiende cualquier solicitud dentro de `atenderSolicitudAuth` (`lib/infraestructura/auth-manejador.ts`). La cookie de sesión la gestiona la librería (`HttpOnly`, `SameSite=Lax`, `Secure` en producción); el código nunca guarda tokens en el navegador.
+
+- **Errores (matriz del change `implement-admin-auth-account`):** credenciales incorrectas y correo inexistente devuelven exactamente la misma respuesta (`401 INVALID_EMAIL_OR_PASSWORD`) y el mismo texto, sin revelar si la cuenta existe; el formulario conserva el correo y borra la contraseña. Entradas mal formadas dan 4xx sin sesión. Una falla interna (por ejemplo, base de datos caída) responde `503 SERVICIO_NO_DISPONIBLE` o `500 ERROR_INESPERADO` con un texto genérico: nunca SQL, trazas, hosts, tokens ni secretos, ni en la respuesta ni en los logs (el log solo registra el tipo de error y su código).
+- **Límite de intentos.** Persistente en la tabla `rate_limit` y activo en todos los entornos. Los valores son los **por defecto de Better Auth 1.7.11**, no valores aprobados por producto: `/sign-in/email` admite 3 solicitudes por ventana de 10 s y por IP (el test de integración lo comprueba); el resto del endpoint, 100 por ventana de 10 s. Es temporal por construcción (al vencer la ventana se puede volver a intentar), así que no bloquea de forma indefinida a la única administradora. Limitaciones conocidas: cuenta por IP, no por correo; sin cabecera de IP (por ejemplo, abrir `localhost` directo, sin proxy) no se aplica; detrás de un proxy o del hosting hay que configurar qué cabeceras de IP son confiables (`advanced.ipAddress`). Esa configuración y los valores definitivos quedan **pendientes del hosting** y de la operación.
+- **Sesión:** hasta la tarea 2.5 rige la duración por defecto de la librería (7 días); la política aprobada (máximo absoluto de 30 días) se configura y prueba en la 2.5. `/admin` todavía no exige sesión (tarea 2.4) y «Cerrar sesión» sigue siendo un enlace (2.5).
+- **Pruebas:** componente (`formulario-login.test.tsx`), integración contra PostgreSQL con solicitudes reales al handler (`login.integracion.test.ts`), unitaria del envoltorio y E2E en navegador con una cuenta sembrada en la base de pruebas (`e2e/`). Los E2E requieren `DATABASE_URL_TEST`.
+
 ### Protocolo de migraciones
 
 Para evitar migraciones incompatibles entre owners (ADR-003; blueprint, secciones 3 y 12). Drizzle Kit, directorio `drizzle/` (SQL y `meta/`), que se versiona.

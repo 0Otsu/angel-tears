@@ -1,5 +1,5 @@
 import { migrate } from "drizzle-orm/node-postgres/migrator"
-import { crearConexionBd } from "../lib/infraestructura/db"
+import { crearConexionBd } from "../lib/infraestructura/conexion-bd"
 import { validarUrlBdPruebas } from "./guardia-url-bd"
 
 // globalSetup del proyecto "integracion" (vitest.config.mts): antes de todas las pruebas deja

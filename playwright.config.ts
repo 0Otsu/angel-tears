@@ -35,6 +35,9 @@ export default defineConfig({
     url: urlBase,
     reuseExistingServer: false,
     timeout: 180_000,
-    env: { DATABASE_URL: urlBdPruebas },
+    // BETTER_AUTH_URL debe coincidir con el origen del servidor de los E2E (puerto propio): si
+    // no, Better Auth rechaza las solicitudes por origen no confiable. El secreto lo carga Next
+    // desde .env.local.
+    env: { DATABASE_URL: urlBdPruebas, BETTER_AUTH_URL: urlBase },
   },
 })

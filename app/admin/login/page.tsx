@@ -63,9 +63,6 @@ export default function PaginaLogin() {
             Ingresá tus datos para continuar.
           </p>
           <FormularioLogin />
-          <p className="mt-6 text-xs leading-relaxed text-muted-foreground">
-            Vista previa visual. Ingresar abre el panel sin autenticación.
-          </p>
         </div>
 
         <p className="text-xs text-muted-foreground">Angel Tears · Administración</p>
