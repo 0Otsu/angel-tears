@@ -78,6 +78,23 @@ describe("adaptador Producto preparado sobre Drizzle/pg existente", () => {
     expect(saldo).toHaveBeenCalledTimes(1)
   })
 
+  it("usa un fallback en minusculas compatible con el CHECK al colisionar con UUID en mayusculas", async () => {
+    const { bd, solicitudes } = transporte(1)
+    const saldo = vi.fn(async () => undefined)
+    const idMayusculas = ID_PRODUCTO_PRUEBA.toUpperCase()
+
+    await bd.transaction((tx) => insertarProductoOcultoConSaldo(tx, idMayusculas, entrada, saldo))
+
+    const inserciones = solicitudes.filter((s) => s.text.startsWith('insert into "producto"'))
+    expect(inserciones).toHaveLength(2)
+    expect(inserciones[0].parametros).toContain("collar")
+    const fallback = inserciones[1].parametros.find((p) => typeof p === "string" && p.startsWith("collar-"))
+    expect(fallback).toBe(`collar-${ID_PRODUCTO_PRUEBA}`)
+    // Mismo formato que producto_slug_formato; no sustituye la prueba SQL pendiente.
+    expect(fallback).toMatch(/^[a-z0-9]+(-[a-z0-9]+)*$/)
+    expect(saldo).toHaveBeenCalledTimes(1)
+  })
+
   it("propaga fallo de C0 y solicita rollback de la tx, sin commit ni manejo parcial", async () => {
     const { bd, solicitudes } = transporte()
     await expect(bd.transaction((tx) => insertarProductoOcultoConSaldo(tx, ID_PRODUCTO_PRUEBA, entrada,
