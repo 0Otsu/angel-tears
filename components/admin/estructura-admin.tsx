@@ -3,7 +3,7 @@
 import { useState, type ReactNode } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, Package, Boxes, Truck, ShoppingBag, Receipt, Wallet, BarChart3, Settings, Menu, ExternalLink, ChevronRight, Sparkles } from "lucide-react"
+import { LayoutDashboard, Package, Boxes, Truck, ShoppingBag, Receipt, Wallet, BarChart3, Settings, User, Menu, ExternalLink, ChevronRight, Sparkles } from "lucide-react"
 import { BotonCerrarSesion } from "@/components/admin/boton-cerrar-sesion"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTitle, SheetDescription, SheetTrigger } from "@/components/ui/sheet"
@@ -18,6 +18,7 @@ const navegacion = [
   { ruta: "/admin/ventas", nombre: "Ventas", icono: Receipt },
   { ruta: "/admin/egresos", nombre: "Egresos", icono: Wallet },
   { ruta: "/admin/reportes", nombre: "Reportes", icono: BarChart3 },
+  { ruta: "/admin/cuenta", nombre: "Cuenta", icono: User },
   { ruta: "/admin/configuracion", nombre: "Configuración", icono: Settings },
 ]
 
