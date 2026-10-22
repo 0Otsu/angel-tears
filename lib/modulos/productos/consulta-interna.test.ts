@@ -28,9 +28,15 @@ describe("contrato de consulta interna de Producto", () => {
     expect(leer).not.toHaveBeenCalled()
   })
 
-  it("la instancia real falla cerrada antes de obtener DB mientras faltan sesiones", async () => {
-    await expect(consultarProductosInternos(new Headers(), [ID_PRODUCTO_PRUEBA]))
-      .rejects.toBeInstanceOf(ErrorSesionRequerida)
+  it("la instancia real propaga falta de configuracion de Auth sin conceder acceso", async () => {
+    // Auth ya valida sesiones reales: falta de configuracion es una falla tecnica, no de sesion.
+    vi.stubEnv("DATABASE_URL", "")
+    try {
+      await expect(consultarProductosInternos(new Headers(), [ID_PRODUCTO_PRUEBA]))
+        .rejects.toThrow("Falta la variable de entorno DATABASE_URL.")
+    } finally {
+      vi.unstubAllEnvs()
+    }
   })
 
   it("rechaza IDs invalidos antes de leer y no consulta por lista vacia", async () => {
