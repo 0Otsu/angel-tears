@@ -29,6 +29,8 @@ Persistencia y operaciones de abastecimiento con efecto único; no duplicar Prod
 
 Integración futura por C0 contratos + schema Inventario después de Producto → Proveedor → Compra/Linea y origen de movimientos. Aplicar solo migraciones revisadas en entorno aislado; verificar constraints/rollback. Conservar datos e historia; no volver a fixtures para ocultar fallo de operación.
 
+Actualización técnica autorizada el 22/10/2026: Proveedor se incorpora junto con Categoría/Producto en `0001_catalogo-proveedores-base`, después de `0000_auth-base`, porque su schema ya está integrado sin migración. Sustituye únicamente la secuencia prevista para esa tabla; Claudio conserva su ownership. Inventario/C0 y Compras no se implementan ni migran en este turno. Es coordinación técnica compartida, sin requisitos funcionales nuevos ni cambios SRS/RUP; detalle y validación del turno en el plan de migración del change `implement-products-public-seo`.
+
 ## Open Questions
 
 Baja de proveedor sin historial, límites de importes/fechas y restricciones de aplicación de saldo inicial no aprobadas. Resolver antes del comportamiento afectado; no bloquean proveedor activo ni ajuste explícito ya definido. SRS/RUP pendientes de formalización.

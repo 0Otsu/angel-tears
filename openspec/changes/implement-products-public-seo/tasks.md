@@ -3,9 +3,13 @@
 ## 1. P0: Producto compartido
 
 - [ ] 1.1 Leer decisiones/gaps/ADR y acordar DTO con Claudio/Emi; registrar pendientes de validación sin inventar RF/CU.
-- [ ] 1.2 Crear schema único Producto/Categoria y categorías sembradas; probar slug único/estable, campos y migración en turno coordinado.
-- [ ] 1.3 Publicar consulta interna/DTO y fixtures de prueba del contrato; comprobar consumo por Compras/Inventario sin otro Product schema.
+- [x] 1.2 Crear schema único Producto/Categoria y categorías sembradas; probar slug único/estable, campos y migración en turno coordinado.
+- [x] 1.3 Publicar consulta interna/DTO y fixtures de prueba del contrato; comprobar consumo por Compras/Inventario sin otro Product schema.
 - [ ] 1.4 Integrar alta oculta + saldo cero C0 en misma tx; probar rollback de ambos y documentar ownership.
+
+Nota P0 local del 20/10/2026: [auditoría/evidencia](../../../docs/REVISION_LOCAL_P0.md). 1.3 verificada con consulta protegida, fixtures y consumidores de los contratos existentes; publicación solo en archivos de esta rama local, sin push. 1.1 no se marca: coordinación humana del DTO pendiente. 1.2 parcial: schema/semilla preparados, migración definitiva y pruebas SQL pendientes del turno Auth. 1.4 parcial: adaptador comparte tx y propaga fallos, pero falta C0 persistente y verificar rollback real de ambas tablas. No avanzar a tareas 2–5 en esta entrega.
+
+Actualización del 22/10/2026: 1.2 verificada en el turno conjunto autorizado `0001_catalogo-proveedores-base` (Categoría/Producto de Augusto y Proveedor de Claudio). SQL/metadatos revisados; reconstrucción desde cero en PostgreSQL Docker, semilla idempotente y constraints/lectura/rollback de Producto comprobados con integración real. Evidencia en el plan de migración del diseño y `lib/modulos/productos/persistencia.integracion.test.ts`. 1.1 continúa pendiente de coordinación del DTO y 1.4 de C0 persistente y rollback conjunto con Inventario; no se avanzan tareas 2–5.
 
 ## 2. Productos e imagen
 
