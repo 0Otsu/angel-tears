@@ -4,6 +4,7 @@ import {
   EMAIL_DE_PRUEBA,
   borrarCuentaDePrueba,
   crearCuentaDePrueba,
+  reiniciarLimiteDeIntentos,
 } from "./apoyo/cuenta-de-prueba"
 
 // Login de la Administradora contra un Next real y la base de pruebas, con una cuenta real
@@ -12,6 +13,10 @@ import {
 test.describe("acceso administrativo", () => {
   test.beforeAll(async () => {
     await crearCuentaDePrueba()
+  })
+
+  test.beforeEach(async () => {
+    await reiniciarLimiteDeIntentos()
   })
 
   test.afterAll(async () => {

@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest"
 import {
   CODIGO_SESION_REQUERIDA,
   ErrorSesionRequerida,
+  conAdministradora,
   crearExigirAdministradora,
   esErrorSesionRequerida,
   type ExigirAdministradora,
@@ -91,6 +92,63 @@ describe("exigirAdministradora", () => {
 
     expect(error.message).not.toContain("valor-secreto")
     expect(error.name).toBe("ErrorSesionRequerida")
+  })
+})
+
+describe("conAdministradora (comandos privados)", () => {
+  it("no ejecuta el comando sin sesion y avisa que hace falta iniciar sesion", async () => {
+    const comando = vi.fn(async () => "hecho")
+    const exigir = crearExigirAdministradora(async () => null)
+
+    const resultado = await conAdministradora(exigir, new Headers(), comando)
+
+    expect(resultado).toEqual({ estado: "sesion_requerida" })
+    expect(comando).not.toHaveBeenCalled()
+  })
+
+  it("ejecuta el comando una sola vez, con la identidad, cuando hay sesion", async () => {
+    const comando = vi.fn(async (a: IdentidadAdministradora) => `por ${a.id}`)
+    const exigir = crearExigirAdministradora(async () => identidad)
+
+    const resultado = await conAdministradora(exigir, new Headers(), comando)
+
+    expect(resultado).toEqual({ estado: "ok", valor: "por admin-1" })
+    expect(comando).toHaveBeenCalledTimes(1)
+  })
+
+  it("si la sesion deja de valer entre dos envios, el segundo no se ejecuta ni se reenvia solo", async () => {
+    let vigente = true
+    const comando = vi.fn(async () => "hecho")
+    const exigir = crearExigirAdministradora(async () => (vigente ? identidad : null))
+
+    await conAdministradora(exigir, new Headers(), comando)
+    vigente = false // la sesion vence antes del segundo envio
+    const segundo = await conAdministradora(exigir, new Headers(), comando)
+
+    expect(segundo).toEqual({ estado: "sesion_requerida" })
+    expect(comando).toHaveBeenCalledTimes(1)
+  })
+
+  it("propaga las fallas tecnicas del verificador sin ejecutar el comando", async () => {
+    const comando = vi.fn(async () => "hecho")
+    const exigir = crearExigirAdministradora(async () => {
+      throw new Error("base de datos no disponible")
+    })
+
+    await expect(conAdministradora(exigir, new Headers(), comando)).rejects.toThrow(
+      "base de datos no disponible",
+    )
+    expect(comando).not.toHaveBeenCalled()
+  })
+
+  it("las fallas del propio comando no se confunden con falta de sesion", async () => {
+    const exigir = crearExigirAdministradora(async () => identidad)
+
+    await expect(
+      conAdministradora(exigir, new Headers(), async () => {
+        throw new Error("fallo del comando")
+      }),
+    ).rejects.toThrow("fallo del comando")
   })
 })
 

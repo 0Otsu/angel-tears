@@ -46,6 +46,31 @@ export type VerificadorSesion = (encabezados: Headers) => Promise<IdentidadAdmin
  */
 export type ExigirAdministradora = (encabezados: Headers) => Promise<IdentidadAdministradora>
 
+/** Resultado de un comando privado: se ejecuto o no hay sesion valida (nada se ejecuto). */
+export type ResultadoComandoPrivado<T> = { estado: "ok"; valor: T } | { estado: "sesion_requerida" }
+
+/**
+ * Ejecuta un comando (Server Action o Route Handler que modifica datos) solo si hay una
+ * Administradora con sesion valida. Sin sesion, vencida o revocada devuelve `sesion_requerida` y
+ * el comando NO se ejecuta; el llamador responde pidiendo iniciar sesion de nuevo. Nunca
+ * reintenta ni reenvia el comando: como mucho se ejecuta una vez, asi que una sesion vencida al
+ * enviar no puede producir efectos ni duplicados. Las fallas tecnicas (base caida) se propagan.
+ */
+export async function conAdministradora<T>(
+  exigir: ExigirAdministradora,
+  encabezados: Headers,
+  comando: (administradora: IdentidadAdministradora) => Promise<T>,
+): Promise<ResultadoComandoPrivado<T>> {
+  let administradora: IdentidadAdministradora
+  try {
+    administradora = await exigir(encabezados)
+  } catch (error) {
+    if (esErrorSesionRequerida(error)) return { estado: "sesion_requerida" }
+    throw error
+  }
+  return { estado: "ok", valor: await comando(administradora) }
+}
+
 export function crearExigirAdministradora(verificar: VerificadorSesion): ExigirAdministradora {
   return async (encabezados) => {
     const identidad = await verificar(encabezados)

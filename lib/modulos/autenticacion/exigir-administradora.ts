@@ -1,13 +1,13 @@
 import "server-only"
+import { obtenerAuth } from "@/lib/infraestructura/auth"
 import { crearExigirAdministradora, type VerificadorSesion } from "@/lib/modulos/autenticacion/contrato"
+import { crearVerificadorDeSesion } from "@/lib/modulos/autenticacion/verificador-better-auth"
 
-// Instancia que usa la aplicacion. TODAVIA NO HAY SESIONES REALES: hasta la tarea 2.4 (Better
-// Auth), el verificador no reconoce a nadie, asi que `exigirAdministradora` rechaza toda
-// solicitud. Falla cerrado a proposito: ninguna ruta privada queda abierta por error.
-//
-// Para probar un modulo propio sin esperar a Auth, no mockear este archivo: crear una instancia
-// con `crearExigirAdministradora(verificadorFalso)` desde "contrato" e inyectarla en el caso de
-// uso. La prueba con la sesion real llega con la tarea 2.4.
-const verificadorSinSesiones: VerificadorSesion = async () => null
+// Instancia que usa la aplicacion: valida la sesion real de Better Auth (tarea 2.4). Se resuelve
+// la instancia de Better Auth en cada llamada, no al importar, para no exigir base de datos ni
+// secretos durante `next build`. Para probar un modulo propio sin sesiones reales, crear una
+// instancia con `crearExigirAdministradora(verificadorFalso)` desde "contrato" e inyectarla.
+const verificadorBetterAuth: VerificadorSesion = (encabezados) =>
+  crearVerificadorDeSesion(obtenerAuth())(encabezados)
 
-export const exigirAdministradora = crearExigirAdministradora(verificadorSinSesiones)
+export const exigirAdministradora = crearExigirAdministradora(verificadorBetterAuth)
