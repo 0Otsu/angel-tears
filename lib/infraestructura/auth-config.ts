@@ -11,6 +11,9 @@ import * as esquemaAuth from "./esquemas/auth"
 //
 // Esta tarea fija lo que cambia las tablas y el alta de la cuenta. Sesion de 30 dias, cookies,
 // limites de intentos, reset de contrasena y correo se configuran en sus tareas (2.3, 2.5, 3.x).
+/** Maximo absoluto de una sesion desde el login: 30 dias (decision de producto aprobada). */
+export const DURACION_MAXIMA_SESION_SEGUNDOS = 60 * 60 * 24 * 30
+
 export type OpcionesAuth = {
   /**
    * Habilita el registro por email. SOLO para el proceso de alta de la Administradora
@@ -36,6 +39,14 @@ export function crearAuth(db: NodePgDatabase, opciones: OpcionesAuth = {}) {
       // Dar de alta una cuenta nunca inicia sesion: el acceso es siempre un login explicito.
       autoSignIn: false,
     },
+    // Sesion (decisiones I4 y cierre de Auth 19/10): maximo ABSOLUTO de 30 dias desde el login.
+    // Por defecto Better Auth renueva `expiresAt` cuando se usa la sesion pasado `updateAge`
+    // (ventana deslizante); `disableSessionRefresh` lo impide, de modo que `expiresAt` queda
+    // fijo en login + 30 dias aunque se use todos los dias, y al vencer hay que iniciar sesion
+    // de nuevo. Sin `cookieCache`: cada solicitud consulta la sesion en la base, asi un logout o
+    // un reset la invalidan al instante. La cookie la gestiona la libreria (HttpOnly,
+    // SameSite=Lax, Secure en produccion) y dura lo mismo que la sesion.
+    session: { expiresIn: DURACION_MAXIMA_SESION_SEGUNDOS, disableSessionRefresh: true },
     // Limite de intentos persistente (SEGURIDAD.md): una sola instancia en memoria no es una
     // garantia productiva. Se activa en todos los entornos (por defecto Better Auth solo lo
     // hace en produccion) para que desarrollo y pruebas ejerciten el mismo comportamiento.
