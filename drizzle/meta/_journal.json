@@ -8,13 +8,6 @@
       "when": 1792604423386,
       "tag": "0000_auth-base",
       "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1792689850848,
-      "tag": "0001_proveedores-local",
-      "breakpoints": true
     }
   ]
 }
