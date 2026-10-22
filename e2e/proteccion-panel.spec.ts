@@ -20,6 +20,7 @@ const RUTAS_DEL_PANEL = [
   "/admin/ventas",
   "/admin/egresos",
   "/admin/reportes",
+  "/admin/cuenta",
   "/admin/configuracion",
 ]
 

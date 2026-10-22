@@ -53,6 +53,14 @@ export function crearAuth(db: NodePgDatabase, opciones: OpcionesAuth = {}) {
     // Los valores (ventana y maximo) son los POR DEFECTO de Better Auth 1.7.11, sin valores
     // propios: no hay cifras de producto aprobadas. Cada ventana es temporal, asi que nunca
     // bloquea de forma indefinida a la unica administradora. Ver docs/DESARROLLO.md.
-    rateLimit: { enabled: true, storage: "database" },
+    rateLimit: {
+      enabled: true,
+      storage: "database",
+      // /change-password verifica la contrasena actual, igual que el login: se le aplica el
+      // mismo limite por defecto que la libreria da a /sign-in/email (3 por ventana de 10 s).
+      // Sin esta regla caeria en el limite general (100 por ventana), demasiado laxo para
+      // adivinar una contrasena. No es un valor de producto: revisar al operar.
+      customRules: { "/change-password": { window: 10, max: 3 } },
+    },
   })
 }
