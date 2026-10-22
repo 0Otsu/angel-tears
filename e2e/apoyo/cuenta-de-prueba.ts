@@ -39,6 +39,24 @@ export async function crearCuentaDePrueba(): Promise<void> {
   })
 }
 
+/**
+ * Reinicia el contador del limite de intentos. Los E2E hacen varios logins seguidos desde la
+ * misma IP y superarian el limite (3 por ventana de 10 s en el login); el limite en si se
+ * prueba aparte, en las pruebas de integracion.
+ */
+export async function reiniciarLimiteDeIntentos(): Promise<void> {
+  await conBaseDePruebas(async (conexion) => {
+    await conexion.db.execute(sql`DELETE FROM rate_limit`)
+  })
+}
+
+/** Simula que las sesiones de la cuenta de prueba ya vencieron (maximo de 30 dias cumplido). */
+export async function vencerSesionesDePrueba(): Promise<void> {
+  await conBaseDePruebas(async (conexion) => {
+    await conexion.db.execute(sql`UPDATE session SET expires_at = now() - interval '1 minute'`)
+  })
+}
+
 export async function borrarCuentaDePrueba(): Promise<void> {
   await conBaseDePruebas(async (conexion) => {
     await conexion.db.execute(sql`DELETE FROM "user"`)

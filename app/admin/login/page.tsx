@@ -3,13 +3,16 @@ import Image from "next/image"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 import { FormularioLogin } from "@/components/admin/formulario-login"
+import { redirigirAlPanelSiHaySesion } from "@/lib/modulos/autenticacion/guardia-admin"
 
 export const metadata: Metadata = {
   title: "Panel de administración",
   robots: { index: false, follow: false },
 }
 
-export default function PaginaLogin() {
+export default async function PaginaLogin() {
+  // Con una sesion valida no se vuelven a pedir las credenciales: va directo al panel.
+  await redirigirAlPanelSiHaySesion()
   return (
     <main className="grid min-h-svh bg-background lg:grid-cols-2">
       <aside
