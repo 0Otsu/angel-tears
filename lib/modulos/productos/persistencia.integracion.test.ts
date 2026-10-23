@@ -33,12 +33,13 @@ describe("Producto sobre las migraciones versionadas en PostgreSQL", () => {
     }
   })
 
-  it("reconstruye las ocho tablas y conserva numeric(18,2) sin columnas de stock en Producto", async () => {
+  it("reconstruye las tablas versionadas y conserva numeric(18,2) sin columnas de stock en Producto", async () => {
     const tablas = await db().execute<{ table_name: string }>(sql`
       SELECT table_name FROM information_schema.tables
       WHERE table_schema = 'public' ORDER BY table_name`)
     expect(tablas.rows.map((t) => t.table_name)).toEqual([
-      "account", "categoria", "producto", "proveedor", "rate_limit", "session", "user", "verification",
+      "account", "ajuste_stock", "categoria", "inventario", "movimiento_stock", "producto", "proveedor",
+      "rate_limit", "session", "user", "verification",
     ])
     const columnas = await db().execute<{ column_name: string; numeric_precision: number; numeric_scale: number }>(sql`
       SELECT column_name, numeric_precision, numeric_scale FROM information_schema.columns
