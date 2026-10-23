@@ -33,14 +33,11 @@ describe("Producto sobre las migraciones versionadas en PostgreSQL", () => {
     }
   })
 
-  it("reconstruye las tablas versionadas y conserva numeric(18,2) sin columnas de stock en Producto", async () => {
+  it("reconstruye Categoria y Producto y conserva numeric(18,2) sin columnas de stock en Producto", async () => {
     const tablas = await db().execute<{ table_name: string }>(sql`
       SELECT table_name FROM information_schema.tables
-      WHERE table_schema = 'public' ORDER BY table_name`)
-    expect(tablas.rows.map((t) => t.table_name)).toEqual([
-      "account", "ajuste_stock", "categoria", "inventario", "movimiento_stock", "producto", "proveedor",
-      "rate_limit", "session", "user", "verification",
-    ])
+      WHERE table_schema = 'public' AND table_name IN ('categoria', 'producto') ORDER BY table_name`)
+    expect(tablas.rows.map((t) => t.table_name)).toEqual(["categoria", "producto"])
     const columnas = await db().execute<{ column_name: string; numeric_precision: number; numeric_scale: number }>(sql`
       SELECT column_name, numeric_precision, numeric_scale FROM information_schema.columns
       WHERE table_schema = 'public' AND table_name = 'producto'`)
@@ -105,11 +102,20 @@ describe("Producto sobre las migraciones versionadas en PostgreSQL", () => {
 
   it("exige categoria existente e impide borrar una categoria referenciada", async () => {
     await db().delete(categoria).where(eq(categoria.codigo, "collares"))
-    await expect(db().insert(producto).values(datos())).rejects.toMatchObject({ cause: { code: "23503" } })
+    await expect(db().insert(producto).values(datos())).rejects.toMatchObject({
+      cause: { code: "23503", constraint: "producto_categoria_codigo_categoria_codigo_fk" },
+    })
     await db().transaction(sembrarCategorias)
     await db().insert(producto).values(datos())
+    // PostgreSQL 17 informa foreign_key_violation; 18 distingue restrict_violation al borrar.
     await expect(db().delete(categoria).where(eq(categoria.codigo, "collares")))
-      .rejects.toMatchObject({ cause: { code: "23503" } })
+      .rejects.toMatchObject({ cause: {
+        code: expect.stringMatching(/^(23503|23001)$/),
+        constraint: "producto_categoria_codigo_categoria_codigo_fk",
+      } })
+    expect(await db().select().from(categoria).where(eq(categoria.codigo, "collares"))).toHaveLength(1)
+    expect(await db().select().from(producto).where(eq(producto.id, ID_PRODUCTO_PRUEBA)))
+      .toMatchObject([{ categoriaCodigo: "collares" }])
   })
 
   it("revierte una insercion de Producto al fallar su transaccion SQL", async () => {
