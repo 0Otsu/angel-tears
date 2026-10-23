@@ -5,11 +5,15 @@
 - [ ] 1.1 Leer decisiones/gaps/ADR y acordar DTO con Claudio/Emi; registrar pendientes de validación sin inventar RF/CU.
 - [x] 1.2 Crear schema único Producto/Categoria y categorías sembradas; probar slug único/estable, campos y migración en turno coordinado.
 - [x] 1.3 Publicar consulta interna/DTO y fixtures de prueba del contrato; comprobar consumo por Compras/Inventario sin otro Product schema.
-- [ ] 1.4 Integrar alta oculta + saldo cero C0 en misma tx; probar rollback de ambos y documentar ownership.
+- [x] 1.4 Integrar alta oculta + saldo cero C0 en misma tx; probar rollback de ambos y documentar ownership.
 
 Nota P0 local del 20/10/2026: [auditoría/evidencia](../../../docs/REVISION_LOCAL_P0.md). 1.3 verificada con consulta protegida, fixtures y consumidores de los contratos existentes; publicación solo en archivos de esta rama local, sin push. 1.1 no se marca: coordinación humana del DTO pendiente. 1.2 parcial: schema/semilla preparados, migración definitiva y pruebas SQL pendientes del turno Auth. 1.4 parcial: adaptador comparte tx y propaga fallos, pero falta C0 persistente y verificar rollback real de ambas tablas. No avanzar a tareas 2–5 en esta entrega.
 
 Actualización del 22/10/2026: 1.2 verificada en el turno conjunto autorizado `0001_catalogo-proveedores-base` (Categoría/Producto de Augusto y Proveedor de Claudio). SQL/metadatos revisados; reconstrucción desde cero en PostgreSQL Docker, semilla idempotente y constraints/lectura/rollback de Producto comprobados con integración real. Evidencia en el plan de migración del diseño y `lib/modulos/productos/persistencia.integracion.test.ts`. 1.1 continúa pendiente de coordinación del DTO y 1.4 de C0 persistente y rollback conjunto con Inventario; no se avanzan tareas 2–5.
+
+Actualización del 23/10/2026 — cierre técnico de 1.4: `0002_inventario-base` y C0 persistente están integrados en main desde `36d4b3b`. `insertarProductoOcultoConSaldo` pasa la misma tx del llamador a `crearContratoInventario(db).crearSaldoCero`, sin abrir/confirmar otra ni capturar sus fallos. Las pruebas PostgreSQL existentes de [Inventario](../../../lib/modulos/inventario/persistencia.integracion.test.ts), bloque «saldo cero junto al alta de Producto (C0)», usan ambos adaptadores reales y verifican creación con saldo 0/mínimo null y ausencia de ambas filas tras un fallo posterior al alta. La suite conjunta Producto + Inventario (27 pruebas) se volvió a ejecutar en esta revisión; la auditoría anterior también verificó las suites completas en PostgreSQL 17.10 y 18.4. No se duplican pruebas. Producto/Categoría y su adaptador siguen siendo de Augusto; Inventario, su schema y C0 siguen siendo de Claudio. Las notas del 20 y 22 son evidencia histórica, no bloqueos actuales de C0.
+
+P0 queda técnicamente preparado: 1.2, 1.3 y 1.4 completas; 1.1 permanece abierta hasta confirmar humanamente el DTO con Claudio/Emi. No se declara P0 formalmente cerrado ni se inicia 2.x. El alta administrativa autorizada de extremo a extremo corresponde a 2.1, no a esta integración interna. Las tasks de Inventario conservan su estado para revisión de Claudio.
 
 ## 2. Productos e imagen
 

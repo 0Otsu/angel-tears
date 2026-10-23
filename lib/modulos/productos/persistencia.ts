@@ -21,7 +21,9 @@ export async function sembrarCategorias(tx: Pick<TransaccionProducto, "insert">)
 /**
  * Preparacion P0, sin endpoint/UI. El llamador autoriza y decide politica comercial antes
  * de abrir UNA tx; propaga cualquier fallo para revertir Producto y saldo juntos.
- * Claudio proveera crearSaldoCero persistente: no conectar el doble en memoria en runtime.
+ * Producto pertenece a Augusto; Inventario/C0 a Claudio. La implementacion persistente es
+ * crearContratoInventario(db).crearSaldoCero; recibe esta misma tx, sin abrir otra.
+ * No conectar el doble en memoria en runtime. Evidencia conjunta en Inventario SQL.
  */
 export async function insertarProductoOcultoConSaldo(
   tx: TransaccionProducto,
