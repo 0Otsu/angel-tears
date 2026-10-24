@@ -1,5 +1,7 @@
 import { sql } from "drizzle-orm"
+import { crearAuth } from "../../lib/infraestructura/auth-config"
 import { crearConexionBd } from "../../lib/infraestructura/conexion-bd"
+import type { MensajeCorreo } from "../../lib/infraestructura/correo"
 import { aprovisionarAdministradora } from "../../lib/modulos/autenticacion/aprovisionar-administradora"
 import { validarUrlBdPruebas } from "../../pruebas/guardia-url-bd"
 
@@ -47,6 +49,38 @@ export async function crearCuentaDePrueba(): Promise<void> {
 export async function reiniciarLimiteDeIntentos(): Promise<void> {
   await conBaseDePruebas(async (conexion) => {
     await conexion.db.execute(sql`DELETE FROM rate_limit`)
+  })
+}
+
+/**
+ * Genera un enlace de recuperacion REAL (el token queda guardado en la base de pruebas, que usa el
+ * servidor de los E2E) sin enviar ningun correo: el proveedor se reemplaza por uno que captura el
+ * mensaje. Devuelve el token que trae el enlace del correo.
+ */
+export async function generarTokenDeRecuperacion(): Promise<string> {
+  return conBaseDePruebas(async (conexion) => {
+    const correos: MensajeCorreo[] = []
+    const pendientes: Promise<unknown>[] = []
+    const auth = crearAuth(conexion.db, {
+      enviarCorreo: async (mensaje) => {
+        correos.push(mensaje)
+      },
+      ejecutarEnSegundoPlano: (tarea) => {
+        pendientes.push(tarea)
+      },
+    })
+    await auth.api.requestPasswordReset({ body: { email: EMAIL_DE_PRUEBA, redirectTo: "/admin/restablecer" } })
+    await Promise.all(pendientes)
+    const token = /reset-password\/([A-Za-z0-9_-]+)/.exec(correos[0]?.texto ?? "")?.[1]
+    if (!token) throw new Error("No se genero el enlace de recuperacion de prueba.")
+    return token
+  })
+}
+
+/** Simula que los enlaces de recuperacion ya vencieron (paso 1 hora). */
+export async function vencerEnlacesDeRecuperacion(): Promise<void> {
+  await conBaseDePruebas(async (conexion) => {
+    await conexion.db.execute(sql`UPDATE verification SET expires_at = now() - interval '1 minute'`)
   })
 }
 
