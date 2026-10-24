@@ -141,12 +141,12 @@ Flujo (decisiones J1 a J4 y cierre de Auth del 19/10/2026): `/admin/login` → �
 
 **Restablecer (tarea 3.2).** Consumir el enlace, cambiar la contraseña y cerrar todas las sesiones ocurren **en una sola transacción** de PostgreSQL: si algo falla, nada cambia y el enlace sigue vigente (hay un test que fuerza el fallo con un trigger). Dos intentos simultáneos con el mismo enlace: solo uno gana. Una contraseña nueva rechazada (largo) **no gasta** el enlace. El enlace pasa por `/api/auth/reset-password/<token>`, que redirige a `/admin/restablecer?token=...` (o `?error=INVALID_TOKEN`); la página no se indexa y no manda el `Referer` (`referrer: no-referrer`). La política de complejidad de la contraseña no está definida: solo se exige un largo de 8 a 128 caracteres.
 
-**Hallazgos de Better Auth 1.7.11 que dejan una decisión pendiente (reemisión):**
+**Hallazgos de Better Auth 1.7.11 sobre la reemisión (decisión del 24/10/2026: se dejan así):**
 1. **Pedir un segundo enlace no invalida el anterior:** los dos valen hasta usarse o vencer. No hay soporte nativo para invalidarlo.
 2. **Los enlaces pendientes sobreviven al restablecimiento:** usar uno no invalida los otros que aún no se usaron; siguen sirviendo hasta que vencen (1 hora). Un test de caracterización lo documenta.
 3. **Vencimiento exacto:** la librería compara «vence antes que ahora»; en el milisegundo exacto de la hora el enlace todavía vale. Es una diferencia de 1 ms con «vencido al alcanzar la hora».
 
-Las opciones son dejarlo así o invalidar los enlaces anteriores con una limpieza propia, pequeña pero atada al formato interno de la librería (el diseño pide no crear infraestructura compleja). Se decide antes de cerrar la recuperación.
+**Decisión (24/10/2026, Emi):** se dejan así. Invalidar los enlaces anteriores exigiría una limpieza propia atada al formato interno de la librería, y el diseño pide no crear infraestructura compleja para la recuperación. El riesgo residual es acotado: cada enlace dura 1 hora, sirve una sola vez, solo llega al correo de la Administradora y hay una única cuenta. Si una versión futura de Better Auth invalida los anteriores de forma nativa, los tests de caracterización de la reemisión avisan y conviene revisar esta decisión.
 
 **Pruebas:** correo (`correo.test.ts`, `correo-recuperacion.test.ts`), orquestación (`recuperar-contrasena.test.ts`), formularios, integración contra el handler real y PostgreSQL con un proveedor de correo de reemplazo (`recuperacion.integracion.test.ts`: neutralidad, tiempo, fallo del proveedor, origen, un solo uso, vencimiento con reloj simulado, concurrencia, rollback, reemisión) y E2E con enlaces reales sin enviar correos (`e2e/recuperacion.spec.ts`).
 
