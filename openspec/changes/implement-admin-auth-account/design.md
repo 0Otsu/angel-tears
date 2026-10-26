@@ -50,6 +50,21 @@ Los mensajes son ejemplos de intención, no copy rígido. Nunca incluir SQL, sta
 
 Implementación futura: E0 DB/arnés + auth schema → provisión segura en entorno de prueba → login/guard/logout → reset/Cuenta. Schema versionado, sin migración automática al build ni datos de demo en producción. Rollback de aplicación según compatibilidad; no eliminar credenciales/historial para volver a mocks.
 
+## Evidencia de cierre — 26/10/2026
+
+Sobre `main` en `92a6a24` (Better Auth 1.7.11, Resend 6.34.1, Drizzle 0.45.4, PostgreSQL 18): `pnpm lint` (sin advertencias), `pnpm typecheck`, `pnpm build`, `pnpm db:check`, `pnpm test` (225 pruebas/28 archivos), `pnpm test:integration` (105 pruebas/10 archivos, contra la base de pruebas aislada) y `pnpm test:e2e` (32 pruebas en Chromium: acceso, Cuenta, protección directa del panel y recuperación) aprobados; `openspec validate --all --strict` y `git diff --check` limpios. Los tests y los E2E no usan Resend: reemplazan el proveedor y no envían correos. Procedimiento, opciones de la librería y limitaciones: [DESARROLLO](../../../docs/DESARROLLO.md).
+
+Decisiones y límites de librería comprobados con pruebas de caracterización (avisan si una versión futura cambia el comportamiento):
+
+- `changePassword({ revokeOtherSessions: true })` reemplaza la sesión actual y le reinicia los 30 días; la política aprobada (conservar la actual sin extender, cerrar las demás) se implementa con `changePassword` más `/revoke-other-sessions`, en dos pasos no atómicos con reintento en pantalla.
+- Reemisión de recuperación (decisión del 24/10/2026): un pedido nuevo no invalida el enlace anterior y los pendientes sobreviven a un restablecimiento. Se dejó así para no crear infraestructura propia atada a la librería; riesgo acotado (1 hora, un solo uso, una sola cuenta).
+- El enlace vence en la comparación estricta de la librería: en el milisegundo exacto de la hora todavía vale.
+- Origen y CSRF se fijan explícitamente porque Better Auth los apaga con `NODE_ENV=test`; el envío del correo va después de responder (`after`) para que el tiempo no delate si la cuenta existe.
+
+RF/CU todavía provisionales (sin IDs nuevos; formalización SRS/RUP pendiente): RF-01 (iniciar sesión) y RF-02 (cerrar sesión) son referencias humanas de la trazabilidad; recuperación por correo, cambio autenticado de contraseña, máximo absoluto de sesión de 30 días e invalidación de sesiones son decisiones de producto aprobadas por el responsable (DECISIONES_PRODUCTO_MVP, secciones 9 y 10) sin número de requisito ni caso de uso.
+
+Sigue pendiente de operación y hosting, sin valores inventados: clave de API y dominio remitente verificado en Resend (y su cuota frente a la ventana de 3 pedidos por minuto), proxy de confianza para el límite de intentos por IP (hoy se evade rotando `x-forwarded-for` si el servidor se expone sin proxy), alta de la administradora en producción, base de producción y política de complejidad de contraseña (hoy solo largo de 8 a 128).
+
 ## Open Questions
 
 Producto: otras sesiones tras cambio autenticado, único bloqueo de ese subflujo. Reemisión de recovery: verificar soporte nativo/versionado y decidir antes de cerrar el flujo, sin infraestructura propia compleja. Nombre/email son solo lectura, su edición no está autorizada. Operación: dominio/remitente Resend, secretos, soporte seguro y valores técnicos de rate limiting. Comprobaciones de librería: representación del máximo absoluto/TTL y enlace no consumido ante rechazo de contraseña, con evidencia. Fuentes académicas: pendientes del registro de trazabilidad. No quedan abiertas elección de ORM/auth/email/testing ni sesión/TTL como decisión de producto.
