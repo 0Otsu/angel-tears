@@ -969,7 +969,7 @@ El backlog no autoriza comenzar ninguno de estos épicos. Actualización del 19/
 
 | Área funcional / destino | Estado real | Diseño/owner y siguiente trabajo |
 | --- | --- | --- |
-| Auth / Cuenta | 🟣 UI/MOCK de login; ❌ NO IMPLEMENTADO en sesión/guard/reset/Cuenta | Emi R1, Better Auth/Resend/Drizzle. Cuenta separada de Configuración; provisión controlada, sin signup público. |
+| Auth / Cuenta | ✅ IMPLEMENTADO y probado en local (26/10/2026): login, sesión de 30 días, guardia en las 10 páginas del panel, logout, `/admin/cuenta`, cambio de contraseña y recuperación por correo. Pendiente de operación: clave y dominio de Resend, hosting, alta en producción | Emi R1, Better Auth/Resend/Drizzle. Cuenta separada de Configuración; provisión controlada, sin signup público. Evidencia en `openspec/changes/implement-admin-auth-account/design.md` y `docs/DESARROLLO.md`. |
 | Productos | 🟣 UI/MOCK | Augusto R1, Producto único/categorías/imagen/slug/visibilidad/destacado; no borrar historia. |
 | Stock | 🟣 UI/MOCK | Claudio R1, saldo/mínimo `<=`/ajustes/historia/contrato transaccional; no saldo duplicado en Producto. |
 | Proveedores | 🟣 UI/MOCK | Claudio R1, datos mínimos/inactivación; baja sin historia pendiente. |
