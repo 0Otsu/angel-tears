@@ -17,7 +17,10 @@ P0 queda técnicamente preparado: 1.2, 1.3 y 1.4 completas; 1.1 permanece abiert
 
 ## 2. Productos e imagen
 
-- [ ] 2.1 Implementar alta/consulta/edición con Zod y guard real; probar obligatorios/opcionales, precisión monetaria y precios históricos intactos; actualizar docs.
+- [x] 2.1 Implementar alta/consulta/edición con Zod y guard real; probar obligatorios/opcionales, precisión monetaria y precios históricos intactos; actualizar docs.
+
+Evidencia de 2.1 del 28/10/2026: [implementación, pruebas y límites](../../../docs/features/PRODUCTOS_2_1.md). Alta/consulta/edición administrativa real conectada a PostgreSQL, guard existente y C0 persistente; precio de venta estrictamente mayor que cero por decisión humana expresa, decimal exacto sin redondeo, slug estable y control de versión. La UI mínima pertenece al alcance autorizado de 2.1; no cierra 2.5 ni incorpora imagen/publicación. Por autorización expresa posterior del responsable, se cierra e integra 2.1 con su limitación documentada: todavía no existen operaciones persistidas de Compras/Ventas con importes históricos para verificar su conservación de punta a punta. Esa regresión sigue pendiente al integrar dichos módulos; no se declara aprobada ni se inventa infraestructura para simularla. 1.1 sigue pendiente de Emi (Claudio ya confirmó el DTO). Sin cambios en tareas de otros owners. Las tasks 2.2–2.5 permanecen sin marcar y no se implementan en este cierre.
+
 - [ ] 2.2 Implementar adapter/Handler de imagen con límites y validación real; probar no autorizado, tipo/tamaño/píxeles inválidos y guardar sin imagen oculto.
 - [ ] 2.3 Implementar reemplazo con compensación/control de versión; probar fallos de upload/BD/cleanup y conservación de referencia anterior.
 - [ ] 2.4 Implementar publicación/ocultación/destacado; probar imagen obligatoria al publicar y ausencia de eliminación física/ranking; documentar criterios.
