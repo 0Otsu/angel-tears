@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { EncabezadoAdmin, EtiquetaEstado, PanelAdmin, TituloPanel } from "./piezas-admin"
+import { CargaImagenProducto } from "./carga-imagen-producto"
 
 const campos = [
   { nombre: "nombre", etiqueta: "Nombre", requerido: true },
@@ -133,6 +134,7 @@ export function ProductosAdmin({ consulta, errorCarga = false }: { consulta: Con
     {errorCarga ? <PanelAdmin className="space-y-3 p-5"><p role="alert">No pudimos consultar los productos. Probá recargar la página.</p><Link href="/admin/productos" className="text-primary underline">Reintentar consulta</Link></PanelAdmin> : <>
       {consulta.categorias.length === 0 && <p role="alert" className="text-sm text-destructive">No hay categorías configuradas. Se necesita completar la preparación de categorías antes de crear productos.</p>}
       <FormularioProducto key={producto?.id ?? "nuevo"} producto={producto} categorias={consulta.categorias} cancelar={() => seleccionar(null)} />
+      {producto && <CargaImagenProducto key={`imagen-${producto.id}`} productoId={producto.id} nombre={producto.nombre} version={producto.version} tieneImagen={producto.tieneImagen} />}
       <PanelAdmin>
         <TituloPanel titulo="Productos registrados" detalle={`${consulta.productos.length} productos · incluye ocultos`} />
         {consulta.productos.length === 0 ? <p className="px-5 pb-6 text-sm text-muted-foreground">Todavía no hay productos registrados.</p> : <div className="overflow-x-auto">
