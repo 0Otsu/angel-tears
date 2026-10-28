@@ -5,7 +5,7 @@ import { MapPin, Clock, Wallet, Truck } from "lucide-react"
 
 const features = [
   { icon: MapPin, title: "Ubicación", description: <>Entre Ríos 924<br />Planta baja, detrás de las escaleras</> },
-  { icon: Clock, title: "Horarios", description: "Consultar horarios vigentes" },
+  { icon: Clock, title: "Horarios", description: "16:00 a 20:30" },
   { icon: Wallet, title: "Medios de pago", description: <>Efectivo<br />Transferencia</> },
   { icon: Truck, title: "Envíos", description: <>Envíos en Concordia<br />A cargo del cliente</> },
 ]
