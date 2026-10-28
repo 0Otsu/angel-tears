@@ -31,6 +31,7 @@
     "@radix-ui/react-tooltip": "1.1.6",
     "better-auth": "1.7.11",
     "class-variance-authority": "0.7.1",
+    "cloudinary": "2.11.0",
     "clsx": "2.1.1",
     "drizzle-orm": "0.45.4",
     "lucide-react": "0.454.0",
@@ -41,6 +42,7 @@
     "recharts": "2.15.4",
     "resend": "6.34.1",
     "server-only": "0.0.1",
+    "sharp": "0.34.5",
     "tailwind-merge": "3.7.0",
     "zod": "4.6.7"
   },
