@@ -36,13 +36,14 @@ export function EstructuraAdmin({ children, nombre, email }: { children: ReactNo
   const [menuAbierto, setMenuAbierto] = useState(false)
   const ruta = usePathname()
   const actual = navegacion.find(item => item.ruta === ruta)?.nombre ?? "Administración"
+  const productosPersistidos = ruta === "/admin/productos"
   return <div className="min-h-svh bg-background text-foreground">
     <a href="#contenido-admin" className="sr-only z-[60] rounded-lg bg-primary px-4 py-3 text-primary-foreground focus:not-sr-only focus:fixed focus:left-4 focus:top-4">Saltar al contenido</a>
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col overflow-y-auto border-r border-border/70 bg-card/30 p-5 lg:flex">
       <div className="pb-10 pt-2"><MarcaAdmin /></div>
       <p className="mb-3 px-3.5 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Tu negocio</p>
       <NavegacionAdmin />
-      <div className="mt-auto space-y-4 pt-8"><div className="rounded-xl border border-border/70 bg-background/70 p-4"><p className="text-xs font-medium text-primary">Un espacio para cada detalle.</p><p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">Navegación de muestra.<br />Sin conexión a datos reales.</p></div><BotonCerrarSesion /></div>
+      <div className="mt-auto space-y-4 pt-8"><div className="rounded-xl border border-border/70 bg-background/70 p-4"><p className="text-xs font-medium text-primary">Un espacio para cada detalle.</p><p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">{productosPersistidos ? "Los productos que guardás quedan registrados en el sistema." : <>Navegación de muestra.<br />Sin conexión a datos reales.</>}</p></div><BotonCerrarSesion /></div>
     </aside>
 
     <div className="min-w-0 lg:ml-60">
@@ -51,7 +52,7 @@ export function EstructuraAdmin({ children, nombre, email }: { children: ReactNo
           <Sheet open={menuAbierto} onOpenChange={setMenuAbierto}>
             <SheetTrigger asChild><Button variant="ghost" size="icon" className="size-11 lg:hidden" aria-label="Abrir navegación administrativa"><Menu className="size-5" /></Button></SheetTrigger>
             <SheetContent side="left" className="w-[min(320px,88vw)] gap-0 overflow-y-auto p-5 sm:max-w-none">
-              <SheetTitle className="pr-6 font-serif text-2xl">Angel Tears</SheetTitle><SheetDescription className="mb-7 mt-1 text-xs">Administración · navegación de prototipo</SheetDescription>
+              <SheetTitle className="pr-6 font-serif text-2xl">Angel Tears</SheetTitle><SheetDescription className="mb-7 mt-1 text-xs">{productosPersistidos ? "Administración · Productos" : "Administración · navegación de prototipo"}</SheetDescription>
               <NavegacionAdmin alNavegar={() => setMenuAbierto(false)} /><div className="mt-auto pt-6"><BotonCerrarSesion /></div>
             </SheetContent>
           </Sheet>
@@ -64,7 +65,7 @@ export function EstructuraAdmin({ children, nombre, email }: { children: ReactNo
         </div>
       </header>
       <main id="contenido-admin" tabIndex={-1} className="mx-auto max-w-[1440px] space-y-6 p-4 pb-10 outline-none lg:p-8">{children}</main>
-      <footer className="flex flex-wrap justify-between gap-2 border-t border-border/70 px-4 py-4 text-[10px] text-muted-foreground lg:px-8"><span>Angel Tears · Prototipo de administración</span><span>Datos de demostración · sin persistencia</span></footer>
+      <footer className="flex flex-wrap justify-between gap-2 border-t border-border/70 px-4 py-4 text-[10px] text-muted-foreground lg:px-8"><span>Angel Tears · {productosPersistidos ? "Administración de productos" : "Prototipo de administración"}</span><span>{productosPersistidos ? "Productos registrados" : "Datos de demostración · sin persistencia"}</span></footer>
     </div>
   </div>
 }
