@@ -13,7 +13,7 @@ export default async function PaginaLogin() {
   // Con una sesion valida no se vuelven a pedir las credenciales: va directo al panel.
   await redirigirAlPanelSiHaySesion()
   return (
-    <MarcoAcceso variante="login" titulo="Panel de administración" descripcion="Ingresá tus datos para continuar.">
+    <MarcoAcceso titulo="Panel de administración" descripcion="Ingresá tus datos para continuar.">
       <FormularioLogin />
       <p className="mt-6 text-sm">
         <Link

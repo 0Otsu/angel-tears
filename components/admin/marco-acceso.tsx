@@ -3,52 +3,33 @@ import Image from "next/image"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 
-// Marco presentacional compartido. La variante login cambia solo la composicion visual;
-// recuperar y restablecer conservan su presentacion actual.
+// Composicion clara compartida por login, recuperar y restablecer contrasena.
 export function MarcoAcceso({
   titulo,
   descripcion,
   children,
-  variante,
 }: {
   titulo: string
   descripcion: string
   children: ReactNode
-  variante?: "login"
 }) {
-  const esLogin = variante === "login"
   return (
-    <main className={`grid min-h-svh bg-background ${esLogin ? "lg:grid-cols-[44%_56%]" : "lg:grid-cols-2"}`}>
+    <main className="grid min-h-svh bg-background lg:grid-cols-[44%_56%]">
       <aside
-        className={esLogin
-          ? "relative hidden overflow-hidden bg-card lg:order-2 lg:block"
-          : "relative m-5 hidden overflow-hidden rounded-3xl bg-card boty-shadow lg:block"}
+        className="relative hidden overflow-hidden bg-card lg:order-2 lg:block"
         aria-label="Identidad de Angel Tears"
       >
         <Image
-          src={esLogin ? "/images/admin/casa-login.jpg" : "/images/products/angel-tears-gold-jewelry.png"}
+          src="/images/admin/casa-login.jpg"
           alt=""
           fill
-          sizes={esLogin ? "56vw" : "50vw"}
-          className={esLogin ? "object-cover object-[50%_65%]" : "object-cover"}
+          sizes="56vw"
+          className="object-cover object-[50%_65%]"
           priority
         />
-        {!esLogin && (
-          <>
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
-            <div className="absolute inset-x-0 bottom-0 p-10 xl:p-14">
-              <p className="mb-5 text-xs uppercase tracking-[0.3em] text-primary">Bijouterie · Accesorios</p>
-              <p className="font-serif text-4xl leading-tight text-foreground xl:text-5xl">
-                Pequeños detalles.
-                <br />
-                Tu estilo, siempre.
-              </p>
-            </div>
-          </>
-        )}
       </aside>
 
-      <section className={`flex min-h-svh flex-col px-6 py-6 sm:px-10 lg:px-12 lg:py-10 ${esLogin ? "lg:order-1" : "xl:px-20"}`}>
+      <section className="flex min-h-svh flex-col px-6 py-6 sm:px-10 lg:order-1 lg:px-12 lg:py-10">
         <Link
           href="/"
           className="inline-flex w-fit items-center gap-2 rounded-full text-sm text-muted-foreground boty-transition hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4 focus-visible:ring-offset-background"
@@ -57,7 +38,7 @@ export function MarcoAcceso({
           Volver al sitio
         </Link>
 
-        <div className={`mx-auto flex w-full max-w-sm flex-1 flex-col justify-center py-10 sm:py-14 ${esLogin ? "lg:py-8" : ""}`}>
+        <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center py-10 sm:py-14 lg:py-8">
           <Link
             href="/"
             className="mb-10 w-fit rounded-sm font-serif text-3xl tracking-wider text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4 focus-visible:ring-offset-background"
