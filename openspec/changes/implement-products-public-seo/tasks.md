@@ -2,7 +2,7 @@
 
 ## 1. P0: Producto compartido
 
-- [ ] 1.1 Leer decisiones/gaps/ADR y acordar DTO con Claudio/Emi; registrar pendientes de validación sin inventar RF/CU.
+- [x] 1.1 Leer decisiones/gaps/ADR y acordar DTO con Claudio/Emi; registrar pendientes de validación sin inventar RF/CU.
 - [x] 1.2 Crear schema único Producto/Categoria y categorías sembradas; probar slug único/estable, campos y migración en turno coordinado.
 - [x] 1.3 Publicar consulta interna/DTO y fixtures de prueba del contrato; comprobar consumo por Compras/Inventario sin otro Product schema.
 - [x] 1.4 Integrar alta oculta + saldo cero C0 en misma tx; probar rollback de ambos y documentar ownership.
@@ -13,7 +13,9 @@ Actualización del 22/10/2026: 1.2 verificada en el turno conjunto autorizado `0
 
 Actualización del 23/10/2026 — cierre técnico de 1.4: `0002_inventario-base` y C0 persistente están integrados en main desde `36d4b3b`. `insertarProductoOcultoConSaldo` pasa la misma tx del llamador a `crearContratoInventario(db).crearSaldoCero`, sin abrir/confirmar otra ni capturar sus fallos. Las pruebas PostgreSQL existentes de [Inventario](../../../lib/modulos/inventario/persistencia.integracion.test.ts), bloque «saldo cero junto al alta de Producto (C0)», usan ambos adaptadores reales y verifican creación con saldo 0/mínimo null y ausencia de ambas filas tras un fallo posterior al alta. La suite conjunta Producto + Inventario (27 pruebas) se volvió a ejecutar en esta revisión; la auditoría anterior también verificó las suites completas en PostgreSQL 17.10 y 18.4. No se duplican pruebas. Producto/Categoría y su adaptador siguen siendo de Augusto; Inventario, su schema y C0 siguen siendo de Claudio. Las notas del 20 y 22 son evidencia histórica, no bloqueos actuales de C0.
 
-P0 queda técnicamente preparado: 1.2, 1.3 y 1.4 completas; 1.1 permanece abierta hasta confirmar humanamente el DTO con Claudio/Emi. No se declara P0 formalmente cerrado ni se inicia 2.x. El alta administrativa autorizada de extremo a extremo corresponde a 2.1, no a esta integración interna. Las tasks de Inventario conservan su estado para revisión de Claudio.
+Estado al 23/10/2026: P0 queda técnicamente preparado: 1.2, 1.3 y 1.4 completas; 1.1 permanece abierta hasta confirmar humanamente el DTO con Claudio/Emi. No se declara P0 formalmente cerrado ni se inicia 2.x. El alta administrativa autorizada de extremo a extremo corresponde a 2.1, no a esta integración interna. Las tasks de Inventario conservan su estado para revisión de Claudio.
+
+Cierre de 1.1 comunicado por el responsable el 29/10/2026: Claudio confirmó que el DTO y la semántica actuales de Producto sirven para Inventario/Compras. Emiliano confirmó la frontera Auth después de verificar main: autorización antes de leer/escribir, consultas mediante `exigirAdministradora`, comandos mediante `conAdministradora` y Auth recibido por contrato/inyección; Producto no implementa cookies, sesiones, `getSession` ni Better Auth por su cuenta, y sin sesión no ejecuta lecturas ni escrituras. Ambas confirmaciones humanas quedan registradas y 1.1 se marca completa. Las notas anteriores conservan su carácter histórico; no se modifica código, contratos, pruebas ni tareas de otros owners. El smoke real de Cloudinary de 2.2 continúa pendiente.
 
 ## 2. Productos e imagen
 

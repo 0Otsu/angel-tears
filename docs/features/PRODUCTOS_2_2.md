@@ -14,7 +14,7 @@ Adjuntar una única imagen principal desde el admin mediante un Handler autentic
 
 ## Contexto y dependencias
 
-Trabajo del 28/10/2026 desde main/origin en `86cf98d29e395c9b4a0d5abddc2e759c3245d6ed`, limpios y sin avances tras fetch; rama `feature/productos-2-2-imagen`. Producto 2.1, Auth y C0 persistentes se reutilizan. 1.1 sigue pendiente únicamente de Emi y el responsable confirmó que no bloquea este slice. No se modifican Auth, Inventario, DTO compartido, schema ni migraciones.
+Trabajo del 28/10/2026 desde main/origin en `86cf98d29e395c9b4a0d5abddc2e759c3245d6ed`, limpios y sin avances tras fetch; rama `feature/productos-2-2-imagen`. Producto 2.1, Auth y C0 persistentes se reutilizan. Al iniciar este slice, 1.1 estaba pendiente únicamente de Emi y el responsable confirmó que no lo bloqueaba. El 29/10/2026 se cerró 1.1 con las confirmaciones humanas de Claudio sobre DTO/semántica y de Emiliano sobre la frontera Auth, registradas en [OpenSpec](../../openspec/changes/implement-products-public-seo/tasks.md). No se modifican Auth, Inventario, DTO compartido, schema ni migraciones.
 
 - **Sharp 0.34.5:** se reutiliza exactamente la versión que ya trae Next y se declara directa para que el decoder del módulo no dependa accidentalmente de una dependencia transitiva. Proporciona metadata y decodificación completa; comprobaciones manuales de extensión/MIME no cubren esa garantía. No se actualiza Sharp de Next ni se instala otra versión nativa.
 - **Cloudinary 2.11.0:** SDK oficial estable compatible con Node 24 del proyecto para upload autenticado y eliminación. El SDK queda exclusivamente en el adaptador servidor; usar HTTP firmado propio duplicaría la firma/protocolo del proveedor. No se agregan parsers multipart, widgets ni otros paquetes auxiliares.
@@ -92,4 +92,4 @@ Configurar credenciales y probar upload/destroy reales antes de afirmar aceptaci
 - `pruebas/imagenes-producto.ts`, `e2e/productos-2-1.spec.ts`, `playwright.config.ts`: archivos de prueba/aislamiento, sin semillas comerciales.
 - Este documento y nota exclusiva de 2.2 en OpenSpec.
 
-OpenSpec 2.2 permanece abierta con implementación y evidencia técnica disponibles para revisión; falta el smoke del proveedor real. No se marca 2.3–2.5 ni 1.1. Entrega en rama con commits, **sin merge/push** por instrucción expresa del responsable.
+OpenSpec 2.2 permanece abierta con implementación y evidencia técnica disponibles para revisión; falta el smoke del proveedor real. Producto 1.1 está cerrada por las confirmaciones humanas registradas el 29/10/2026; 2.3–2.5 siguen sin marcar. Entrega en rama con commits, **sin merge/push** por instrucción expresa del responsable.
