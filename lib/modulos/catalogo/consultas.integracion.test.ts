@@ -78,4 +78,15 @@ describe("proyeccion publica PostgreSQL Producto + Inventario", () => {
       await expect(servicio().consultarPorSlug("cualquier-slug")).rejects.toThrow("DB no disponible")
     } finally { select.mockRestore() }
   })
+
+  it("indexables incluye PDP agotada, excluye oculto y usa modificacion real de producto/stock", async () => {
+    const agotado = await crear("Agotado", true, 0)
+    const oculto = await crear("Oculto", false, 3)
+    const fecha = new Date("2026-10-31T12:00:00Z")
+    await con.db.update(producto).set({ actualizadoEn: new Date("2026-10-30T12:00:00Z") }).where(eq(producto.id, agotado.id))
+    await con.db.update(inventario).set({ actualizadoEn: fecha }).where(eq(inventario.productoId, agotado.id))
+    const filas = await servicio().listarIndexables()
+    expect(filas.find((p) => p.slug === agotado.slug)?.modificadoEn).toEqual(fecha)
+    expect(filas.some((p) => p.slug === oculto.slug)).toBe(false)
+  })
 })

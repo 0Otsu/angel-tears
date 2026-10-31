@@ -52,7 +52,9 @@ Evidencia técnica 4.1 del 31/10/2026: title/description/OG/Twitter con datos e 
 - [x] 4.2 Implementar Product/Offer y datos locales veraces; verificar ARS/disponibilidad y serialización segura, sin horarios/reviews/materiales inventados; actualizar trazabilidad.
 
 Evidencia 4.2 del 31/10/2026: Product/Offer con decimal exacto/ARS y InStock/OutOfStock de la misma proyección de PDP. LocalBusiness solo identidad/dirección/contactos confirmados, sin horarios/días/geocoordenadas/reviews. Serialización escapa caracteres que podrían cerrar script. Tres pruebas unitarias y E2E con descripción hostil persistida, navegador sin ejecución y estado agotado coherente pasan. Trazabilidad enlaza evidencia sin inventar RF/CU; sin validación externa de rich results ni datos comerciales nuevos.
-- [ ] 4.3 Implementar sitemap/robots y reglas de indexación; probar publicadas agotadas incluidas, ocultos/admin/reset excluidos y guard independiente de robots.
+- [x] 4.3 Implementar sitemap/robots y reglas de indexación; probar publicadas agotadas incluidas, ocultos/admin/reset excluidos y guard independiente de robots.
+
+Evidencia técnica 4.3 del 31/10/2026: sitemap/robots dinámicos sin caché persistente, origen SITE_URL validado; Home/catálogo y PDP publicadas incluidas, también agotadas; ocultos/admin/API/recovery/reset fuera. lastModified usa fechas reales de Producto/Inventario. Sin dominio: sitemap vacío y robots disallow-all, sin localhost inventado. Seis PostgreSQL de proyección y E2E con dominio reservado verifican retiro de oculto en siguiente solicitud y guard admin real sin sesión. Dominio/configuración productiva siguen pendientes.
 - [ ] 4.4 Verificar responsive, teclado/foco/labels/alt/contraste, sizes/lazy/LCP y JS enviado; registrar medición y corregir defectos del slice sin rediseño global.
 
 ## 5. Integración y aceptación

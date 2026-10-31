@@ -59,5 +59,11 @@ export function crearConsultasCatalogo(db: NodePgDatabase) {
     return fila ? proyectar(fila) : null
   }
 
-  return { listar, consultarPorSlug }
+  async function listarIndexables() {
+    return db.select({ slug: producto.slug, modificadoEn: sql<Date>`greatest(${producto.actualizadoEn}, ${inventario.actualizadoEn})`.mapWith(producto.actualizadoEn) })
+      .from(producto).innerJoin(inventario, eq(inventario.productoId, producto.id))
+      .where(eq(producto.publicado, true)).orderBy(asc(producto.id))
+  }
+
+  return { listar, consultarPorSlug, listarIndexables }
 }

@@ -127,6 +127,38 @@ test("JSON-LD coincide con PDP, ARS, agotado y no ejecuta contenido persistido",
   }
 })
 
+test("sitemap y robots siguen visibilidad real, incluido agotado y ocultacion posterior", async ({ request }) => {
+  const robots = await request.get("/robots.txt")
+  const sitemap = await request.get("/sitemap.xml")
+  expect(robots.status()).toBe(200)
+  expect(sitemap.status()).toBe(200)
+  if (!process.env.SITE_URL) {
+    expect(await robots.text()).toContain("Disallow: /")
+    expect(await sitemap.text()).not.toContain("<loc>")
+    return
+  }
+  const contenido = await sitemap.text()
+  const origen = new URL(process.env.SITE_URL).origin
+  expect(contenido).toContain(`<loc>${origen}/</loc>`)
+  expect(contenido).toContain(`<loc>${origen}/catalogo</loc>`)
+  expect(contenido).toContain(slug(0))
+  expect(contenido).toContain(slug(2))
+  expect(contenido).not.toContain(slug(3))
+  expect(contenido).not.toMatch(/<loc>[^<]*\/(admin|api)/)
+  expect(await robots.text()).toContain("Disallow: /admin")
+  const conexion = con()
+  try {
+    await conexion.db.update(producto).set({ publicado: false }).where(eq(producto.id, ids[0]))
+    expect(await (await request.get("/sitemap.xml")).text()).not.toContain(slug(0))
+    const admin = await request.get("/admin/productos", { maxRedirects: 0 })
+    expect([303, 307]).toContain(admin.status())
+    expect(admin.headers().location).toContain("/admin/login")
+  } finally {
+    await conexion.db.update(producto).set({ publicado: true }).where(eq(producto.id, ids[0]))
+    await conexion.pool.end()
+  }
+})
+
 test("fallo PostgreSQL se muestra como error recuperable y no como vacio/404", async ({ page }) => {
   const conexion = con()
   try {
