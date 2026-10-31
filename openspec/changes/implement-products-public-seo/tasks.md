@@ -31,7 +31,9 @@ Checkpoint independiente del 31/10/2026: 2.4 cerrada tras recuperar el contenedo
 
 ## 3. Público real
 
-- [ ] 3.1 Implementar proyección autorizada con Inventario real y sin N+1; probar publicado/oculto/sin stock y ausencia de datos privados en DTO.
+- [x] 3.1 Implementar proyección autorizada con Inventario real y sin N+1; probar publicado/oculto/sin stock y ausencia de datos privados en DTO.
+
+Evidencia 3.1 del 31/10/2026: proyección de solo lectura en `lib/modulos/catalogo`, JOIN explícito de Producto/Categoría/Inventario conforme al blueprint sección 6. Cinco pruebas PostgreSQL verifican elegibilidad, PDP agotada, oculto/inexistente, DTO sin datos privados, filtros/límite/exclusión, una consulta sin N+1 y errores propagados. Sin cambios a Inventario/contratos ni consumo del proveedor de imágenes. Lint específico y typecheck correctos. La traducción de null a 404 y la UI Sin stock se verifican en 3.2.
 - [ ] 3.2 Conectar catálogo/PDP conservando URLs/visual; probar PDP agotada/Sin stock, oculto e inexistente 404 y fallo BD distinto de no encontrado.
 - [ ] 3.3 Conectar Home destacados/categorías elegibles sin CMS; probar destacado agotado/oculto excluido y contactos/historias confirmados conservados.
 - [ ] 3.4 Integrar consultas por solicitud y refresco postcommit; probar ocultar/agotar/reponer sin contenido persistentemente stale y documentar caché.
