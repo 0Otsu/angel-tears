@@ -24,6 +24,9 @@ Evidencia de 2.1 del 28/10/2026: [implementación, pruebas y límites](../../../
 - [ ] 2.2 Implementar adapter/Handler de imagen con límites y validación real; probar no autorizado, tipo/tamaño/píxeles inválidos y guardar sin imagen oculto.
 - [ ] 2.3 Implementar reemplazo con compensación/control de versión; probar fallos de upload/BD/cleanup y conservación de referencia anterior.
 - [ ] 2.4 Implementar publicación/ocultación/destacado; probar imagen obligatoria al publicar y ausencia de eliminación física/ranking; documentar criterios.
+
+Checkpoint independiente del 31/10/2026: comandos de 2.4 y Action protegida preparados desde main, sin depender de 2.2 ni implementar UI de 2.5. **2.4 parcial**, no aceptada: integración PostgreSQL bloqueada porque Docker Desktop aborta al iniciar su servicio de inferencia; no se modifican datos ni se sustituye DB real por dobles para cerrar la aceptación. Evidencia y continuación en [Producto/publico cierre](../../../docs/features/PRODUCTOS_PUBLICO_CIERRE.md). 2.2 permanece bloqueada por credenciales/smoke real en su rama intacta; 2.3 no iniciada. No se avanzó 3.x/4.x antes de validar este checkpoint.
+
 - [ ] 2.5 Integrar formularios/listado/errores/confirmación accesibles; verificar con RTL estados/conservación de entradas donde aporte valor.
 
 ## 3. Público real

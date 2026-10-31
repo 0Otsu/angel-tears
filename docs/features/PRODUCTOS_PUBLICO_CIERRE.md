@@ -1,0 +1,37 @@
+# Producto/publico/SEO independientes de Cloudinary
+
+## RF y CU relacionados
+
+RF-03..07 de referencia suministrada; decisiones A/C/L y destacado de la actualización 8, [blueprint](../BLUEPRINT_IMPLEMENTACION_MVP.md), ADR-003/007/008 y change `implement-products-public-seo`. CU exactos pendientes de formalización con RUP; no se crean identificadores ni se certifica aceptación académica.
+
+## Objetivo y contexto
+
+31/10/2026. Por solicitud expresa se trabaja secuencialmente desde main/origin `86cf98d`, rama independiente `feature/productos-publico-cierre`. `feature/productos-2-2-imagen` se conserva sin cambios en `dde6b2b`: primera imagen implementada, smoke real Cloudinary bloqueado por las tres credenciales ausentes. No se incorpora ninguno de sus commits. La confirmación humana de 1.1 permanece registrada en aquella rama; su integración documental no se adelanta aquí.
+
+## Producto 2.4
+
+`publicacion.ts` implementa publicar/ocultar/destacar/quitar destacado. Cada comando usa `conAdministradora`, Zod (UUID, versión positiva y acción allowlist) y una transacción con lock de Producto. Solo escribe el flag correspondiente, versión y fecha; una versión obsoleta se rechaza. Ocultar/destacar no exige imagen ni saldo; publicar exige referencia persistida completa y URL HTTPS utilizable. El constraint de P0 ya exige conjunto completo; no se consulta ni simula Cloudinary. La validación del archivo/proveedor pertenece a 2.2.
+
+`publicacion-acciones.ts` compone el guard real, conserva protección de origen nativa de Actions, devuelve errores técnicos neutros e invalida paths únicamente después del commit. No añade UI anticipada de 2.5 ni permite borrar productos. Los cambios no tocan Auth, Inventario, contratos compartidos, schema o migraciones.
+
+Aceptación: ausencia de sesión sin lecturas/escrituras; imagen requerida al publicar; oculto sin imagen permitido; cuatro acciones conservan datos/slug/precio/imagen/saldo; inexistente/versionado inválido/conflicto distinguidos; carreras no sobrescriben. Pruebas específicas: `publicacion.integracion.test.ts`, PostgreSQL aislado del arnés existente, referencias de imagen insertadas solo en test sin red/proveedor falso de runtime.
+
+## Fuera de alcance y dependencias
+
+2.2 no cerrada, 2.3 sin implementar. 2.5 solo planificación hasta integrar imagen/reemplazo. Sin carga demo, borrado de fixtures, nuevas tablas, nuevas dependencias ni infraestructura. Dominio productivo, catálogo comercial y credenciales reales siguen siendo requisitos operativos pendientes; no se inventan valores.
+
+## Checkpoints
+
+Los resultados se registran por task al terminar su validación. Ningún check anterior representa el smoke Cloudinary. No merge ni push por instrucción de esta entrega.
+
+### Bloqueo local de validación — 31/10/2026
+
+2.4 queda **parcial**, sin marcar completa: implementación y siete escenarios PostgreSQL preparados, sin ejecución satisfactoria. El arnés falla al conectar a `127.0.0.1:62075` (ECONNREFUSED). Docker Desktop no estaba iniciado; tras iniciarlo y reiniciarlo una vez, aborta por `initializing Inference manager` / socket `Docker/run/dockerInference` inaccesible. No se cambian opciones del motor ni se borran contenedores/volúmenes/datos para resolverlo. El fallo coincide con [el incidente reportado en Docker](https://github.com/docker/desktop-feedback/issues/554), sin asumir que la reparación de otra máquina sea aplicable a esta.
+
+Los tipos ignorados `.next/dev/types` de 2.2 apuntaban a su Handler ausente en main; se apartaron reversiblemente a `work/tipos-next-22-20261031`, sin tocar código/configuración. `pnpm typecheck` pasó después. Lint, build, `db:check`, `db:generate` (11 tablas, sin cambios), OpenSpec strict (3/3), doctor saludable y diff-check correctos. `pnpm test`: **240 pruebas / 32 archivos**, incluidas tres nuevas de frontera (sin sesión, fallo técnico del verificador, entrada inválida sin transacción). No son evidencia SQL: las siete pruebas de integración de 2.4 siguen pendientes de ejecución. El build todavía genera el público de fixtures porque no se implementó 3.x.
+
+La instrucción de trabajar secuencialmente exige probar/confirmar cada checkpoint antes del siguiente. Por ello no se inicia 3.1, y 3.2–3.4/4.1–4.4 permanecen sin implementar en esta rama. E2E de público real no aplica todavía; los E2E con DB tampoco pueden validarse hasta recuperar el servicio. No se elimina ni migra ninguno de los siete fixtures. No hay relacionado real ni seed nuevo.
+
+Para retomar: recuperar Docker Desktop sin reset de datos, iniciar el contenedor existente `angel-tears-local-pg17`, ejecutar integración de `publicacion.integracion.test.ts` y regresión Producto/Inventario, verificar guard real con sesión y cerrar 2.4 solo si pasan. Después seguir 3.1 → 3.2 → 3.3 → 3.4 → SEO 4.x. 2.5 queda para listado con CTA Nuevo producto, alta dedicada, edición, categoría/filtro y menú accesible; integrar sus acciones de imagen únicamente después de 2.2/2.3.
+
+Integración futura de 2.2: no hay dependencia de sus archivos ni cambios de package/lock, contratos o schema. Ambas ramas editan `tasks.md`; conciliar las notas y conservar su cierre humano de 1.1 y estado real de 2.2. Sus cambios de UI/DTO de imagen no se copian en esta rama. Tras combinar, repetir checks de edición/versionado y público; la referencia publicada deberá provenir del upload real validado en 2.2.
