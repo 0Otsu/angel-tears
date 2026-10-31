@@ -3,15 +3,16 @@
 import { useState } from "react"
 import { Header } from "@/components/boty/header"
 import { Footer } from "@/components/boty/footer"
-import { productosPublicosDemo as catalogProducts, categoriasPublicas as categories } from "@/lib/mock/productos"
+import type { ProductoPublico } from "@/lib/modulos/catalogo/contrato"
+import { CATEGORIAS_INICIALES } from "@/lib/modulos/productos/categorias"
 import { TarjetaProducto } from "@/components/publico/tarjeta-producto"
 import identidad from "@/components/publico/identidad.module.css"
 
-export function Catalogo() {
+export function Catalogo({ productos }: { productos: ProductoPublico[] }) {
   const [selectedCategory, setSelectedCategory] = useState("Todos")
   const filteredProducts = selectedCategory === "Todos"
-    ? catalogProducts
-    : catalogProducts.filter((product) => product.category === selectedCategory)
+    ? productos
+    : productos.filter((product) => product.categoriaCodigo === selectedCategory)
 
   return (
     <main className={`min-h-screen ${identidad.sitio}`}>
@@ -23,7 +24,6 @@ export function Catalogo() {
             <span className="mb-4 block text-sm uppercase tracking-[0.3em] text-primary">Catálogo</span>
             <h1 className="mb-5 font-serif text-5xl leading-tight text-foreground md:text-6xl">Encontrá ese detalle que te representa</h1>
             <p className="max-w-xl text-lg leading-relaxed text-muted-foreground">Explorá nuestra colección de accesorios y encontrá el que mejor acompaña tu estilo.</p>
-            <p className="mt-4 text-xs leading-relaxed text-muted-foreground">Catálogo de muestra: imágenes, nombres, precios y disponibilidad pendientes de confirmar.</p>
           </div>
         </div>
       </section>
@@ -32,23 +32,24 @@ export function Catalogo() {
         <div className="mx-auto max-w-7xl">
           <div className="mb-10 -mx-6 overflow-x-auto px-6 pb-2 lg:mx-0 lg:px-0">
             <div className="flex min-w-max gap-2 lg:flex-wrap">
-              {categories.map((category) => {
-                const isActive = selectedCategory === category
+              {[{ codigo: "Todos", nombre: "Todos" }, ...CATEGORIAS_INICIALES].map((category) => {
+                const isActive = selectedCategory === category.codigo
                 return (
                   <button
-                    key={category}
+                    key={category.codigo}
                     type="button"
-                    onClick={() => setSelectedCategory(category)}
+                    onClick={() => setSelectedCategory(category.codigo)}
                     aria-pressed={isActive}
                     className={`rounded-full px-5 py-2.5 text-sm transition-colors ${isActive ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:text-foreground"}`}
                   >
-                    {category}
+                    {category.nombre}
                   </button>
                 )
               })}
             </div>
           </div>
 
+          <p role="status" className="mb-6 text-sm text-muted-foreground">{filteredProducts.length === 0 ? (productos.length === 0 ? "No hay productos disponibles por el momento." : "No hay productos disponibles en esta categoría.") : `${filteredProducts.length} productos disponibles`}</p>
           <div className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
             {filteredProducts.map((product) => (
               <TarjetaProducto key={product.id} product={product} />

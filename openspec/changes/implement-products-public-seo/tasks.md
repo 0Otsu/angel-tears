@@ -23,22 +23,41 @@ Evidencia de 2.1 del 28/10/2026: [implementación, pruebas y límites](../../../
 
 - [ ] 2.2 Implementar adapter/Handler de imagen con límites y validación real; probar no autorizado, tipo/tamaño/píxeles inválidos y guardar sin imagen oculto.
 - [ ] 2.3 Implementar reemplazo con compensación/control de versión; probar fallos de upload/BD/cleanup y conservación de referencia anterior.
-- [ ] 2.4 Implementar publicación/ocultación/destacado; probar imagen obligatoria al publicar y ausencia de eliminación física/ranking; documentar criterios.
+- [x] 2.4 Implementar publicación/ocultación/destacado; probar imagen obligatoria al publicar y ausencia de eliminación física/ranking; documentar criterios.
+
+Checkpoint independiente del 31/10/2026: 2.4 cerrada tras recuperar el contenedor PostgreSQL existente, sin reinicializar datos. Sus siete pruebas SQL y la regresión conjunta Producto/Inventario (52 pruebas) pasan: imagen persistida requerida, conservación de datos/saldo, autorización y conflictos/versionado concurrente. Frontera real de Auth reutilizada; sin UI anticipada de 2.5 ni código de upload. Evidencia en [Producto/publico cierre](../../../docs/features/PRODUCTOS_PUBLICO_CIERRE.md). 2.2 permanece bloqueada por credenciales/smoke real en su rama intacta; 2.3 no iniciada.
+
 - [ ] 2.5 Integrar formularios/listado/errores/confirmación accesibles; verificar con RTL estados/conservación de entradas donde aporte valor.
 
 ## 3. Público real
 
-- [ ] 3.1 Implementar proyección autorizada con Inventario real y sin N+1; probar publicado/oculto/sin stock y ausencia de datos privados en DTO.
-- [ ] 3.2 Conectar catálogo/PDP conservando URLs/visual; probar PDP agotada/Sin stock, oculto e inexistente 404 y fallo BD distinto de no encontrado.
-- [ ] 3.3 Conectar Home destacados/categorías elegibles sin CMS; probar destacado agotado/oculto excluido y contactos/historias confirmados conservados.
-- [ ] 3.4 Integrar consultas por solicitud y refresco postcommit; probar ocultar/agotar/reponer sin contenido persistentemente stale y documentar caché.
+- [x] 3.1 Implementar proyección autorizada con Inventario real y sin N+1; probar publicado/oculto/sin stock y ausencia de datos privados en DTO.
+
+Evidencia 3.1 del 31/10/2026: proyección de solo lectura en `lib/modulos/catalogo`, JOIN explícito de Producto/Categoría/Inventario conforme al blueprint sección 6. Cinco pruebas PostgreSQL verifican elegibilidad, PDP agotada, oculto/inexistente, DTO sin datos privados, filtros/límite/exclusión, una consulta sin N+1 y errores propagados. Sin cambios a Inventario/contratos ni consumo del proveedor de imágenes. Lint específico y typecheck correctos. La traducción de null a 404 y la UI Sin stock se verifican en 3.2.
+- [x] 3.2 Conectar catálogo/PDP conservando URLs/visual; probar PDP agotada/Sin stock, oculto e inexistente 404 y fallo BD distinto de no encontrado.
+
+Evidencia 3.2 del 31/10/2026: catálogo/PDP dinámicos consultan PostgreSQL; se retira SSG de fixtures y se conserva `lib/mock/productos.ts` intacto. Cinco E2E Next producción prueban desktop/notebook/mobile, categoría, precio exacto, imagen, agotado/Sin stock, 404, HTML sin JS sin privados y fallo SQL real recuperable (solo DB de pruebas, restaurada en finally). Reintentar hace una solicitud nueva. Relacionados: misma categoría, publicados/con stock, excluye actual, máximo tres/orden estable, sin persistencia nueva. Lint/typecheck/build y pruebas específicas correctos; visual inspeccionado desktop/mobile.
+- [x] 3.3 Conectar Home destacados/categorías elegibles sin CMS; probar destacado agotado/oculto excluido y contactos/historias confirmados conservados.
+
+Evidencia 3.3 del 31/10/2026: Home dinámica consulta hasta cuatro destacados elegibles, orden UUID estable; categorías de la selección derivadas de productos reales. E2E confirma visible elegible y exclusión de agotado/oculto/no destacado, dirección y WhatsApp conservados. Sin cambios al resto del contenido confirmado. Error recuperable de selección preserva el resto de Home; sin fixtures como fuente, CMS ni ranking. Lint/typecheck/build y E2E específico correctos.
+- [x] 3.4 Integrar consultas por solicitud y refresco postcommit; probar ocultar/agotar/reponer sin contenido persistentemente stale y documentar caché.
+
+Evidencia 3.4 del 31/10/2026: Home/catálogo/PDP `force-dynamic`, SQL por solicitud y solo memoización React por request de PDP/metadata; sin Data Cache/Full Route Cache ni Redis. Actions de Producto invalidan rutas públicas después de ok/commit. No se modifica Inventario: la siguiente solicitud consulta el saldo real. E2E confirma header no-store, navegación PDP→catálogo tras ocultar, 404, republicar, agotar/Sin stock y reponer en Home/listados. Una pestaña abierta no recibe push; recarga/navegación nueva obtiene el estado actual, conforme ADR-008. Lint/typecheck/build y E2E específico correctos.
 
 ## 4. SEO, accesibilidad y rendimiento
 
-- [ ] 4.1 Implementar metadata/canonical/OG por producto con lectura compartida; verificar HTML sin JS, imagen HTTPS y dominio validado, sin canonical localhost en producción.
-- [ ] 4.2 Implementar Product/Offer y datos locales veraces; verificar ARS/disponibilidad y serialización segura, sin horarios/reviews/materiales inventados; actualizar trazabilidad.
-- [ ] 4.3 Implementar sitemap/robots y reglas de indexación; probar publicadas agotadas incluidas, ocultos/admin/reset excluidos y guard independiente de robots.
+- [x] 4.1 Implementar metadata/canonical/OG por producto con lectura compartida; verificar HTML sin JS, imagen HTTPS y dominio validado, sin canonical localhost en producción.
+
+Evidencia técnica 4.1 del 31/10/2026: title/description/OG/Twitter con datos e imagen HTTPS persistidos, canonical por slug estable y lectura React compartida con PDP. `SITE_URL` parametriza origen HTTPS público validado en servidor; rechaza localhost/IP/credenciales/rutas/puertos, sin fallback a Host/Auth. Sin valor se omiten canonical/OG URL y se indica noindex. Doce pruebas de metadata/configuración y E2E HTML con dominio reservado de test pasan; dominio definitivo/configuración productiva siguen pendientes, no se inventó ni se certifica indexación real. Lint/typecheck/build correctos.
+- [x] 4.2 Implementar Product/Offer y datos locales veraces; verificar ARS/disponibilidad y serialización segura, sin horarios/reviews/materiales inventados; actualizar trazabilidad.
+
+Evidencia 4.2 del 31/10/2026: Product/Offer con decimal exacto/ARS y InStock/OutOfStock de la misma proyección de PDP. LocalBusiness solo identidad/dirección/contactos confirmados, sin horarios/días/geocoordenadas/reviews. Serialización escapa caracteres que podrían cerrar script. Tres pruebas unitarias y E2E con descripción hostil persistida, navegador sin ejecución y estado agotado coherente pasan. Trazabilidad enlaza evidencia sin inventar RF/CU; sin validación externa de rich results ni datos comerciales nuevos.
+- [x] 4.3 Implementar sitemap/robots y reglas de indexación; probar publicadas agotadas incluidas, ocultos/admin/reset excluidos y guard independiente de robots.
+
+Evidencia técnica 4.3 del 31/10/2026: sitemap/robots dinámicos sin caché persistente, origen SITE_URL validado; Home/catálogo y PDP publicadas incluidas, también agotadas; ocultos/admin/API/recovery/reset fuera. lastModified usa fechas reales de Producto/Inventario. Sin dominio: sitemap vacío y robots disallow-all, sin localhost inventado. Seis PostgreSQL de proyección y E2E con dominio reservado verifican retiro de oculto en siguiente solicitud y guard admin real sin sesión. Dominio/configuración productiva siguen pendientes.
 - [ ] 4.4 Verificar responsive, teclado/foco/labels/alt/contraste, sizes/lazy/LCP y JS enviado; registrar medición y corregir defectos del slice sin rediseño global.
+
+Checkpoint parcial 4.4 del 31/10/2026: desktop/notebook/mobile y 320 px con nombres/precio largos, teclado/foco/alt/contraste básico y medición local verificados. Se corrige únicamente desborde de contenido real en tarjetas/PDP/Home. E2E pasa y registra LCP/CLS/JS; no equivale a CWV productivos. Permanece abierta: configuración existente unoptimized entrega originales, sin srcset efectivo de CDN; la entrega responsive/optimizada y medición con assets reales requiere retomar imágenes/Cloudinary fuera de esta rama. No se modifica proveedor/configuración global ni se falsea esa aceptación. Evidencia/límites en [cierre público](../../../docs/features/PRODUCTOS_PUBLICO_CIERRE.md).
 
 ## 5. Integración y aceptación
 

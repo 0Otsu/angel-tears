@@ -72,4 +72,6 @@ RNF temáticos aportados: acceso restringido, protección de información, separ
 
 ## 5. Regla de continuación
 
+Evidencia técnica local del 31/10/2026 para RF-03/07 de referencia: [Producto/público/SEO](features/PRODUCTOS_PUBLICO_CIERRE.md) registra publicación, proyección real, catálogo/PDP/Home, metadata y Product/Offer/LocalBusiness con precio ARS/disponibilidad real y serialización segura. No agrega RF/CU ni afirma formalización SRS/RUP o rich results productivos. Imagen real/remplazo, dominio definitivo e integración completa mantienen sus pendientes; los fixtures no se oficializan como datos comerciales.
+
 Las aprobaciones del responsable permiten planificar y preparar slices sin afirmar SRS/RUP canónicos. Si una fuente superior recibida contradice el diseño, registrar diferencia y obtener resolución humana antes del cambio afectado. Un gap bloquea el comportamiento que depende de él, no impide trabajar en partes independientes. No elegir una política de producto desconocida para completar un checkbox OpenSpec.
