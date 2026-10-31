@@ -103,6 +103,30 @@ test("metadata publica real comparte slug/contenido y evita canonical local", as
   expect(html).not.toMatch(/rel="canonical" href="https?:\/\/(localhost|127\.)/)
 })
 
+test("JSON-LD coincide con PDP, ARS, agotado y no ejecuta contenido persistido", async ({ page }) => {
+  const conexion = con()
+  const texto = '</script><script>window.atacado=true</script>'
+  try {
+    await conexion.db.update(producto).set({ descripcion: texto }).where(eq(producto.id, ids[0]))
+    await page.route("https://example.test/**", (route) => route.abort())
+    await page.goto(`/catalogo/${slug(0)}`)
+    const datos = JSON.parse(await page.locator('script[type="application/ld+json"]').textContent() ?? "null")
+    expect(datos).toMatchObject({ "@type": "Product", name: nombres[0], description: texto, offers: { price: "1250.50", priceCurrency: "ARS", availability: "https://schema.org/InStock" } })
+    expect(await page.evaluate(() => "atacado" in window)).toBe(false)
+    await page.goto(`/catalogo/${slug(2)}`)
+    const agotado = JSON.parse(await page.locator('script[type="application/ld+json"]').textContent() ?? "null")
+    expect(agotado.offers.availability).toBe("https://schema.org/OutOfStock")
+    await expect(page.getByText("Sin stock", { exact: true })).toBeVisible()
+    await page.goto("/")
+    const local = JSON.parse(await page.locator('script[type="application/ld+json"]').textContent() ?? "null")
+    expect(local).toMatchObject({ "@type": "LocalBusiness", name: "Angel Tears" })
+    expect(local).not.toHaveProperty("openingHours")
+  } finally {
+    await conexion.db.update(producto).set({ descripcion: "Descripción persistida del producto." }).where(eq(producto.id, ids[0]))
+    await conexion.pool.end()
+  }
+})
+
 test("fallo PostgreSQL se muestra como error recuperable y no como vacio/404", async ({ page }) => {
   const conexion = con()
   try {

@@ -7,6 +7,7 @@ import { Contacto } from "@/components/boty/contacto"
 import identidad from "@/components/publico/identidad.module.css"
 import { Footer } from "@/components/boty/footer"
 import { metadataPublica } from "@/lib/modulos/catalogo/metadata-publica"
+import { datosLocal, serializarDatosEstructurados } from "@/lib/modulos/catalogo/datos-estructurados"
 
 export const dynamic = "force-dynamic"
 export function generateMetadata() { return metadataPublica("Bijouterie en Concordia", "Bijouterie y accesorios de Angel Tears en Concordia, Entre Ríos. Conocé nuestros productos y la información del local.", "/") }
@@ -14,6 +15,7 @@ export function generateMetadata() { return metadataPublica("Bijouterie en Conco
 export default function HomePage() {
   return (
     <main className={identidad.sitio}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializarDatosEstructurados(datosLocal()) }} />
       <Header />
       <Hero />
       <SeleccionHome />
