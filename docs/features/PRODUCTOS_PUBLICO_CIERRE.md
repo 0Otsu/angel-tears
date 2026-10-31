@@ -24,7 +24,7 @@ Aceptación: ausencia de sesión sin lecturas/escrituras; imagen requerida al pu
 
 Los resultados se registran por task al terminar su validación. Ningún check anterior representa el smoke Cloudinary. No merge ni push por instrucción de esta entrega.
 
-### Bloqueo local de validación — 31/10/2026
+### Bloqueo local de validación — 31/10/2026 (histórico, resuelto)
 
 2.4 queda **parcial**, sin marcar completa: implementación y siete escenarios PostgreSQL preparados, sin ejecución satisfactoria. El arnés falla al conectar a `127.0.0.1:62075` (ECONNREFUSED). Docker Desktop no estaba iniciado; tras iniciarlo y reiniciarlo una vez, aborta por `initializing Inference manager` / socket `Docker/run/dockerInference` inaccesible. No se cambian opciones del motor ni se borran contenedores/volúmenes/datos para resolverlo. El fallo coincide con [el incidente reportado en Docker](https://github.com/docker/desktop-feedback/issues/554), sin asumir que la reparación de otra máquina sea aplicable a esta.
 
@@ -35,3 +35,7 @@ La instrucción de trabajar secuencialmente exige probar/confirmar cada checkpoi
 Para retomar: recuperar Docker Desktop sin reset de datos, iniciar el contenedor existente `angel-tears-local-pg17`, ejecutar integración de `publicacion.integracion.test.ts` y regresión Producto/Inventario, verificar guard real con sesión y cerrar 2.4 solo si pasan. Después seguir 3.1 → 3.2 → 3.3 → 3.4 → SEO 4.x. 2.5 queda para listado con CTA Nuevo producto, alta dedicada, edición, categoría/filtro y menú accesible; integrar sus acciones de imagen únicamente después de 2.2/2.3.
 
 Integración futura de 2.2: no hay dependencia de sus archivos ni cambios de package/lock, contratos o schema. Ambas ramas editan `tasks.md`; conciliar las notas y conservar su cierre humano de 1.1 y estado real de 2.2. Sus cambios de UI/DTO de imagen no se copian en esta rama. Tras combinar, repetir checks de edición/versionado y público; la referencia publicada deberá provenir del upload real validado en 2.2.
+
+### Cierre de 2.4 — 31/10/2026
+
+Docker ya operativo por intervención del responsable. Se inició únicamente `angel-tears-local-pg17`, conservando volumen y datos. Conexión PostgreSQL real confirmada y hashes de las tres migraciones de desarrollo coinciden con `0000_auth-base`, `0001_catalogo-proveedores-base`, `0002_inventario-base`; no hizo falta aplicar ni generar migraciones. **7/7** escenarios de publicación pasan; regresión conjunta **52/52** Producto/Inventario, incluida la prueba existente con verificador Better Auth real. Las tres pruebas unitarias de frontera comprueban ausencia de acceso ante sesión inexistente/fallo del verificador/entrada inválida. Typecheck, lint específico, OpenSpec strict y diff-check correctos. Se cierra 2.4 al nivel de comandos/Action autorizado, sin adelantar UI de 2.5 ni afirmar upload real.
