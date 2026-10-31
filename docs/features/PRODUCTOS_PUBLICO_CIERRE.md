@@ -55,3 +55,9 @@ Evidencia: cinco E2E con servidor Next de producción/base `_test` (tres viewpor
 ### Cierre de 3.3 — 31/10/2026
 
 Home dinámica sustituye su selección de muestra por hasta cuatro destacados publicados/con stock (tamaño visual existente), orden UUID estable sin ranking. Categorías del filtro derivadas de esos productos elegibles. Vacío explícito; error recuperable acotado a selección, con formulario GET nativo para nueva solicitud sin ocultar contactos/contenido del negocio. Hero/local/historias/contacto/footer conservados. E2E específico verde verifica elegible, agotado/oculto/no destacado excluidos, dirección y WhatsApp. Lint/typecheck/build/OpenSpec/diff correctos. No se borran fixtures ni se crean productos comerciales/seed.
+
+### Cierre de 3.4 — 31/10/2026
+
+Política ADR-008: Home/catálogo/PDP `force-dynamic`, lectura SQL por solicitud, sin cache persistente compartida. `cache` de React solo comparte PDP y metadata dentro de la misma solicitud. No `unstable_cache`, tags stale, caché de saldo en Producto, Redis o flags experimentales. Enlaces de ficha y regreso al catálogo sin prefetch. Actions de alta/edición/publicación invalidan Home/catálogo/PDP/sitemap y admin únicamente tras resultado ok/commit; las consultas nuevas de stock no requieren modificar hooks/código de Inventario.
+
+E2E específico verde: header no-store; ocultar tras visitar PDP y regresar por navegación cliente retira la tarjeta, URL directa 404 y Home sin el producto; republicar recupera listado; saldo cero retira Home/listado pero conserva PDP Sin stock; reponer devuelve ambos. Cambios del dataset solo en `_test`, restaurados en finally. Lint/typecheck/build correctos. No se promete push a pestañas abiertas ni eliminar cachés ajenas/copias CDN de imágenes: una nueva navegación/recarga obtiene datos vigentes. El caso integral desde UI de ajustes/imagen/publicación corresponde a 5.1, no se marca por esta prueba de frescura.

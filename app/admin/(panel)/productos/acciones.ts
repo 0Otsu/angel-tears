@@ -17,7 +17,13 @@ async function guardar(formulario: FormData, edicion: boolean): Promise<Resultad
     const resultado = edicion
       ? await administracion.editar(encabezados, { id: formulario.get("id"), version: formulario.get("version") }, datosDe(formulario))
       : await administracion.crear(encabezados, datosDe(formulario))
-    if (resultado.estado === "ok") revalidatePath("/admin/productos")
+    if (resultado.estado === "ok") {
+      revalidatePath("/admin/productos")
+      revalidatePath("/")
+      revalidatePath("/catalogo")
+      revalidatePath("/catalogo/[slug]", "page")
+      revalidatePath("/sitemap.xml")
+    }
     return resultado
   } catch (error) {
     console.error("[productos] fallo al guardar", { tipo: error instanceof Error ? error.name : typeof error })

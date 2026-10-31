@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test"
-import { inArray, sql } from "drizzle-orm"
+import { eq, inArray, sql } from "drizzle-orm"
 import { crearConexionBd } from "../lib/infraestructura/conexion-bd"
 import { producto, categoria } from "../lib/infraestructura/esquemas/producto"
 import { inventario } from "../lib/infraestructura/esquemas/inventario"
@@ -99,4 +99,39 @@ test("fallo PostgreSQL se muestra como error recuperable y no como vacio/404", a
     await page.getByRole("button", { name: "Reintentar" }).click()
     await expect(page.getByRole("heading", { name: nombres[0], exact: true })).toBeVisible()
   } finally { await conexion.pool.end() }
+})
+
+test("publicar/ocultar/agotar/reponer refresca navegacion y solicitudes sin cache persistente", async ({ page }) => {
+  const conexion = con()
+  await page.route("https://example.test/**", (route) => route.abort())
+  try {
+    const respuesta = await page.goto("/catalogo")
+    expect(respuesta?.headers()["cache-control"]).toContain("no-store")
+    await page.getByRole("heading", { name: nombres[0], exact: true }).click()
+    await conexion.db.update(producto).set({ publicado: false }).where(eq(producto.id, ids[0]))
+    await page.getByRole("link", { name: "Volver al catálogo", exact: true }).first().click()
+    await expect(page.getByRole("heading", { name: nombres[0], exact: true })).toHaveCount(0)
+    expect((await page.goto(`/catalogo/${slug(0)}`))?.status()).toBe(404)
+    await page.goto("/")
+    await expect(page.getByRole("heading", { name: nombres[0], exact: true })).toHaveCount(0)
+    await conexion.db.update(producto).set({ publicado: true }).where(eq(producto.id, ids[0]))
+    await page.goto("/catalogo")
+    await expect(page.getByRole("heading", { name: nombres[0], exact: true })).toBeVisible()
+    await conexion.db.update(inventario).set({ cantidad: 0 }).where(eq(inventario.productoId, ids[0]))
+    await page.reload()
+    await expect(page.getByRole("heading", { name: nombres[0], exact: true })).toHaveCount(0)
+    await page.goto("/")
+    await expect(page.getByRole("heading", { name: nombres[0], exact: true })).toHaveCount(0)
+    expect((await page.goto(`/catalogo/${slug(0)}`))?.status()).toBe(200)
+    await expect(page.getByText("Sin stock", { exact: true })).toBeVisible()
+    await conexion.db.update(inventario).set({ cantidad: 2 }).where(eq(inventario.productoId, ids[0]))
+    await page.goto("/catalogo")
+    await expect(page.getByRole("heading", { name: nombres[0], exact: true })).toBeVisible()
+    await page.goto("/")
+    await expect(page.getByRole("heading", { name: nombres[0], exact: true })).toBeVisible()
+  } finally {
+    await conexion.db.update(producto).set({ publicado: true }).where(eq(producto.id, ids[0]))
+    await conexion.db.update(inventario).set({ cantidad: 2 }).where(eq(inventario.productoId, ids[0]))
+    await conexion.pool.end()
+  }
 })

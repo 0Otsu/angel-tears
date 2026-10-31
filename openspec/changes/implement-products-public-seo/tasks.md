@@ -40,7 +40,9 @@ Evidencia 3.2 del 31/10/2026: catálogo/PDP dinámicos consultan PostgreSQL; se 
 - [x] 3.3 Conectar Home destacados/categorías elegibles sin CMS; probar destacado agotado/oculto excluido y contactos/historias confirmados conservados.
 
 Evidencia 3.3 del 31/10/2026: Home dinámica consulta hasta cuatro destacados elegibles, orden UUID estable; categorías de la selección derivadas de productos reales. E2E confirma visible elegible y exclusión de agotado/oculto/no destacado, dirección y WhatsApp conservados. Sin cambios al resto del contenido confirmado. Error recuperable de selección preserva el resto de Home; sin fixtures como fuente, CMS ni ranking. Lint/typecheck/build y E2E específico correctos.
-- [ ] 3.4 Integrar consultas por solicitud y refresco postcommit; probar ocultar/agotar/reponer sin contenido persistentemente stale y documentar caché.
+- [x] 3.4 Integrar consultas por solicitud y refresco postcommit; probar ocultar/agotar/reponer sin contenido persistentemente stale y documentar caché.
+
+Evidencia 3.4 del 31/10/2026: Home/catálogo/PDP `force-dynamic`, SQL por solicitud y solo memoización React por request de PDP/metadata; sin Data Cache/Full Route Cache ni Redis. Actions de Producto invalidan rutas públicas después de ok/commit. No se modifica Inventario: la siguiente solicitud consulta el saldo real. E2E confirma header no-store, navegación PDP→catálogo tras ocultar, 404, republicar, agotar/Sin stock y reponer en Home/listados. Una pestaña abierta no recibe push; recarga/navegación nueva obtiene el estado actual, conforme ADR-008. Lint/typecheck/build y E2E específico correctos.
 
 ## 4. SEO, accesibilidad y rendimiento
 
