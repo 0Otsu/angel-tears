@@ -12,7 +12,7 @@ describe("metadata con origen explicito", () => {
     expect(meta.openGraph).not.toHaveProperty("url")
     expect(meta.robots).toEqual({ index: false, follow: false })
   })
-  it.each(["http://localhost:3000", "https://localhost", "https://foo.localhost", "https://127.0.0.1", "https://[::1]", "http://tienda.example", "https://tienda.example/ruta", "https://usuario:secreto@tienda.example", "https://tienda.example?x=1", "https://tienda.example:3000"])("rechaza origen no publico/ambiguo %s", (SITE_URL) => {
+  it.each(["http://localhost:3000", "https://localhost", "https://foo.localhost", "https://localhost.", "https://foo.localhost.", "https://127.0.0.1", "https://[::1]", "http://tienda.example", "https://tienda.example/ruta", "https://usuario:secreto@tienda.example", "https://tienda.example?x=1", "https://tienda.example:3000"])("rechaza origen no publico/ambiguo %s", (SITE_URL) => {
     expect(() => leerOrigenPublico({ SITE_URL })).toThrow("SITE_URL debe ser")
   })
   it("usa slug estable, descripcion e imagen real sin depender de disponibilidad", () => {

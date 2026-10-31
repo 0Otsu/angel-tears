@@ -7,7 +7,7 @@ export function leerOrigenPublico(entorno: { SITE_URL?: string } = { SITE_URL: p
   if (!valor) return null
   try {
     const url = new URL(valor)
-    const host = url.hostname.replace(/^\[|\]$/g, "")
+    const host = url.hostname.replace(/^\[|\]$/g, "").replace(/\.$/, "")
     if (url.protocol !== "https:" || url.username || url.password || url.port || url.pathname !== "/" || url.search || url.hash
       || !host.includes(".") || isIP(host) || /(^|\.)(localhost|local|internal|lan)$/.test(host)) throw new Error()
     return url.origin
