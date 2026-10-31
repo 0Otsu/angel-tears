@@ -8,16 +8,16 @@ import { validarUrlBdPruebas } from "../pruebas/guardia-url-bd"
 import { readFile } from "node:fs/promises"
 
 const con = () => crearConexionBd(validarUrlBdPruebas(process.env.DATABASE_URL_TEST, process.env.DATABASE_URL))
-const ids = [crypto.randomUUID(), crypto.randomUUID(), crypto.randomUUID(), crypto.randomUUID()]
+const ids = Array.from({ length: 5 }, () => crypto.randomUUID())
 const slug = (indice: number) => `publico-${ids[indice]}`
-const nombres = ["Collar público real", "Collar relacionado", "Collar agotado", "Collar oculto"]
+const nombres = ["Collar público real", "Collar relacionado", "Collar agotado", "Collar oculto", "Collar sin destacar"]
 
 test.beforeAll(async () => {
   const conexion = con()
   try {
     await conexion.db.insert(categoria).values(CATEGORIAS_INICIALES.map((c) => ({ ...c }))).onConflictDoNothing()
     for (const [indice, id] of ids.entries()) {
-      await conexion.db.insert(producto).values({ id, slug: slug(indice), nombre: nombres[indice], precio: "1250.50", categoriaCodigo: "collares", descripcion: "Descripción persistida del producto.", material: "Acero", cuidados: "Secar con paño suave.", publicado: indice !== 3, destacado: true,
+      await conexion.db.insert(producto).values({ id, slug: slug(indice), nombre: nombres[indice], precio: "1250.50", categoriaCodigo: "collares", descripcion: "Descripción persistida del producto.", material: "Acero", cuidados: "Secar con paño suave.", publicado: indice !== 3, destacado: indice !== 4,
         imagenAssetId: "asset-privado-e2e", imagenPublicId: "public-id-privado-e2e", imagenVersionProveedor: "1", imagenUrlSegura: "https://example.test/publico.png", imagenAncho: 640, imagenAlto: 640, imagenFormato: "png" })
       await conexion.db.insert(inventario).values({ productoId: id, cantidad: indice === 2 ? 0 : 2 })
     }
@@ -74,6 +74,16 @@ test("HTML util sin JS ni identificadores privados de imagen", async ({ browser 
     expect(html).not.toContain("asset-privado-e2e")
     expect(html).not.toContain("public-id-privado-e2e")
   } finally { await contexto.close() }
+})
+
+test("Home destacados reales y contenido confirmado conservado", async ({ page }) => {
+  await page.route("https://example.test/**", (route) => route.abort())
+  await page.goto("/")
+  const seleccion = page.getByRole("region", { name: "Accesorios para todos los días" })
+  await expect(seleccion.getByRole("heading", { name: nombres[0], exact: true })).toBeVisible()
+  for (const indice of [2, 3, 4]) await expect(seleccion.getByRole("heading", { name: nombres[indice], exact: true })).toHaveCount(0)
+  await expect(page.getByText(/Entre Ríos 924/).first()).toBeVisible()
+  await expect(page.getByRole("link", { name: "WhatsApp de Angel Tears (abre otra pestaña)" })).toHaveAttribute("href", "https://wa.me/5493454266760")
 })
 
 test("fallo PostgreSQL se muestra como error recuperable y no como vacio/404", async ({ page }) => {

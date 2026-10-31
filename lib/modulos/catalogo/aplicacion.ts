@@ -13,6 +13,7 @@ async function lecturaPublica<T>(leer: () => Promise<T>): Promise<T> {
 }
 export const consultarProductoPublico = cache((slug: string) => lecturaPublica(() => crearConsultasCatalogo(obtenerDb()).consultarPorSlug(slug)))
 export function listarCatalogoPublico() { return lecturaPublica(() => crearConsultasCatalogo(obtenerDb()).listar()) }
+export function listarDestacadosPublicos() { return lecturaPublica(() => crearConsultasCatalogo(obtenerDb()).listar({ destacados: true, limite: 4 })) }
 export function listarRelacionados(productoId: string, categoriaCodigo: CodigoCategoria) {
   return lecturaPublica(() => crearConsultasCatalogo(obtenerDb()).listar({ categoriaCodigo, excluirId: productoId, limite: 3 }))
 }

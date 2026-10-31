@@ -37,7 +37,9 @@ Evidencia 3.1 del 31/10/2026: proyección de solo lectura en `lib/modulos/catalo
 - [x] 3.2 Conectar catálogo/PDP conservando URLs/visual; probar PDP agotada/Sin stock, oculto e inexistente 404 y fallo BD distinto de no encontrado.
 
 Evidencia 3.2 del 31/10/2026: catálogo/PDP dinámicos consultan PostgreSQL; se retira SSG de fixtures y se conserva `lib/mock/productos.ts` intacto. Cinco E2E Next producción prueban desktop/notebook/mobile, categoría, precio exacto, imagen, agotado/Sin stock, 404, HTML sin JS sin privados y fallo SQL real recuperable (solo DB de pruebas, restaurada en finally). Reintentar hace una solicitud nueva. Relacionados: misma categoría, publicados/con stock, excluye actual, máximo tres/orden estable, sin persistencia nueva. Lint/typecheck/build y pruebas específicas correctos; visual inspeccionado desktop/mobile.
-- [ ] 3.3 Conectar Home destacados/categorías elegibles sin CMS; probar destacado agotado/oculto excluido y contactos/historias confirmados conservados.
+- [x] 3.3 Conectar Home destacados/categorías elegibles sin CMS; probar destacado agotado/oculto excluido y contactos/historias confirmados conservados.
+
+Evidencia 3.3 del 31/10/2026: Home dinámica consulta hasta cuatro destacados elegibles, orden UUID estable; categorías de la selección derivadas de productos reales. E2E confirma visible elegible y exclusión de agotado/oculto/no destacado, dirección y WhatsApp conservados. Sin cambios al resto del contenido confirmado. Error recuperable de selección preserva el resto de Home; sin fixtures como fuente, CMS ni ranking. Lint/typecheck/build y E2E específico correctos.
 - [ ] 3.4 Integrar consultas por solicitud y refresco postcommit; probar ocultar/agotar/reponer sin contenido persistentemente stale y documentar caché.
 
 ## 4. SEO, accesibilidad y rendimiento
