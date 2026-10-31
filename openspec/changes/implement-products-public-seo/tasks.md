@@ -46,7 +46,9 @@ Evidencia 3.4 del 31/10/2026: Home/catálogo/PDP `force-dynamic`, SQL por solici
 
 ## 4. SEO, accesibilidad y rendimiento
 
-- [ ] 4.1 Implementar metadata/canonical/OG por producto con lectura compartida; verificar HTML sin JS, imagen HTTPS y dominio validado, sin canonical localhost en producción.
+- [x] 4.1 Implementar metadata/canonical/OG por producto con lectura compartida; verificar HTML sin JS, imagen HTTPS y dominio validado, sin canonical localhost en producción.
+
+Evidencia técnica 4.1 del 31/10/2026: title/description/OG/Twitter con datos e imagen HTTPS persistidos, canonical por slug estable y lectura React compartida con PDP. `SITE_URL` parametriza origen HTTPS público validado en servidor; rechaza localhost/IP/credenciales/rutas/puertos, sin fallback a Host/Auth. Sin valor se omiten canonical/OG URL y se indica noindex. Doce pruebas de metadata/configuración y E2E HTML con dominio reservado de test pasan; dominio definitivo/configuración productiva siguen pendientes, no se inventó ni se certifica indexación real. Lint/typecheck/build correctos.
 - [ ] 4.2 Implementar Product/Offer y datos locales veraces; verificar ARS/disponibilidad y serialización segura, sin horarios/reviews/materiales inventados; actualizar trazabilidad.
 - [ ] 4.3 Implementar sitemap/robots y reglas de indexación; probar publicadas agotadas incluidas, ocultos/admin/reset excluidos y guard independiente de robots.
 - [ ] 4.4 Verificar responsive, teclado/foco/labels/alt/contraste, sizes/lazy/LCP y JS enviado; registrar medición y corregir defectos del slice sin rediseño global.

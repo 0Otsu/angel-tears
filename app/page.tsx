@@ -6,8 +6,10 @@ import { Testimonials } from "@/components/boty/testimonials"
 import { Contacto } from "@/components/boty/contacto"
 import identidad from "@/components/publico/identidad.module.css"
 import { Footer } from "@/components/boty/footer"
+import { metadataPublica } from "@/lib/modulos/catalogo/metadata-publica"
 
 export const dynamic = "force-dynamic"
+export function generateMetadata() { return metadataPublica("Bijouterie en Concordia", "Bijouterie y accesorios de Angel Tears en Concordia, Entre Ríos. Conocé nuestros productos y la información del local.", "/") }
 
 export default function HomePage() {
   return (

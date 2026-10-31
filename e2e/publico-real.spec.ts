@@ -86,6 +86,23 @@ test("Home destacados reales y contenido confirmado conservado", async ({ page }
   await expect(page.getByRole("link", { name: "WhatsApp de Angel Tears (abre otra pestaña)" })).toHaveAttribute("href", "https://wa.me/5493454266760")
 })
 
+test("metadata publica real comparte slug/contenido y evita canonical local", async ({ request }) => {
+  const respuesta = await request.get(`/catalogo/${slug(0)}`)
+  const html = await respuesta.text()
+  expect(html).toContain(`${nombres[0]} | Angel Tears`)
+  expect(html).toContain('property="og:image" content="https://example.test/publico.png"')
+  expect(html).toContain('name="description" content="Descripción persistida del producto."')
+  if (process.env.SITE_URL) {
+    const canonical = `${new URL(process.env.SITE_URL).origin}/catalogo/${slug(0)}`
+    expect(html).toContain(`rel="canonical" href="${canonical}"`)
+    expect(html).toContain(`property="og:url" content="${canonical}"`)
+  } else {
+    expect(html).not.toContain('rel="canonical"')
+    expect(html).toContain('name="robots" content="noindex, nofollow"')
+  }
+  expect(html).not.toMatch(/rel="canonical" href="https?:\/\/(localhost|127\.)/)
+})
+
 test("fallo PostgreSQL se muestra como error recuperable y no como vacio/404", async ({ page }) => {
   const conexion = con()
   try {

@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { DetalleProducto } from "@/components/publico/detalle-producto"
 import { consultarProductoPublico, listarRelacionados } from "@/lib/modulos/catalogo/aplicacion"
+import { metadataProducto } from "@/lib/modulos/catalogo/metadata-publica"
 
 export const dynamic = "force-dynamic"
 
@@ -9,7 +10,7 @@ type Propiedades = { params: Promise<{ slug: string }> }
 export async function generateMetadata({ params }: Propiedades): Promise<Metadata> {
   const producto = await consultarProductoPublico((await params).slug)
   if (!producto) return { title: 'Producto no encontrado' }
-  return { title: producto.nombre, description: producto.descripcion ?? undefined }
+  return metadataProducto(producto)
 }
 export default async function PaginaProducto({ params }: Propiedades) {
   const producto = await consultarProductoPublico((await params).slug)
