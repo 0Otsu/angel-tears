@@ -5,7 +5,7 @@ import { producto, categoria } from "../lib/infraestructura/esquemas/producto"
 import { inventario } from "../lib/infraestructura/esquemas/inventario"
 import { CATEGORIAS_INICIALES } from "../lib/modulos/productos/categorias"
 import { validarUrlBdPruebas } from "../pruebas/guardia-url-bd"
-import { readFile } from "node:fs/promises"
+import { readFile, writeFile } from "node:fs/promises"
 
 const con = () => crearConexionBd(validarUrlBdPruebas(process.env.DATABASE_URL_TEST, process.env.DATABASE_URL))
 const ids = Array.from({ length: 5 }, () => crypto.randomUUID())
@@ -53,6 +53,7 @@ for (const [vista, width, height] of [["desktop", 1440, 1000], ["notebook", 1280
     await expect(relacionados.getByRole("heading", { name: nombres[0], exact: true })).toHaveCount(0)
     await expect(relacionados.getByRole("heading", { name: nombres[2], exact: true })).toHaveCount(0)
     expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
+    await page.evaluate(() => window.scrollTo(0, 0))
     await page.screenshot({ path: info.outputPath(`pdp-${vista}.png`), fullPage: true })
     const respuesta = await page.goto(`/catalogo/${slug(2)}`)
     expect(respuesta?.status()).toBe(200)
@@ -205,6 +206,76 @@ test("publicar/ocultar/agotar/reponer refresca navegacion y solicitudes sin cach
   } finally {
     await conexion.db.update(producto).set({ publicado: true }).where(eq(producto.id, ids[0]))
     await conexion.db.update(inventario).set({ cantidad: 2 }).where(eq(inventario.productoId, ids[0]))
+    await conexion.pool.end()
+  }
+})
+
+test("teclado, foco, alt y medicion local del publico", async ({ page }, info) => {
+  await page.emulateMedia({ reducedMotion: "reduce" })
+  await page.addInitScript(() => {
+    const metricas = { lcp: 0, cls: 0 }
+    Object.assign(window, { metricasPublicas: metricas })
+    new PerformanceObserver((lista) => { for (const entrada of lista.getEntries()) metricas.lcp = entrada.startTime }).observe({ type: "largest-contentful-paint", buffered: true })
+    new PerformanceObserver((lista) => { for (const entrada of lista.getEntries()) {
+      const cambio = entrada as PerformanceEntry & { value: number; hadRecentInput: boolean }
+      if (!cambio.hadRecentInput) metricas.cls += cambio.value
+    } }).observe({ type: "layout-shift", buffered: true })
+  })
+  await page.route("https://example.test/**", async (route) => route.fulfill({ contentType: "image/png", body: await readFile("public/images/products/angel-tears-rings.png") }))
+  await page.goto("/catalogo")
+  const anillos = page.getByRole("button", { name: "Anillos", exact: true })
+  await anillos.focus()
+  await page.keyboard.press("Enter")
+  await expect(anillos).toHaveAttribute("aria-pressed", "true")
+  expect(await anillos.evaluate((boton) => getComputedStyle(boton).outlineStyle)).not.toBe("none")
+  await page.goto(`/catalogo/${slug(0)}`)
+  const imagenPrincipal = page.getByRole("img", { name: new RegExp(nombres[0]) })
+  await imagenPrincipal.evaluate((imagen) => (imagen as HTMLImageElement).decode())
+  await page.evaluate(() => document.fonts.ready)
+  await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))))
+  await page.waitForFunction(() => (window as typeof window & { metricasPublicas: { lcp: number } }).metricasPublicas.lcp > 0)
+  const medicion = await page.evaluate(() => {
+    const navegacion = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming
+    const scripts = (performance.getEntriesByType("resource") as PerformanceResourceTiming[]).filter((recurso) => recurso.initiatorType === "script")
+    const metricas = (window as typeof window & { metricasPublicas: { lcp: number; cls: number } }).metricasPublicas
+    function luminancia(hex: string) {
+      const rgb = hex.trim().replace("#", "").match(/.{2}/g)!.map((valor) => parseInt(valor, 16) / 255).map((valor) => valor <= 0.04045 ? valor / 12.92 : ((valor + 0.055) / 1.055) ** 2.4)
+      return rgb[0] * 0.2126 + rgb[1] * 0.7152 + rgb[2] * 0.0722
+    }
+    const css = getComputedStyle(document.documentElement)
+    const fondo = luminancia(css.getPropertyValue("--background"))
+    const secundario = luminancia(css.getPropertyValue("--muted-foreground"))
+    const primario = luminancia(css.getPropertyValue("--primary"))
+    return { ...metricas, ttfbMs: navegacion.responseStart, domContentLoadedMs: navegacion.domContentLoadedEventEnd, jsRecursos: scripts.length, jsBytesCodificados: scripts.reduce((suma, recurso) => suma + recurso.encodedBodySize, 0), contrasteSecundario: (fondo + 0.05) / (secundario + 0.05), contrasteCTA: (fondo + 0.05) / (primario + 0.05) }
+  })
+  expect(medicion.contrasteSecundario).toBeGreaterThanOrEqual(4.5)
+  expect(medicion.contrasteCTA).toBeGreaterThanOrEqual(4.5)
+  const archivoMedicion = info.outputPath("metricas-publicas-locales.json")
+  await writeFile(archivoMedicion, JSON.stringify(medicion, null, 2))
+  await info.attach("metricas-publicas-locales", { path: archivoMedicion, contentType: "application/json" })
+  expect(await page.locator("img:not([alt])").count()).toBe(0)
+  await expect(imagenPrincipal).not.toHaveAttribute("loading", "lazy")
+  const cuidados = page.getByRole("button", { name: "Cuidados", exact: true })
+  await cuidados.focus()
+  await page.keyboard.press("Enter")
+  await expect(page.getByText("Secar con paño suave.")).toBeVisible()
+  await expect(cuidados).toBeFocused()
+  expect(await cuidados.evaluate((boton) => getComputedStyle(boton).outlineStyle)).not.toBe("none")
+})
+
+test("contenido persistido largo y precio maximo no desbordan mobile", async ({ page }, info) => {
+  const conexion = con()
+  try {
+    await conexion.db.update(producto).set({ nombre: "Producto".repeat(18), precio: "9999999999999999.99", descripcion: "Texto".repeat(80) }).where(eq(producto.id, ids[0]))
+    await page.setViewportSize({ width: 320, height: 740 })
+    await page.route("https://example.test/**", (route) => route.abort())
+    await page.goto("/catalogo")
+    expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
+    await page.goto(`/catalogo/${slug(0)}`)
+    expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
+    await page.screenshot({ path: info.outputPath("pdp-contenido-largo-mobile.png"), fullPage: true })
+  } finally {
+    await conexion.db.update(producto).set({ nombre: nombres[0], precio: "1250.50", descripcion: "Descripción persistida del producto." }).where(eq(producto.id, ids[0]))
     await conexion.pool.end()
   }
 })

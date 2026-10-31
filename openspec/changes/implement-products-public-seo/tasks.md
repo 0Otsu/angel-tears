@@ -57,6 +57,8 @@ Evidencia 4.2 del 31/10/2026: Product/Offer con decimal exacto/ARS y InStock/Out
 Evidencia técnica 4.3 del 31/10/2026: sitemap/robots dinámicos sin caché persistente, origen SITE_URL validado; Home/catálogo y PDP publicadas incluidas, también agotadas; ocultos/admin/API/recovery/reset fuera. lastModified usa fechas reales de Producto/Inventario. Sin dominio: sitemap vacío y robots disallow-all, sin localhost inventado. Seis PostgreSQL de proyección y E2E con dominio reservado verifican retiro de oculto en siguiente solicitud y guard admin real sin sesión. Dominio/configuración productiva siguen pendientes.
 - [ ] 4.4 Verificar responsive, teclado/foco/labels/alt/contraste, sizes/lazy/LCP y JS enviado; registrar medición y corregir defectos del slice sin rediseño global.
 
+Checkpoint parcial 4.4 del 31/10/2026: desktop/notebook/mobile y 320 px con nombres/precio largos, teclado/foco/alt/contraste básico y medición local verificados. Se corrige únicamente desborde de contenido real en tarjetas/PDP/Home. E2E pasa y registra LCP/CLS/JS; no equivale a CWV productivos. Permanece abierta: configuración existente unoptimized entrega originales, sin srcset efectivo de CDN; la entrega responsive/optimizada y medición con assets reales requiere retomar imágenes/Cloudinary fuera de esta rama. No se modifica proveedor/configuración global ni se falsea esa aceptación. Evidencia/límites en [cierre público](../../../docs/features/PRODUCTOS_PUBLICO_CIERRE.md).
+
 ## 5. Integración y aceptación
 
 - [ ] 5.1 Ejecutar E2E alta → imagen → publicar → compra/ajuste → Home/catálogo/PDP → agotar/ocultar/reponer con dependencias reales.

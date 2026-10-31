@@ -12,15 +12,15 @@ import identidad from "@/components/publico/identidad.module.css"
 
 function ProductInfo({ product }: { product: ProductoPublico }) {
   return (
-    <div className="flex flex-col">
+    <div className="flex min-w-0 flex-col [overflow-wrap:anywhere]">
       <div className="mb-8">
         <p className="mb-3 text-sm uppercase tracking-[0.3em] text-primary">{product.categoriaNombre}</p>
         <h1 className="mb-4 font-serif text-4xl leading-tight text-foreground md:text-5xl">{product.nombre}</h1>
         {product.descripcion && <p className="leading-relaxed text-foreground/80">{product.descripcion}</p>}
       </div>
 
-      <div className="mb-7 flex items-center gap-4">
-        <p className="text-3xl font-medium text-foreground">{formatPrice(product.precio)}</p>
+      <div className="mb-7 flex flex-wrap items-center gap-4">
+        <p className="min-w-0 max-w-full text-3xl font-medium text-foreground">{formatPrice(product.precio)}</p>
         <span className="rounded-full bg-card px-3 py-1 text-xs text-foreground">{product.disponible ? "Disponible" : "Sin stock"}</span>
       </div>
 
