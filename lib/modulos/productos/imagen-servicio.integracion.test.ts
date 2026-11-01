@@ -11,6 +11,9 @@ import { crearCargaImagenProducto } from "./imagen-servicio"
 import { crearManejadorImagenProducto } from "./imagen-http"
 import { insertarProductoOcultoConSaldo, sembrarCategorias } from "./persistencia"
 import { crearAlmacenCloudinary } from "./imagen-cloudinary"
+import { crearPublicacionProductos } from "./publicacion"
+import { crearConsultasCatalogo } from "@/lib/modulos/catalogo/consultas"
+import { metadataProducto } from "@/lib/modulos/catalogo/metadata-publica"
 
 const exigir = crearExigirAdministradora(async () => ({ id: "admin", nombre: "Admin", email: "admin@ejemplo.com" }))
 const headers = new Headers({ origin: "http://localhost:3000" })
@@ -72,6 +75,26 @@ describe("primera imagen sobre PostgreSQL real y almacen controlado", () => {
     await expect(servicio()(headers, { id, version: 1 }, Buffer.from("falso jpg"))).rejects.toMatchObject({ codigo: "tipo_invalido" })
     expect(subir).not.toHaveBeenCalled()
     expect((await leer()).version).toBe(1)
+  })
+  it("la primera imagen habilita publicacion con version vigente y llega a PDP/SEO sin exponer privados", async () => {
+    const publicar = crearPublicacionProductos({ db: conexion.db, exigir })
+    expect(await publicar(headers, { id, version: 1, accion: "publicar" })).toEqual({ estado: "imagen_requerida" })
+    const carga = await servicio()(headers, { id, version: 1 }, png)
+    expect(await publicar(headers, { id, version: 1, accion: "publicar" })).toEqual({ estado: "conflicto_version" })
+    expect(await publicar(headers, { id, version: carga.version, accion: "publicar" })).toMatchObject({ estado: "ok", version: 3 })
+    const catalogo = crearConsultasCatalogo(conexion.db)
+    const publico = await catalogo.consultarPorSlug("collar-imagen")
+    expect(publico).toMatchObject({ slug: "collar-imagen", precio: "150.50", disponible: false,
+      imagen: { url: carga.imagen.urlSegura, ancho: carga.imagen.ancho, alto: carga.imagen.alto } })
+    expect(publico).not.toHaveProperty("imagenAssetId")
+    expect(publico).not.toHaveProperty("imagenPublicId")
+    expect(publico).not.toHaveProperty("version")
+    expect(await catalogo.listar()).toEqual([]) // C0 sigue en cero: PDP agotada, fuera de listados.
+    expect(metadataProducto(publico!, "https://tienda.example").openGraph?.images).toEqual([
+      expect.objectContaining({ url: carga.imagen.urlSegura, width: carga.imagen.ancho, height: carga.imagen.alto }),
+    ])
+    expect(await leer()).toMatchObject({ version: 3, publicado: true, destacado: false, slug: "collar-imagen", precio: "150.50" })
+    expect(eliminar).not.toHaveBeenCalled()
   })
   it("fallo del proveedor no adjunta y solicita limpieza del id propio por si hubo respuesta perdida", async () => {
     subir.mockRejectedValueOnce(new Error("Fallo controlado del almacen"))

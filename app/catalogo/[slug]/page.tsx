@@ -1,17 +1,23 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { DetalleProducto } from "@/components/publico/detalle-producto"
-import { buscarProductoDemo, productosPublicosDemo } from "@/lib/mock/productos"
+import { consultarProductoPublico, listarRelacionados } from "@/lib/modulos/catalogo/aplicacion"
+import { metadataProducto } from "@/lib/modulos/catalogo/metadata-publica"
+import { datosProducto, serializarDatosEstructurados } from "@/lib/modulos/catalogo/datos-estructurados"
+
+export const dynamic = "force-dynamic"
 
 type Propiedades = { params: Promise<{ slug: string }> }
-export function generateStaticParams() { return productosPublicosDemo.map(producto => ({ slug: producto.id })) }
 export async function generateMetadata({ params }: Propiedades): Promise<Metadata> {
-  const producto = buscarProductoDemo((await params).slug)
+  const producto = await consultarProductoPublico((await params).slug)
   if (!producto) return { title: 'Producto no encontrado' }
-  return { title: producto.name, description: producto.description }
+  return metadataProducto(producto)
 }
 export default async function PaginaProducto({ params }: Propiedades) {
-  const producto = buscarProductoDemo((await params).slug)
+  const producto = await consultarProductoPublico((await params).slug)
   if (!producto) notFound()
-  return <DetalleProducto product={producto} />
+  return <>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializarDatosEstructurados(datosProducto(producto)) }} />
+    <DetalleProducto product={producto} relacionados={await listarRelacionados(producto.id, producto.categoriaCodigo)} />
+  </>
 }

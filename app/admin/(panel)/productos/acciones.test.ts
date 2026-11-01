@@ -20,7 +20,9 @@ describe("Server Actions de Producto 2.1", () => {
     expect(crear.mock.calls[0][1]).toMatchObject({ nombre: "Collar", precio: "90071992547409.93" })
     expect(crear.mock.calls[0][1]).not.toHaveProperty("publicado")
     expect(crear.mock.calls[0][1]).not.toHaveProperty("slug")
-    expect(revalidar).toHaveBeenCalledExactlyOnceWith("/admin/productos")
+    expect(revalidar.mock.calls).toEqual([
+      ["/admin/productos"], ["/"], ["/catalogo"], ["/catalogo/[slug]", "page"], ["/sitemap.xml"],
+    ])
   })
 
   it("envia referencia y version separadas y no revalida una edicion rechazada", async () => {
