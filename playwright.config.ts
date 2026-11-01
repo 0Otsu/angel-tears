@@ -38,6 +38,9 @@ export default defineConfig({
     // BETTER_AUTH_URL debe coincidir con el origen del servidor de los E2E (puerto propio): si
     // no, Better Auth rechaza las solicitudes por origen no confiable. El secreto lo carga Next
     // desde .env.local.
-    env: { DATABASE_URL: urlBdPruebas, BETTER_AUTH_URL: urlBase },
+    env: { DATABASE_URL: urlBdPruebas, BETTER_AUTH_URL: urlBase,
+      // Los E2E nunca suben recursos a cuentas reales: prueban tambien el error de configuracion.
+      CLOUDINARY_CLOUD_NAME: "", CLOUDINARY_API_KEY: "", CLOUDINARY_API_SECRET: "",
+    },
   },
 })

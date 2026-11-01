@@ -1,5 +1,5 @@
 import "server-only"
-import { and, asc, eq } from "drizzle-orm"
+import { and, asc, eq, sql } from "drizzle-orm"
 import type { NodePgDatabase } from "drizzle-orm/node-postgres"
 import { categoria, producto } from "@/lib/infraestructura/esquemas/producto"
 import { conAdministradora, type ExigirAdministradora } from "@/lib/modulos/autenticacion/contrato"
@@ -14,6 +14,7 @@ const camposAdministrativos = {
   descripcion: producto.descripcion, material: producto.material, medida: producto.medida,
   color: producto.color, cuidados: producto.cuidados, publicado: producto.publicado,
   destacado: producto.destacado, version: producto.version,
+  tieneImagen: sql<boolean>`${producto.imagenAssetId} IS NOT NULL`,
 }
 
 export function crearAdministracionProductos(dependencias: {

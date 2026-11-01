@@ -9,6 +9,7 @@ export type ProductoAdministrativo = DatosProducto & {
   publicado: boolean
   destacado: boolean
   version: number
+  tieneImagen: boolean
 }
 
 export type ConsultaAdministrativa = {

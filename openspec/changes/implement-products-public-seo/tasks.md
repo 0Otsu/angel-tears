@@ -1,8 +1,12 @@
 # Tasks
 
+Sincronizacion del 01/11/2026: la rama `feature/productos-2-2-imagen` incorpora mediante merge normal `origin/main` en `276e5c0`, conservando los cuatro commits propios de imagen y ambas lineas de evidencia. Estado al preparar el smoke: 1.1 y 2.1 completas; 2.2 abierta hasta smoke Cloudinary real; 2.3/2.5 abiertas; 2.4, 3.1-3.4 y 4.1-4.3 completas; 4.4 parcial/abierta. Las notas fechadas anteriores describen sus checkpoints historicos. Configuracion de ejemplo conciliada con SITE_URL y las tres variables Cloudinary, sin secretos. Regresion combinada PostgreSQL verifica primera carga con proveedor controlado, publicacion con version vigente y referencia publica/metadata; no sustituye el smoke real ni cierra 5.x. Evidencia combinada en [Producto 2.2](../../../docs/features/PRODUCTOS_2_2.md).
+
+Actualizacion posterior del 01/11/2026: smoke Cloudinary real satisfactorio y 2.2 completa. Upload desde UI/Handler autenticados, asset confirmado por Admin API, referencia/version PostgreSQL, delivery HTTPS con bytes originales, segunda carga rechazada sin nuevo asset, publicacion/PDP/OG/ocultacion y carrera real de dos uploads con compensacion del perdedor comprobados. Ambos productos descartables y sus assets retirados; datos previos intactos. Sin secretos en evidencia, cambios de produccion ni infraestructura para provocar fallos. Limites de COMMIT ambiguo/cleanup fallido documentados en [Producto 2.2](../../../docs/features/PRODUCTOS_2_2.md). 2.3/2.5 y 5.x siguen abiertas; 4.4 parcial.
+
 ## 1. P0: Producto compartido
 
-- [ ] 1.1 Leer decisiones/gaps/ADR y acordar DTO con Claudio/Emi; registrar pendientes de validación sin inventar RF/CU.
+- [x] 1.1 Leer decisiones/gaps/ADR y acordar DTO con Claudio/Emi; registrar pendientes de validación sin inventar RF/CU.
 - [x] 1.2 Crear schema único Producto/Categoria y categorías sembradas; probar slug único/estable, campos y migración en turno coordinado.
 - [x] 1.3 Publicar consulta interna/DTO y fixtures de prueba del contrato; comprobar consumo por Compras/Inventario sin otro Product schema.
 - [x] 1.4 Integrar alta oculta + saldo cero C0 en misma tx; probar rollback de ambos y documentar ownership.
@@ -13,7 +17,9 @@ Actualización del 22/10/2026: 1.2 verificada en el turno conjunto autorizado `0
 
 Actualización del 23/10/2026 — cierre técnico de 1.4: `0002_inventario-base` y C0 persistente están integrados en main desde `36d4b3b`. `insertarProductoOcultoConSaldo` pasa la misma tx del llamador a `crearContratoInventario(db).crearSaldoCero`, sin abrir/confirmar otra ni capturar sus fallos. Las pruebas PostgreSQL existentes de [Inventario](../../../lib/modulos/inventario/persistencia.integracion.test.ts), bloque «saldo cero junto al alta de Producto (C0)», usan ambos adaptadores reales y verifican creación con saldo 0/mínimo null y ausencia de ambas filas tras un fallo posterior al alta. La suite conjunta Producto + Inventario (27 pruebas) se volvió a ejecutar en esta revisión; la auditoría anterior también verificó las suites completas en PostgreSQL 17.10 y 18.4. No se duplican pruebas. Producto/Categoría y su adaptador siguen siendo de Augusto; Inventario, su schema y C0 siguen siendo de Claudio. Las notas del 20 y 22 son evidencia histórica, no bloqueos actuales de C0.
 
-P0 queda técnicamente preparado: 1.2, 1.3 y 1.4 completas; 1.1 permanece abierta hasta confirmar humanamente el DTO con Claudio/Emi. No se declara P0 formalmente cerrado ni se inicia 2.x. El alta administrativa autorizada de extremo a extremo corresponde a 2.1, no a esta integración interna. Las tasks de Inventario conservan su estado para revisión de Claudio.
+Estado al 23/10/2026: P0 queda técnicamente preparado: 1.2, 1.3 y 1.4 completas; 1.1 permanece abierta hasta confirmar humanamente el DTO con Claudio/Emi. No se declara P0 formalmente cerrado ni se inicia 2.x. El alta administrativa autorizada de extremo a extremo corresponde a 2.1, no a esta integración interna. Las tasks de Inventario conservan su estado para revisión de Claudio.
+
+Cierre de 1.1 comunicado por el responsable el 29/10/2026: Claudio confirmó que el DTO y la semántica actuales de Producto sirven para Inventario/Compras. Emiliano confirmó la frontera Auth después de verificar main: autorización antes de leer/escribir, consultas mediante `exigirAdministradora`, comandos mediante `conAdministradora` y Auth recibido por contrato/inyección; Producto no implementa cookies, sesiones, `getSession` ni Better Auth por su cuenta, y sin sesión no ejecuta lecturas ni escrituras. Ambas confirmaciones humanas quedan registradas y 1.1 se marca completa. Las notas anteriores conservan su carácter histórico; no se modifica código, contratos, pruebas ni tareas de otros owners. El smoke real de Cloudinary de 2.2 continúa pendiente.
 
 ## 2. Productos e imagen
 
@@ -21,7 +27,10 @@ P0 queda técnicamente preparado: 1.2, 1.3 y 1.4 completas; 1.1 permanece abiert
 
 Evidencia de 2.1 del 28/10/2026: [implementación, pruebas y límites](../../../docs/features/PRODUCTOS_2_1.md). Alta/consulta/edición administrativa real conectada a PostgreSQL, guard existente y C0 persistente; precio de venta estrictamente mayor que cero por decisión humana expresa, decimal exacto sin redondeo, slug estable y control de versión. La UI mínima pertenece al alcance autorizado de 2.1; no cierra 2.5 ni incorpora imagen/publicación. Por autorización expresa posterior del responsable, se cierra e integra 2.1 con su limitación documentada: todavía no existen operaciones persistidas de Compras/Ventas con importes históricos para verificar su conservación de punta a punta. Esa regresión sigue pendiente al integrar dichos módulos; no se declara aprobada ni se inventa infraestructura para simularla. 1.1 sigue pendiente de Emi (Claudio ya confirmó el DTO). Sin cambios en tareas de otros owners. Las tasks 2.2–2.5 permanecen sin marcar y no se implementan en este cierre.
 
-- [ ] 2.2 Implementar adapter/Handler de imagen con límites y validación real; probar no autorizado, tipo/tamaño/píxeles inválidos y guardar sin imagen oculto.
+- [x] 2.2 Implementar adapter/Handler de imagen con límites y validación real; probar no autorizado, tipo/tamaño/píxeles inválidos y guardar sin imagen oculto.
+
+Evidencia local de 2.2 del 28/10/2026: [primera carga de imagen](../../../docs/features/PRODUCTOS_2_2.md). Handler multipart con guard real/origen y lectura acotada, decoder Sharp JPEG/PNG/WebP 3 MiB/20 MP, adaptador Cloudinary servidor, persistencia en columnas existentes con control de versión, compensación del recurso nuevo y control accesible con progreso por eventos reales. Decoder/SDK controlado, PostgreSQL y navegador se distinguen en la evidencia. Sin credenciales locales, el upload/destroy contra Cloudinary real queda pendiente; 2.2 permanece sin marcar hasta esa comprobación. Producto oculto sigue guardable sin imagen. No hay reemplazo, publicación ni rediseño final: 2.3–2.5 y 1.1 conservan su estado, sin cambios en tasks de otros owners ni merge/push.
+
 - [ ] 2.3 Implementar reemplazo con compensación/control de versión; probar fallos de upload/BD/cleanup y conservación de referencia anterior.
 - [x] 2.4 Implementar publicación/ocultación/destacado; probar imagen obligatoria al publicar y ausencia de eliminación física/ranking; documentar criterios.
 

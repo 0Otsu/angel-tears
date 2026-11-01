@@ -5,6 +5,7 @@ import { categoria, producto } from "../lib/infraestructura/esquemas/producto"
 import { inventario } from "../lib/infraestructura/esquemas/inventario"
 import { CATEGORIAS_INICIALES, type CodigoCategoria } from "../lib/modulos/productos/categorias"
 import { validarUrlBdPruebas } from "../pruebas/guardia-url-bd"
+import { crearImagenPrueba } from "../pruebas/imagenes-producto"
 import { borrarCuentaDePrueba, CONTRASENA_DE_PRUEBA, crearCuentaDePrueba, EMAIL_DE_PRUEBA, reiniciarLimiteDeIntentos, vencerSesionesDePrueba } from "./apoyo/cuenta-de-prueba"
 
 // Servidor Next real del arnes existente, exclusivamente sobre DATABASE_URL_TEST.
@@ -80,8 +81,22 @@ for (const [nombreVista, width, height] of [["desktop", 1440, 1000], ["notebook"
       const desborde = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)
       expect(desborde).toBe(false)
       await page.screenshot({ path: info.outputPath(`productos-${nombreVista}.png`), fullPage: true })
+      await page.getByRole("button", { name: `Editar ${nombre} editado` }).click()
+      const imagen = page.getByRole("region", { name: `Imagen de ${nombre} editado` })
       if (nombreVista === "desktop") {
-        await page.getByRole("button", { name: `Editar ${nombre} editado` }).click()
+        const origenAjeno = await page.request.post(`/api/admin/productos/${creado.id}/imagen`, { headers: { origin: "https://ajeno.test" }, multipart: { version: "2", imagen: { name: "collar.png", mimeType: "image/png", buffer: await crearImagenPrueba() } } })
+        expect(origenAjeno.status()).toBe(403)
+      }
+      await imagen.getByLabel("Archivo de imagen principal").setInputFiles({ name: "collar.png", mimeType: "image/png", buffer: await crearImagenPrueba() })
+      await expect(imagen.getByAltText(/Vista previa/)).toBeVisible()
+      await imagen.getByRole("button", { name: "Subir imagen" }).click()
+      await expect(imagen.getByRole("alert")).toContainText("La carga de imágenes no está disponible")
+      await expect(imagen.getByAltText(/Vista previa/)).toBeVisible()
+      await imagen.getByRole("button", { name: "Reintentar carga" }).click()
+      await expect(imagen.getByRole("alert")).toContainText("La carga de imágenes no está disponible")
+      expect((await conexion.db.select().from(producto).where(eq(producto.id, creado.id)))[0]).toMatchObject({ imagenAssetId: null, version: 2 })
+      await imagen.screenshot({ path: info.outputPath(`primera-imagen-${nombreVista}.png`) })
+      if (nombreVista === "desktop") {
         await page.getByLabel("Precio de venta (ARS) *").fill("3000.00")
         await vencerSesionesDePrueba()
         await page.getByRole("button", { name: "Guardar cambios" }).click()
@@ -92,3 +107,12 @@ for (const [nombreVista, width, height] of [["desktop", 1440, 1000], ["notebook"
     } finally { await conexion.pool.end() }
   })
 }
+
+test("el Handler real de imagen rechaza una solicitud sin sesion", async ({ request }) => {
+  const respuesta = await request.post(`/api/admin/productos/${crypto.randomUUID()}/imagen`, {
+    headers: { origin: "http://localhost:3100" },
+    multipart: { version: "1", imagen: { name: "falso.jpg", mimeType: "image/jpeg", buffer: Buffer.from("archivo falso") } },
+  })
+  expect(respuesta.status()).toBe(401)
+  expect(await respuesta.json()).toMatchObject({ codigo: "sesion_requerida" })
+})
