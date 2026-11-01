@@ -20,6 +20,8 @@ Producto real de extremo a extremo, fuentes públicas frescas y SEO veraz. Sin C
 
 ## Risks / Trade-offs
 
+Diseno de 2.3 autorizado el 01/11/2026: `POST /api/admin/productos/[id]/imagen` conserva primera carga; `PUT` distingue reemplazo reutilizando Handler multipart, decoder, adapter y transporte. Reemplazo exige imagen existente/version vigente, sube un ID nuevo y actualiza mediante CAS de version y referencia anterior. Solo tras commit confirmado intenta limpiar la anterior, comprobando antes que ninguna fila la referencie. Fallo anterior al commit conserva A y compensa solo B; confirmacion ambigua conserva recursos hasta poder comprobar referencias. Fallo de limpieza postcommit devuelve exito con aviso de conciliacion, sin revertir B. Sin colas, schema nuevo ni cambios en Auth/Inventario. UI minima en el control actual, imagen vigente separada del preview y cancelacion antes de enviar; redisenar listado/formularios sigue en 2.5.
+
 - C0/E0 faltantes → DTO/puertos/dobles para avanzar; aceptación con Inventario/Auth reales obligatoria.
 - Upload/DB no comparten tx → compensación, conservar anterior, limpiar sin destruir referencia válida.
 - Pérdida de SEO por ocultación/caché → consultas frescas y pruebas HTML/meta/404/sitemap.

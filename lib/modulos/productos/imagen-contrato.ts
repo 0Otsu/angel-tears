@@ -24,7 +24,10 @@ export const mensajesErrorImagen = {
   solicitud_invalida: "La solicitud de imagen no es válida. Seleccioná el archivo nuevamente.",
   producto_inexistente: "El producto no está disponible.",
   imagen_existente: "El producto ya tiene una imagen principal. Este control solo permite la primera carga.",
+  imagen_requerida: "El producto todavía no tiene imagen. Usá la primera carga antes de reemplazarla.",
+  error_persistencia: "No pudimos guardar la nueva imagen. Se conservó el último estado válido del producto. Recargá el listado antes de reintentar.",
   conflicto_version: "El producto cambió durante la carga. Recargá el listado antes de continuar.",
+  version_desactualizada: "Esta edición usa una versión anterior del producto. Recargá el listado antes de reemplazar la imagen.",
   tipo_invalido: "Elegí una imagen JPEG, PNG o WebP.",
   imagen_corrupta: "No pudimos leer esa imagen. Elegí un archivo válido.",
   exceso_bytes: "La imagen supera el máximo de 3 MiB.",
@@ -43,7 +46,7 @@ export class ErrorImagen extends Error {
 }
 
 export const esquemaResultadoImagen = z.discriminatedUnion("estado", [
-  z.object({ estado: z.literal("ok"), productoId: z.uuid(), version: z.number().int().positive(), imagen: esquemaReferenciaImagen }),
+  z.object({ estado: z.literal("ok"), productoId: z.uuid(), version: z.number().int().positive(), imagen: esquemaReferenciaImagen, limpiezaPendiente: z.boolean().optional() }),
   z.object({ estado: z.literal("error"), codigo: z.enum(Object.keys(mensajesErrorImagen) as [CodigoErrorImagen, ...CodigoErrorImagen[]]), mensaje: z.string() }),
 ])
 export type ResultadoImagen = z.infer<typeof esquemaResultadoImagen>
