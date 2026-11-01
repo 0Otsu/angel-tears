@@ -11,6 +11,16 @@ class XhrPrueba {
 }
 afterEach(() => vi.unstubAllGlobals())
 describe("transporte XHR real por eventos (sin timers de progreso)", () => {
+  it("reemplazo usa PUT sin cambiar URL ni multipart de primera carga", async () => {
+    vi.stubGlobal("XMLHttpRequest", XhrPrueba)
+    const datos = new FormData()
+    const peticion = enviarImagenProducto("id", datos, { alProgreso: vi.fn(), alProcesar: vi.fn() }, new AbortController().signal, "reemplazo")
+    const xhr = XhrPrueba.actual
+    expect(xhr.open).toHaveBeenCalledWith("PUT", "/api/admin/productos/id/imagen")
+    expect(xhr.send).toHaveBeenCalledWith(datos)
+    xhr.onerror?.()
+    await peticion
+  })
   it("calcula solo progreso computable y espera respuesta antes de resolver", async () => {
     vi.stubGlobal("XMLHttpRequest", XhrPrueba)
     const alProgreso = vi.fn(); const alProcesar = vi.fn()

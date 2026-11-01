@@ -33,7 +33,7 @@ export function crearManejadorImagenProducto(dependencias: {
   exigir: ExigirAdministradora
   origen: () => string | undefined
   adjuntar: (encabezados: Headers, referencia: unknown, contenido: Uint8Array) => Promise<ImagenGuardada>
-  alGuardar: () => void
+  alGuardar: (resultado: ImagenGuardada) => void
 }) {
   return async function atender(request: Request, id: string): Promise<Response> {
     const cabeceras = { "cache-control": "no-store" }
@@ -50,7 +50,7 @@ export function crearManejadorImagenProducto(dependencias: {
       if (archivo.size > MAXIMO_BYTES_IMAGEN) throw new ErrorImagen("exceso_bytes", 413)
       // Nombre, extension y MIME del File no autorizan el formato: se decodifica en Productos.
       const resultado = await dependencias.adjuntar(request.headers, { id, version: datos.get("version") }, new Uint8Array(await archivo.arrayBuffer()))
-      dependencias.alGuardar()
+      dependencias.alGuardar(resultado)
       return Response.json(resultado, { headers: cabeceras })
     } catch (error) {
       const controlado = esErrorSesionRequerida(error) ? new ErrorImagen("sesion_requerida", 401) : error instanceof ErrorImagen ? error : new ErrorImagen("error_tecnico", 500)

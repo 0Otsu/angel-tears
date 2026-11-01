@@ -20,6 +20,21 @@ async function solicitud(bytes?: Uint8Array, origenRequest = origen) {
 }
 
 describe("multipart protegido de Producto", () => {
+  it("PUT reutiliza guard/origen/limites y conserva errores tipados de reemplazo", async () => {
+    const { atender, adjuntar } = preparar()
+    const datos = new FormData()
+    datos.set("version", "2")
+    datos.set("imagen", new File([new Uint8Array(await crearImagenPrueba())], "nueva.png"))
+    adjuntar.mockRejectedValueOnce(new ErrorImagen("imagen_requerida", 409))
+    const respuesta = await atender(new Request(origen, { method: "PUT", headers: { origin: origen }, body: datos }), id)
+    expect(respuesta.status).toBe(409)
+    expect(await respuesta.json()).toMatchObject({ codigo: "imagen_requerida" })
+    const sinSesion = preparar(false)
+    const request = new Request(origen, { method: "PUT", headers: { origin: origen }, body: "no leer" })
+    expect((await sinSesion.atender(request, id)).status).toBe(401)
+    expect(request.bodyUsed).toBe(false)
+    expect(sinSesion.adjuntar).not.toHaveBeenCalled()
+  })
   it("sin sesion no consume el cuerpo ni invoca almacenamiento", async () => {
     const { atender, adjuntar } = preparar(false)
     const request = await solicitud()

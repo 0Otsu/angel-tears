@@ -29,6 +29,18 @@ El sistema SHALL permitir subir/reemplazar la imagen desde Admin y conservar la 
 - **WHEN** falla la carga o el guardado de la nueva referencia
 - **THEN** la imagen anterior continúa vigente y se informa el error sin perder datos del producto.
 
+#### Scenario: Limpieza anterior falla despues de confirmar
+- **WHEN** la nueva referencia ya se confirmo en PostgreSQL y falla la eliminacion del recurso anterior
+- **THEN** la imagen nueva continua vigente, se informa limpieza pendiente y no se revierte ni elimina la nueva referencia.
+
+#### Scenario: Dos reemplazos de la misma version
+- **WHEN** dos cargas intentan reemplazar la imagen desde la misma version del producto
+- **THEN** solo una confirma; la perdedora recibe conflicto y limpia exclusivamente su recurso nuevo, sin borrar el ganador ni alterar los demas datos.
+
+#### Scenario: Confirmacion de escritura desconocida
+- **WHEN** se pierde el acuse de commit y tampoco puede verificarse la referencia persistida
+- **THEN** no se destruyen recursos a ciegas, se informa error de confirmacion y queda conciliacion operativa pendiente.
+
 ### Requirement: Identidad e historia estables
 El sistema SHALL conservar el slug existente al renombrar, no eliminar físicamente productos y no modificar importes históricos de compras/ventas al cambiar el precio actual.
 

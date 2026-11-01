@@ -9,7 +9,7 @@ vi.mock("@/app/admin/(panel)/productos/acciones", () => ({ crearProductoAccion: 
 
 const consulta: ConsultaAdministrativa = {
   categorias: [{ codigo: "collares", nombre: "Collares" }],
-  productos: [{ id: "cd12704c-e5a7-4216-b16e-ad6d7ae47490", nombre: "Collar real", slug: "collar-real", precio: "1500.50", categoriaCodigo: "collares", categoriaNombre: "Collares", descripcion: "Descripción", material: null, medida: null, color: null, cuidados: null, publicado: false, destacado: false, version: 1, tieneImagen: false }],
+  productos: [{ id: "cd12704c-e5a7-4216-b16e-ad6d7ae47490", nombre: "Collar real", slug: "collar-real", precio: "1500.50", categoriaCodigo: "collares", categoriaNombre: "Collares", descripcion: "Descripción", material: null, medida: null, color: null, cuidados: null, publicado: false, destacado: false, version: 1, tieneImagen: false, imagen: null }],
 }
 const nombre = () => screen.getByLabelText("Nombre *") as HTMLInputElement
 const precio = () => screen.getByLabelText("Precio de venta (ARS) *") as HTMLInputElement
