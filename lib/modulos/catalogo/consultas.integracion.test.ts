@@ -43,7 +43,7 @@ describe("proyeccion publica PostgreSQL Producto + Inventario", () => {
   it("DTO allowlist sin saldo exacto, minimo, version, flags privados ni ids del proveedor", async () => {
     const visible = await crear("Visible", true, 12)
     const dto = await servicio().consultarPorSlug(visible.slug)
-    expect(Object.keys(dto!).sort()).toEqual(["id", "slug", "nombre", "precio", "moneda", "categoriaCodigo", "categoriaNombre", "descripcion", "material", "medida", "color", "cuidados", "destacado", "disponible", "imagen"].sort())
+    expect(Object.keys(dto!).sort()).toEqual(["galeria", "id", "slug", "nombre", "precio", "moneda", "categoriaCodigo", "categoriaNombre", "descripcion", "material", "medida", "color", "cuidados", "destacado", "disponible", "imagen"].sort())
     expect(dto).toMatchObject({ precio: "90071992547409.93", moneda: "ARS", disponible: true, imagen: { url: "https://example.test/imagen.jpg", ancho: 640, alto: 480 } })
     expect(JSON.stringify(dto)).not.toMatch(/privado|cantidad|minimo|version|actualizadoEn|creadoEn/)
   })

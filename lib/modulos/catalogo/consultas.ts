@@ -2,6 +2,7 @@ import "server-only"
 import { and, asc, eq, gt, ne, sql } from "drizzle-orm"
 import type { NodePgDatabase } from "drizzle-orm/node-postgres"
 import { z } from "zod"
+import { productoMedia } from "@/lib/infraestructura/esquemas/producto-media"
 import { producto, categoria } from "@/lib/infraestructura/esquemas/producto"
 import { inventario } from "@/lib/infraestructura/esquemas/inventario"
 import { CODIGOS_CATEGORIA } from "@/lib/modulos/productos/categorias"
@@ -55,8 +56,11 @@ export function crearConsultasCatalogo(db: NodePgDatabase) {
   }
 
   async function consultarPorSlug(slug: string): Promise<ProductoPublico | null> {
-    const [fila] = await base().where(and(eq(producto.publicado, true), eq(producto.slug, slug))).limit(1)
-    return fila ? proyectar(fila) : null
+    // Galeria en el mismo SELECT/instantanea que principal, visibilidad y disponibilidad.
+    const [fila] = await db.select({ ...camposPublicos, galeria: sql<{ url: string; ancho: number; alto: number; alt: string }[]>`coalesce((select jsonb_agg(jsonb_build_object('url',m.url_segura,'ancho',m.ancho,'alto',m.alto,'alt',${producto.nombre} || ', imagen ' || m.orden) order by m.principal desc,m.orden) from ${productoMedia} m where m.producto_id=${producto.id}),'[]'::jsonb)` })
+      .from(producto).innerJoin(categoria, eq(categoria.codigo, producto.categoriaCodigo)).innerJoin(inventario, eq(inventario.productoId, producto.id))
+      .where(and(eq(producto.publicado, true), eq(producto.slug, slug))).limit(1)
+    return fila ? { ...proyectar(fila), galeria: fila.galeria } : null
   }
 
   async function listarIndexables() {
