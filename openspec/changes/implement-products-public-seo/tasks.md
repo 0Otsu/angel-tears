@@ -2,6 +2,8 @@
 
 Estado vigente del 02/11/2026: 2.1-2.5, G1, 3.1-3.4 y 4.1-4.4 completas en su alcance tecnico. 4.4 incorpora CDN responsive real y mediciones sobre build de produccion local, responsive/teclado/contraste/fuentes/JS; no certifica CWV de campo ni deployment. 5.x y video siguen pendientes. Evidencia en [cierre 4.4](../../../docs/features/PUBLICO_4_4.md). Las notas siguientes conservan sus checkpoints historicos.
 
+Pasada final de UI/UX de Productos autorizada el 02/11/2026, sin reabrir 2.x/G1 ni comenzar 5.x: listado/CTA/toolbar/resumen compactos, precio ARS exacto reutilizado, menu contextual y recuperacion solo cuando corresponde. Pending del comando separado del refresco RSC despues de confirmacion real; error individual del uploader sin segunda dropzone, con File/retry/progreso existentes. Revision real antes/despues, reemplazo Cloudinary, responsive y regresiones en [cierre UX](../../../docs/features/PRODUCTOS_UX_CIERRE.md). Sin cambiar negocio, schema/migrations, adapter, Auth, Inventario o Publico/SEO; 5.1-5.3 y video conservan su estado.
+
 Estado tras cierre de 2.5 del 01/11/2026: 2.1-2.5 completas, 4.4 parcial y 5.x abiertas. UI administrativa final en listado/rutas dedicadas, sin ampliar otros modulos. Evidencia en [Producto 2.5](../../../docs/features/PRODUCTOS_2_5.md).
 
 Estado vigente tras cierre de 2.3 del 01/11/2026: 2.2 y 2.3 completas con Cloudinary real; 2.5 abierta, 4.4 parcial y 5.x sin marcar. Las notas fechadas inferiores conservan sus checkpoints historicos. Evidencia de reemplazo, pruebas y limites en [Producto 2.3](../../../docs/features/PRODUCTOS_2_3.md).

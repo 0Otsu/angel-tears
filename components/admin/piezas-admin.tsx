@@ -15,8 +15,8 @@ export function TarjetaIndicador({ titulo, valor, nota, icono: Icono }: { titulo
   return <PanelAdmin className="relative overflow-hidden p-4 lg:p-5"><div className="mb-5 flex items-center justify-between gap-2 lg:gap-3"><p className="text-xs font-medium text-muted-foreground">{titulo}</p><span className="flex size-7 shrink-0 items-center justify-center rounded-xl bg-card text-primary lg:size-9"><Icono className="size-3.5 lg:size-4" aria-hidden="true" /></span></div><p className="text-xl font-medium tracking-tight tabular-nums md:text-2xl xl:text-3xl">{valor}</p><p className="mt-2 text-[10px] leading-relaxed text-muted-foreground lg:text-xs">{nota}</p></PanelAdmin>
 }
 
-export function EncabezadoAdmin({ titulo, descripcion, children }: { titulo: string; descripcion: string; children?: ReactNode }) {
-  return <div className="flex flex-wrap items-end justify-between gap-5"><div><p className="mb-2 text-[10px] uppercase tracking-[0.22em] text-primary">Angel Tears · Administración</p><h1 className="font-serif text-3xl leading-tight lg:text-4xl">{titulo}</h1><p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">{descripcion}</p></div>{children}</div>
+export function EncabezadoAdmin({ titulo, descripcion, simple = false, children }: { titulo: string; descripcion?: string; simple?: boolean; children?: ReactNode }) {
+  return <div className={cn("flex flex-wrap justify-between gap-5", simple ? "items-center" : "items-end")}><div className="min-w-0">{!simple && <p className="mb-2 text-[10px] uppercase tracking-[0.22em] text-primary">Angel Tears · Administración</p>}<h1 className="font-serif text-3xl leading-tight lg:text-4xl">{titulo}</h1>{descripcion && <p className="mt-2 max-w-xl break-words text-sm leading-relaxed text-muted-foreground">{descripcion}</p>}</div>{children}</div>
 }
 
 export function EtiquetaEstado({ children, tono = "neutro" }: { children: ReactNode; tono?: "oliva" | "alerta" | "neutro" }) {
