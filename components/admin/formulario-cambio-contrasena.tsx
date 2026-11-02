@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, type FormEvent } from "react"
+import { useTransition, useState, type FormEvent } from "react"
 import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
+import { PendingButton } from "@/components/ui/pending-button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { authClient } from "@/lib/infraestructura/auth-cliente"
@@ -32,6 +32,7 @@ const claseCampo =
 
 export function FormularioCambioContrasena() {
   const router = useRouter()
+  const [navegando, navegar] = useTransition()
   const [errores, setErrores] = useState<ErroresCambioContrasena>({})
   const [aviso, setAviso] = useState<Aviso | null>(null)
   const [pendienteCerrarOtras, setPendienteCerrarOtras] = useState(false)
@@ -45,13 +46,12 @@ export function FormularioCambioContrasena() {
   }
 
   function volverAlLogin() {
-    router.push("/admin/login")
-    router.refresh()
+    navegar(() => { router.push("/admin/login"); router.refresh() })
   }
 
   async function alEnviar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault()
-    if (enviando) return
+    if (enviando || navegando) return
     const formulario = evento.currentTarget
     const datos = new FormData(formulario)
     const valores = {
@@ -109,7 +109,7 @@ export function FormularioCambioContrasena() {
   }
 
   async function reintentarCierre() {
-    if (enviando) return
+    if (enviando || navegando) return
     setEnviando(true)
     setAviso(null)
     try {
@@ -221,19 +221,20 @@ export function FormularioCambioContrasena() {
       )}
 
       {pendienteCerrarOtras && (
-        <Button type="button" variant="outline" onClick={reintentarCierre} disabled={enviando}>
+        <PendingButton pending={enviando || navegando} pendingLabel="Cerrando sesiones…" type="button" variant="outline" onClick={reintentarCierre}>
           Cerrar mis otras sesiones
-        </Button>
+        </PendingButton>
       )}
 
-      <Button
+      <PendingButton
+        pending={enviando || navegando} pendingLabel="Guardando…"
         type="submit"
-        disabled={enviando}
-        aria-busy={enviando}
+        disabled={enviando || navegando}
+        aria-busy={enviando || navegando}
         className="h-12 rounded-full px-8 text-sm font-normal tracking-wide"
       >
         {enviando ? "Guardando…" : "Cambiar contraseña"}
-      </Button>
+      </PendingButton>
     </form>
   )
 }

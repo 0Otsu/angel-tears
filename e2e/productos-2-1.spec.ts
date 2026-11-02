@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test"
+import { expect, test, type Page } from "@playwright/test"
 import { eq, inArray } from "drizzle-orm"
 import { crearConexionBd } from "../lib/infraestructura/conexion-bd"
 import { categoria, producto } from "../lib/infraestructura/esquemas/producto"
@@ -9,6 +9,19 @@ import { crearImagenPrueba } from "../pruebas/imagenes-producto"
 import { borrarCuentaDePrueba, CONTRASENA_DE_PRUEBA, crearCuentaDePrueba, EMAIL_DE_PRUEBA, reiniciarLimiteDeIntentos, vencerSesionesDePrueba } from "./apoyo/cuenta-de-prueba"
 
 // Servidor Next real del arnes existente, exclusivamente sobre DATABASE_URL_TEST.
+// Retiene una respuesta REAL solo en el navegador de prueba, sin tiempos ficticios en la app.
+async function observarEspera(page: Page, patron: string, accion: () => Promise<unknown>, texto: string, captura: string) {
+  let liberar!: () => void
+  const espera = new Promise<void>(r => { liberar = r })
+  let terminar!: () => void
+  const finalizado = new Promise<void>(r => { terminar = r })
+  await page.route(patron, async ruta => { try { const respuesta = await ruta.fetch(); await espera; await ruta.fulfill({ response: respuesta }) } finally { terminar() } })
+  try {
+    await accion()
+    await expect(page.getByText(texto, { exact: true }).first()).toBeVisible()
+    await page.screenshot({ path: captura, fullPage: true })
+  } finally { liberar(); await finalizado; await page.unroute(patron) }
+}
 const con = () => crearConexionBd(validarUrlBdPruebas(process.env.DATABASE_URL_TEST, process.env.DATABASE_URL))
 const ids: string[] = []
 let categoriasAgregadas: CodigoCategoria[] = []
@@ -40,10 +53,10 @@ for (const [nombreVista, width, height] of [["desktop", 1440, 1000], ["notebook"
     await expect(page).toHaveURL(/\/admin\/login$/)
     await page.getByLabel("Correo electrónico").fill(EMAIL_DE_PRUEBA)
     await page.getByLabel("Contraseña", { exact: true }).fill(CONTRASENA_DE_PRUEBA)
-    await page.getByRole("button", { name: "Ingresar", exact: true }).click()
+    await observarEspera(page, "**/api/auth/sign-in/email", () => page.getByRole("button", { name: "Ingresar", exact: true }).click(), "Ingresando…", info.outputPath(`feedback-login-${nombreVista}.png`))
     await expect(page).toHaveURL(/\/admin$/)
     await page.goto("/admin/productos")
-    await page.getByRole("link", {name: "Nuevo producto", exact: true}).first().click()
+    await observarEspera(page, "**/admin/productos/nuevo*", () => page.getByRole("button", {name: "Nuevo producto", exact: true}).first().click(), "Cargando…", info.outputPath(`feedback-navegacion-${nombreVista}.png`))
     const formulario = page.getByRole("form")
     await expect(page.getByText("Datos de demostración · sin persistencia")).toHaveCount(0)
     await formulario.getByRole("button", { name: "Guardar y continuar" }).click()
@@ -57,7 +70,7 @@ for (const [nombreVista, width, height] of [["desktop", 1440, 1000], ["notebook"
     await expect(page.getByLabel("Precio de venta (ARS) *")).toBeFocused()
     await page.getByLabel("Precio de venta (ARS) *").fill("1250.50")
     await page.getByLabel("Material", { exact: true }).fill("Acero")
-    await formulario.getByRole("button", { name: "Guardar y continuar" }).click()
+    await observarEspera(page, "**/admin/productos/nuevo", () => formulario.getByRole("button", { name: "Guardar y continuar" }).click(), "Guardando…", info.outputPath(`feedback-guardar-${nombreVista}.png`))
     await expect(page).toHaveURL(/\/editar\?paso=imagen&alta=1$/)
     await expect(page.getByText(/Oculto/).first()).toBeVisible()
     const conexion = con()
@@ -104,7 +117,7 @@ for (const [nombreVista, width, height] of [["desktop", 1440, 1000], ["notebook"
         await page.goto("/admin/productos")
         const menu=page.getByRole("button",{name:`Acciones de ${nombre} editado`,exact:true})
         await menu.focus();await page.keyboard.press("Enter")
-        await page.getByRole("menuitem",{name:"Publicar",exact:true}).click()
+        await observarEspera(page, "**/admin/productos", () => page.getByRole("menuitem",{name:"Publicar",exact:true}).click(), "Publicando…", info.outputPath("feedback-publicar-desktop.png"))
         await expect(page.getByRole("alert")).toContainText("Agregá una imagen válida")
         await menu.click();await page.getByRole("menuitem",{name:"Destacar",exact:true}).click()
         await expect(page.getByText("Producto destacado.",{exact:true})).toBeVisible()

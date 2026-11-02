@@ -1,10 +1,10 @@
 "use client"
 
-import { useState, type FormEvent } from "react"
+import { useTransition, useState, type FormEvent } from "react"
 import { useRouter } from "next/navigation"
 import { ArrowRight } from "lucide-react"
 import { z } from "zod"
-import { Button } from "@/components/ui/button"
+import { PendingButton } from "@/components/ui/pending-button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { authClient } from "@/lib/infraestructura/auth-cliente"
@@ -34,12 +34,13 @@ function mensajeDeError(error: { status?: number; code?: string }): string {
 
 export function FormularioLogin() {
   const router = useRouter()
+  const [navegando, navegar] = useTransition()
   const [errores, setErrores] = useState<Errores>({})
   const [enviando, setEnviando] = useState(false)
 
   async function alEnviar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault()
-    if (enviando) return
+    if (enviando || navegando) return
     const formulario = evento.currentTarget
     const datos = new FormData(formulario)
     const email = String(datos.get("email") ?? "").trim()
@@ -66,8 +67,7 @@ export function FormularioLogin() {
         fallar(formulario, mensajeDeError(error))
         return
       }
-      router.push("/admin")
-      router.refresh()
+      navegar(() => { router.push("/admin"); router.refresh() })
     } catch {
       fallar(formulario, MENSAJE_TECNICO)
     } finally {
@@ -146,17 +146,18 @@ export function FormularioLogin() {
         </p>
       )}
 
-      <Button
+      <PendingButton
+        pending={enviando || navegando} pendingLabel="Ingresando…"
         type="submit"
-        disabled={enviando}
-        aria-busy={enviando}
+        disabled={enviando || navegando}
+        aria-busy={enviando || navegando}
         className="group mt-2 h-13 w-full rounded-full px-8 text-sm font-normal tracking-wide boty-shadow boty-transition focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       >
         {enviando ? "Ingresando…" : "Ingresar"}
         {!enviando && (
           <ArrowRight className="size-4 boty-transition group-hover:translate-x-1" aria-hidden="true" />
         )}
-      </Button>
+      </PendingButton>
     </form>
   )
 }
