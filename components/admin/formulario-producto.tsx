@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState, useTransition, type FormEvent, type ReactNode } from "react"
+import { startTransition, useEffect, useRef, useState, useTransition, type FormEvent, type ReactNode } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { crearProductoAccion, editarProductoAccion } from "@/app/admin/(panel)/productos/acciones"
@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PanelAdmin, TituloPanel } from "./piezas-admin"
+import { AvisoProductoGuardado } from "./aviso-producto-guardado"
 
 const campos = [
   { nombre: "nombre", etiqueta: "Nombre", requerido: true },
@@ -33,7 +34,7 @@ function valoresIniciales(producto?: ProductoAdministrativo): Record<NombreCampo
 function mensaje(resultado: EstadoFormularioProducto) {
   switch (resultado.estado) {
     case "sesion_requerida": return "Tu sesión venció. Volvé a iniciar sesión antes de guardar."
-    case "conflicto_version": return "Otra edición se guardó antes. Recargá el listado y revisá el producto antes de volver a editarlo."
+    case "conflicto_version": return "El producto cambió desde que lo abriste."
     case "no_encontrado": return "El producto ya no está disponible. Recargá el listado."
     case "error_tecnico": return "No pudimos guardar el producto. Conservamos tus datos para que puedas reintentar."
     case "datos_invalidos": return "Revisá los campos indicados."
@@ -56,7 +57,10 @@ export function FormularioProducto({ producto, categorias, cancelar, versionProp
   useEffect(() => { alCambiarBorrador?.(JSON.stringify(valores) !== JSON.stringify(guardados)) }, [valores, guardados, alCambiarBorrador])
   const [versionEsperada, setVersionEsperada] = useState(producto?.version ?? 0)
   const [resultado, setResultado] = useState<EstadoFormularioProducto>({ estado: "inicial" })
-  const [pendiente, iniciar] = useTransition()
+  const [guardando, ocupar] = useState(false)
+  const [navegando, navegar] = useTransition()
+  const enviando = useRef(false)
+  const pendiente = guardando || navegando
   useEffect(() => { alCambiarOcupado?.(pendiente) }, [pendiente, alCambiarOcupado])
   const formularioRef = useRef<HTMLFormElement>(null)
   const router = useRouter()
@@ -69,12 +73,13 @@ export function FormularioProducto({ producto, categorias, cancelar, versionProp
     }
   }, [pendiente, resultado])
 
-  function enviar(evento: FormEvent<HTMLFormElement>) {
+  async function enviar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault()
-    if (pendiente) return
+    if (pendiente || enviando.current) return
     const formulario = evento.currentTarget
     const datos = new FormData(formulario)
-    iniciar(async () => {
+    enviando.current = true; ocupar(true)
+    try {
       let respuesta: EstadoFormularioProducto
       try {
         respuesta = await (producto ? editarProductoAccion(datos) : crearProductoAccion(datos))
@@ -85,14 +90,16 @@ export function FormularioProducto({ producto, categorias, cancelar, versionProp
       if (respuesta.estado === "ok") {
         setGuardados(valores)
         if (producto) setVersionEsperada(Math.max(versionEsperada, versionPropia ?? 0) + 1)
-        alGuardar?.(respuesta.productoId, valores)
-        if (producto) router.refresh()
+        if (producto) {
+          alGuardar?.(respuesta.productoId, valores)
+          startTransition(() => router.refresh())
+        } else navegar(() => alGuardar?.(respuesta.productoId, valores))
       }
-    })
+    } finally { enviando.current = false; ocupar(false) }
   }
 
   return <PanelAdmin>
-    <TituloPanel titulo="Datos del producto" detalle={producto ? "La URL y los estados actuales se conservan." : "Se conservará oculto hasta que elijas publicarlo."} />
+    <TituloPanel titulo="Datos del producto" />
     <form ref={formularioRef} onSubmit={enviar} noValidate aria-label={producto ? "Editar producto" : "Nuevo producto"} className="space-y-5 px-5 pb-6 lg:px-6">
       {producto && <><input type="hidden" name="id" value={producto.id} /><input type="hidden" name="version" value={Math.max(versionEsperada, versionPropia ?? 0)} /></>}
       <fieldset disabled={pendiente} className="grid min-w-0 gap-5 sm:grid-cols-2">
@@ -105,7 +112,7 @@ export function FormularioProducto({ producto, categorias, cancelar, versionProp
               required={requerido} aria-invalid={Boolean(errores[campo.nombre])}
               aria-describedby={errores[campo.nombre] ? `error-${campo.nombre}` : campo.nombre === "precio" ? "ayuda-precio" : undefined}
               inputMode={campo.nombre === "precio" ? "decimal" : undefined} className="h-11 bg-background" />
-            {campo.nombre === "precio" && <p id="ayuda-precio" className="text-xs text-muted-foreground">Mayor que $0. Decimales opcionales, hasta dos: 222, 222.5 o 222.50.</p>}
+            {campo.nombre === "precio" && <p id="ayuda-precio" className="text-xs text-muted-foreground">Mayor que $0. Hasta dos decimales, con punto: 33000.50.</p>}
             {errores[campo.nombre] && <p id={`error-${campo.nombre}`} className="text-sm text-destructive">{errores[campo.nombre]}</p>}
           </div>
         })}
@@ -121,15 +128,15 @@ export function FormularioProducto({ producto, categorias, cancelar, versionProp
           {errores.categoriaCodigo && <p id="error-categoriaCodigo" className="text-sm text-destructive">{errores.categoriaCodigo}</p>}
         </div>
       </fieldset>
-      {resultado.estado === "ok" && <p role="status" className="text-sm text-primary">Producto guardado correctamente.</p>}
+      {resultado.estado === "ok" && <AvisoProductoGuardado key={versionEsperada} texto={producto ? "Cambios guardados." : "Producto creado."} />}
       {mensaje(resultado) && <div role="alert" className="space-y-2 text-sm text-destructive">
         <p>{mensaje(resultado)}</p>
         {resultado.estado === "sesion_requerida" && <Link href="/admin/login" className="underline">Iniciar sesión</Link>}
-        {(resultado.estado === "conflicto_version" || resultado.estado === "no_encontrado") && <Button type="button" variant="outline" onClick={() => { window.location.reload() }}>Recargar listado</Button>}
+        {(resultado.estado === "conflicto_version" || resultado.estado === "no_encontrado") && <Button type="button" variant="outline" onClick={() => { window.location.reload() }}>Recargar datos</Button>}
       </div>}
       <div className="flex flex-wrap gap-3">
         {accionCancelar ?? <Button type="button" variant="outline" className="border-destructive/35 text-destructive hover:bg-destructive/5" disabled={pendiente} onClick={cancelar}>Cancelar</Button>}
-        <PendingButton pending={pendiente} pendingLabel="Guardando…" type="submit" disabled={pendiente || categorias.length === 0} aria-busy={pendiente}>{pendiente ? "Guardando…" : producto ? "Guardar cambios" : "Guardar y continuar"}</PendingButton>
+        <PendingButton className="min-h-11" pending={pendiente} pendingLabel="Guardando…" type="submit" disabled={pendiente || categorias.length === 0}>{producto ? "Guardar cambios" : "Guardar y continuar"}</PendingButton>
       </div>
     </form>
   </PanelAdmin>

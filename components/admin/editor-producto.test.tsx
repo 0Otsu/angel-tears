@@ -18,6 +18,7 @@ it("publicacion pendiente bloquea solo su producto y vuelve a permitir tras erro
  fireEvent.click(screen.getAllByRole("button",{name:"Publicar producto"})[0])
  const pendiente = screen.getByRole("button",{name:"Publicando…"}) as HTMLButtonElement
  expect(pendiente.disabled).toBe(true)
+ expect(screen.getAllByText("Publicando…")).toHaveLength(1)
  fireEvent.click(pendiente)
  expect(publicar).toHaveBeenCalledTimes(1)
  expect((screen.getByRole("button",{name:"Publicar producto"}) as HTMLButtonElement).disabled).toBe(false)
@@ -29,7 +30,7 @@ beforeEach(() => { editar.mockReset(); publicar.mockReset(); navegar.mockReset()
 it("empty state prioriza CTA y no despliega formulario", () => {
   render(<ProductosAdmin consulta={{ productos: [], categorias }} />)
   expect(screen.queryByRole("form")).toBeNull()
-  fireEvent.click(screen.getAllByRole("button", { name: "Nuevo producto" })[0])
+  fireEvent.click(screen.getByRole("button", { name: "Crear primer producto" }))
   expect(navegar).toHaveBeenCalledWith("/admin/productos/nuevo")
 })
 it("filtra productos persistidos y distingue filtro vacio", () => {
@@ -67,7 +68,7 @@ it("guardar oculto confirma el comando y navega sin competir con un refresh", as
  publicar.mockResolvedValue({estado:"ok",productoId:producto.id,slug:producto.slug,version:2});
  render(<AccionesProducto producto={producto} finalizar />);
  fireEvent.click(screen.getByRole("button",{name:"Guardar como oculto"}));
- await waitFor(()=>expect(navegar).toHaveBeenCalledWith("/admin/productos"));
+ await waitFor(()=>expect(navegar).toHaveBeenCalledWith(`/admin/productos?cancelado=${producto.id}`));
  expect(publicar).toHaveBeenCalledWith({id:producto.id,version:1,accion:"ocultar"});
  expect(refrescar).not.toHaveBeenCalled();
 })
@@ -80,4 +81,39 @@ it("publicar desde resumen conserva feedback al pasar a acciones de producto pub
  expect(await screen.findByText("Producto publicado.")).toBeTruthy();
  expect(screen.getByRole("button",{name:"Acciones de Collar"})).toBeTruthy();
  expect(screen.getByRole("button",{name:"Cancelar"})).toBeTruthy();
+})
+
+it("recuperacion contextual: error normal permite retry y solo un conflicto pide recargar", async () => {
+  publicar.mockResolvedValueOnce({ estado: "error_tecnico" }).mockResolvedValueOnce({ estado: "conflicto_version" })
+  render(<AccionesProducto producto={{ ...producto, tieneImagen: true }} finalizar />)
+  expect(screen.queryByRole("button", { name: "Recargar datos" })).toBeNull()
+  fireEvent.click(screen.getByRole("button", { name: "Publicar producto" }))
+  await screen.findByRole("alert")
+  expect(screen.queryByRole("button", { name: "Recargar datos" })).toBeNull()
+  fireEvent.click(screen.getByRole("button", { name: "Reintentar" }))
+  expect(await screen.findByText("El producto cambió desde que lo abriste.")).toBeTruthy()
+  expect(screen.getByRole("button", { name: "Recargar datos" })).toBeTruthy()
+  expect((screen.getByRole("button", { name: "Publicar producto" }) as HTMLButtonElement).disabled).toBe(false)
+})
+it("Finalizar conserva borrador y pide guardarlo antes de confirmar el estado", () => {
+  render(<EditorProducto producto={{ ...producto, tieneImagen: true, imagen: { urlSegura: "https://example.test/A.png", ancho: 20, alto: 20 }, precio: "33000.50" }} categorias={categorias} />)
+  fireEvent.change(screen.getByLabelText("Nombre *"), { target: { value: "Sin guardar" } })
+  fireEvent.click(screen.getByRole("button", { name: "3. Finalizar" }))
+  expect(screen.getByText("Tenés cambios sin guardar.")).toBeTruthy()
+  expect(screen.getByText("$33.000,50")).toBeTruthy()
+  expect((screen.getByRole("button", { name: "Publicar producto" }) as HTMLButtonElement).disabled).toBe(true)
+  fireEvent.click(screen.getByRole("button", { name: "Volver a Datos" }))
+  expect((screen.getByLabelText("Nombre *") as HTMLInputElement).value).toBe("Sin guardar")
+  expect(publicar).not.toHaveBeenCalled()
+})
+it("listado aplica la confirmacion propia antes del refresh y conserva el aviso al filtrar", async () => {
+  publicar.mockResolvedValue({ estado: "ok", productoId: producto.id, slug: producto.slug, version: 2 })
+  render(<ProductosAdmin consulta={{ productos: [{ ...producto, tieneImagen: true, precio: "33000.00" }], categorias }} />)
+  expect(screen.getByText("$33.000")).toBeTruthy()
+  fireEvent.change(screen.getByLabelText("Estado"), { target: { value: "oculto" } })
+  fireEvent.keyDown(screen.getByRole("button", { name: "Acciones de Collar" }), { key: "Enter", code: "Enter" })
+  fireEvent.click(await screen.findByRole("menuitem", { name: "Publicar" }))
+  expect(await screen.findByText("Producto publicado.")).toBeTruthy()
+  expect(screen.queryByRole("heading", { name: "Collar" })).toBeNull()
+  expect(screen.getByText("No hay productos que coincidan con estos filtros.")).toBeTruthy()
 })

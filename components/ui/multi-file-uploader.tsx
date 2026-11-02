@@ -41,18 +41,17 @@ export function MultiFileUploader<T>({ maxFiles, count = 0, onSuccess, onBusy, o
       onDrop={e => { e.preventDefault(); seleccionar(e.dataTransfer.files) }}
       className={`cursor-pointer rounded-xl border-2 border-dashed p-6 text-center transition-colors duration-150 motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-primary ${drag ? "border-primary bg-primary/10 ring-4 ring-primary/10" : "border-border bg-card/30"}`}>
       <Upload aria-hidden="true" className="mx-auto mb-3 size-7 text-primary" />
-      <p className="font-medium">{drag ? "Soltá para agregar" : count || archivos.length ? "Agregar archivos" : "Arrastrá imágenes hasta acá"}</p>
+      <p className="font-medium">{drag ? "Soltá para agregar" : count || archivos.length ? props.textoSeleccionar ?? "Agregar archivos" : props.textoIdle ?? "Arrastrá imágenes hasta acá"}</p>
       <p className="text-sm text-muted-foreground">o hacé clic para seleccionarlas</p>
     </div>}
-    <p id={`${id}-ayuda`} className="text-xs text-muted-foreground">Hasta {maxFiles} archivos · {count} guardados · {archivos.length} seleccionados. {props.instrucciones}</p>
+    <p id={`${id}-ayuda`} className="text-xs text-muted-foreground">Hasta {maxFiles} archivos. {props.instrucciones}</p>
     {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
-    {archivos.length > 0 && <Button type="button" disabled={props.disabled || !archivos.some(a => a.fase === "selected")} onClick={() => { fallar(""); activar(true) }}>Subir archivos</Button>}
+    {archivos.some(a => a.fase === "selected") && <Button className="min-h-11" type="button" disabled={props.disabled || busy} onClick={() => { fallar(""); activar(true) }}>Subir archivos</Button>}
     <ul aria-label="Archivos seleccionados" className="space-y-4">{archivos.map(a => <li key={a.id} className="min-w-0 rounded-xl border p-4">
-      <FileUploader {...props} initialFile={a.archivo} etiqueta={`${props.etiqueta}: ${a.archivo.name}`} compact showPickerButton={false}
+      <FileUploader {...props} initialFile={a.archivo} etiqueta={`${props.etiqueta}: ${a.archivo.name}`} compact showPickerButton={false} showUploadButton={false}
         disabled={props.disabled || Boolean(activo && activo.id !== a.id)} autoUpload={siguiente?.id === a.id}
         onPhase={nueva => fase(a.id, nueva)} onRemove={() => { fallar(""); cambiar(prev => prev.filter(p => p.id !== a.id)) }}
         onSuccess={(resultado, archivo) => { fallar(""); onSuccess(resultado, archivo); cambiar(prev => prev.filter(p => p.id !== a.id)) }} />
-      {a.fase === "error" && <Button type="button" variant="outline" onClick={() => { fallar(""); cambiar(prev => prev.filter(p => p.id !== a.id)) }}>Quitar archivo</Button>}
     </li>)}</ul>
   </div>
 }

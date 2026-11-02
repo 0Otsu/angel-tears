@@ -55,7 +55,7 @@ for(const [vista,width,height] of [["desktop",1440,1000],["notebook",1280,800],[
       await expect(page).toHaveURL(/\/admin$/)
       await page.goto("/admin/productos")
       await page.getByRole("button",{name:`Acciones de ${nombre}`,exact:true}).click()
-      await page.getByRole("menuitem",{name:"Cambiar imagen",exact:true}).click()
+      await page.getByRole("menuitem",{name:"Gestionar imágenes",exact:true}).click()
       const panel=page.getByRole("region",{name:`Imagen de ${nombre}`})
       const actual=panel.getByAltText(`Imagen actual de ${nombre}`)
       await expect(actual).toBeVisible()

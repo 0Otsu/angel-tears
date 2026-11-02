@@ -43,7 +43,7 @@ export function EstructuraAdmin({ children, nombre, email }: { children: ReactNo
       <div className="pb-10 pt-2"><MarcaAdmin /></div>
       <p className="mb-3 px-3.5 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Tu negocio</p>
       <NavegacionAdmin />
-      <div className="mt-auto space-y-4 pt-8"><div className="rounded-xl border border-border/70 bg-background/70 p-4"><p className="text-xs font-medium text-primary">Un espacio para cada detalle.</p><p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">{productosPersistidos ? "Los productos que guardás quedan registrados en el sistema." : <>Navegación de muestra.<br />Sin conexión a datos reales.</>}</p></div><BotonCerrarSesion /></div>
+      <div className="mt-auto space-y-4 pt-8">{!productosPersistidos && <div className="rounded-xl border border-border/70 bg-background/70 p-4"><p className="text-xs font-medium text-primary">Un espacio para cada detalle.</p><p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">Navegación de muestra.<br />Sin conexión a datos reales.</p></div>}<BotonCerrarSesion /></div>
     </aside>
 
     <div className="min-w-0 lg:ml-60">
@@ -56,7 +56,7 @@ export function EstructuraAdmin({ children, nombre, email }: { children: ReactNo
               <NavegacionAdmin alNavegar={() => setMenuAbierto(false)} /><div className="mt-auto pt-6"><BotonCerrarSesion /></div>
             </SheetContent>
           </Sheet>
-          <p className="hidden items-center gap-2 text-xs text-muted-foreground sm:flex">Administración<ChevronRight className="size-3" aria-hidden="true" /><span className="text-foreground">{actual}</span></p>
+          {productosPersistidos ? ruta !== "/admin/productos" && <nav aria-label="Ubicación" className="hidden items-center gap-2 text-xs text-muted-foreground sm:flex"><Link href="/admin/productos" className="rounded-sm underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-primary">Productos</Link><ChevronRight className="size-3" aria-hidden="true" /><span>{ruta.endsWith("/nuevo") ? "Nuevo producto" : "Editar producto"}</span></nav> : <p className="hidden items-center gap-2 text-xs text-muted-foreground sm:flex">Administración<ChevronRight className="size-3" aria-hidden="true" /><span className="text-foreground">{actual}</span></p>}
           <span className="font-serif text-xl sm:hidden">Angel Tears</span>
         </div>
         <div className="flex shrink-0 items-center gap-3 lg:gap-5">
@@ -65,7 +65,7 @@ export function EstructuraAdmin({ children, nombre, email }: { children: ReactNo
         </div>
       </header>
       <main id="contenido-admin" tabIndex={-1} className="mx-auto max-w-[1440px] space-y-6 p-4 pb-10 outline-none lg:p-8">{children}</main>
-      <footer className="flex flex-wrap justify-between gap-2 border-t border-border/70 px-4 py-4 text-[10px] text-muted-foreground lg:px-8"><span>Angel Tears · {productosPersistidos ? "Administración de productos" : "Prototipo de administración"}</span><span>{productosPersistidos ? "Productos registrados" : "Datos de demostración · sin persistencia"}</span></footer>
+      {!productosPersistidos && <footer className="flex flex-wrap justify-between gap-2 border-t border-border/70 px-4 py-4 text-[10px] text-muted-foreground lg:px-8"><span>Angel Tears · Prototipo de administración</span><span>Datos de demostración · sin persistencia</span></footer>}
     </div>
   </div>
 }
