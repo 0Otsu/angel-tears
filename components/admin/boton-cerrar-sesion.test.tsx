@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { BotonCerrarSesion } from "@/components/admin/boton-cerrar-sesion"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 const { cerrarSesion, push, refresh } = vi.hoisted(() => ({
   cerrarSesion: vi.fn(),
@@ -18,6 +19,14 @@ beforeEach(() => {
 })
 
 describe("boton de cerrar sesion", () => {
+  it("variante de menu conserva error inline y no cierra ni navega si falla el mismo handler", async () => {
+    cerrarSesion.mockResolvedValue({ error: { status: 500 } })
+    render(<DropdownMenu open><DropdownMenuTrigger>Usuario</DropdownMenuTrigger><DropdownMenuContent><BotonCerrarSesion enMenu /></DropdownMenuContent></DropdownMenu>)
+    fireEvent.click(screen.getByRole("menuitem", { name: "Cerrar sesión" }))
+    expect((await screen.findByRole("alert")).textContent).toContain("No pudimos cerrar la sesión")
+    expect(screen.getByRole("menuitem", { name: "Cerrar sesión" })).toBeTruthy()
+    expect(cerrarSesion).toHaveBeenCalledTimes(1); expect(push).not.toHaveBeenCalled()
+  })
   it("cierra la sesion en el servidor y vuelve al login", async () => {
     cerrarSesion.mockResolvedValue({ data: { success: true }, error: null })
     render(<BotonCerrarSesion />)

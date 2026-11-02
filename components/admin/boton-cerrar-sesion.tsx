@@ -5,11 +5,12 @@ import { useRouter } from "next/navigation"
 import { Spinner } from "@/components/ui/spinner"
 import { LogOut } from "lucide-react"
 import { authClient } from "@/lib/infraestructura/auth-cliente"
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
 
 // Cierre de sesion real (tarea 2.5): invalida la sesion en el servidor (la fila de la base y la
 // cookie) y vuelve al login. Si el servidor no confirma el cierre, NO se navega: la sesion sigue
 // abierta y se avisa, en vez de aparentar que se cerro.
-export function BotonCerrarSesion() {
+export function BotonCerrarSesion({ enMenu = false }: { enMenu?: boolean }) {
   const router = useRouter()
   const [navegando, navegar] = useTransition()
   const [cerrando, setCerrando] = useState(false)
@@ -35,7 +36,9 @@ export function BotonCerrarSesion() {
 
   return (
     <div>
-      <button
+      {enMenu ? <DropdownMenuItem disabled={cerrando || navegando} aria-busy={cerrando || navegando} className="min-h-11" onSelect={evento => { evento.preventDefault(); void cerrarSesion() }}>
+        {cerrando || navegando ? <Spinner /> : <LogOut className="size-4" aria-hidden="true" />}{cerrando || navegando ? "Cerrando sesión…" : "Cerrar sesión"}
+      </DropdownMenuItem> : <button
         type="button"
         onClick={cerrarSesion}
         disabled={cerrando || navegando}
@@ -44,7 +47,7 @@ export function BotonCerrarSesion() {
       >
         {cerrando || navegando ? <Spinner /> : <LogOut className="size-4" aria-hidden="true" />}
         {cerrando || navegando ? "Cerrando sesión…" : "Cerrar sesión"}
-      </button>
+      </button>}
       {fallo && (
         <p role="alert" className="px-3.5 pt-1 text-xs text-destructive">
           No pudimos cerrar la sesión. Probá de nuevo.

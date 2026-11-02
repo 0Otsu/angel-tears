@@ -7,4 +7,4 @@ export default async function PaginaStock() {
   return <VistaModulo modulo="stock" />
 }
 
-export const metadata: Metadata = { title: "Stock" }
+export const metadata: Metadata = { title: "Inventario" }

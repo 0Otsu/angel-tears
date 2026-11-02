@@ -176,6 +176,8 @@ Un UUID de solicitud identifica una operación lógica, no un producto ni un int
 
 ## 8. Arquitectura Next.js y navegación
 
+Actualizacion de navegacion autorizada el 02/11/2026: el shell agrupa cinco destinos (Resumen, Productos, Inventario, Operaciones y Finanzas) sin cambiar ownership ni contratos. Inventario conserva `/admin/stock`; Operaciones abre `/admin/ventas` y ofrece enlaces secundarios a Ventas/Compras/Proveedores en sus rutas actuales. `/admin/finanzas` reutiliza la vista financiera mock y enlaza Egresos en `/admin/egresos`; `/admin/reportes` redirige con guard previo a Finanzas. Cuenta se accede desde el menu de identidad del header; Configuracion conserva su ruta sin enlace principal. Esta agrupacion no implementa las capacidades R2/R3 ni reemplaza mocks.
+
 | Superficie futura | Organización / acceso |
 | --- | --- |
 | `/`, `/catalogo`, `/catalogo/[slug]` | conservar URLs y visual público; RSC consulta proyección real, Client solo filtros/controles; ningún visitante necesita sesión |

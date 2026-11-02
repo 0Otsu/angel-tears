@@ -53,7 +53,8 @@ test.describe("cuenta de la Administradora", () => {
   test("se llega desde el menu y muestra nombre y correo de solo lectura, sin edicion de identidad", async ({ page }) => {
     await iniciarSesionPorLaInterfaz(page)
 
-    await page.getByRole("link", { name: "Cuenta" }).click()
+    await page.getByRole("button", { name: /^Menú de usuario:/ }).click()
+    await page.getByRole("menuitem", { name: "Mi cuenta" }).click()
 
     await expect(page).toHaveURL(/\/admin\/cuenta$/)
     await expect(page.getByRole("heading", { name: "Cuenta" })).toBeVisible()
