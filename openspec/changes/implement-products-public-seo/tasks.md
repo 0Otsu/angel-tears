@@ -50,6 +50,12 @@ Polish posterior autorizado del 01/11/2026, sin reabrir 2.5 ni reglas de negocio
 
 ## 3. Público real
 
+### Ampliacion autorizada: galeria de imagenes
+
+- [x] G1 Implementar relacion/backfill compatibles, maximo siete, principal, cola reutilizable con progreso/retry independientes y galeria PDP; verificar PostgreSQL, migration nueva/existente, navegador y Cloudinary real antes de integrar. No reabre 2.2-2.5. Evidencia en [galeria](../../../docs/features/PRODUCTOS_GALERIA.md): 348 unit/component, 172 PostgreSQL, 57 E2E; smoke Cloudinary real hasta siete assets, octavo rechazado, principal/reemplazo/eliminacion/delivery y cleanup comprobados. Una migration 0003 con backfill validado desde cero/sobre datos anteriores; sin cambiar otros owners.
+
+Video P1 queda pendiente: no hay decoder/validacion de contenedor/duracion ni politica de tamano/hosting de video; no se acepta video a medias. Conserva 4.4 parcial y 5.x abiertas.
+
 - [x] 3.1 Implementar proyección autorizada con Inventario real y sin N+1; probar publicado/oculto/sin stock y ausencia de datos privados en DTO.
 
 Evidencia 3.1 del 31/10/2026: proyección de solo lectura en `lib/modulos/catalogo`, JOIN explícito de Producto/Categoría/Inventario conforme al blueprint sección 6. Cinco pruebas PostgreSQL verifican elegibilidad, PDP agotada, oculto/inexistente, DTO sin datos privados, filtros/límite/exclusión, una consulta sin N+1 y errores propagados. Sin cambios a Inventario/contratos ni consumo del proveedor de imágenes. Lint específico y typecheck correctos. La traducción de null a 404 y la UI Sin stock se verifican en 3.2.

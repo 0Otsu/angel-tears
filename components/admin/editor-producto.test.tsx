@@ -8,7 +8,7 @@ const { editar, publicar, navegar, refrescar } = vi.hoisted(() => ({ editar: vi.
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: refrescar, push: navegar }) }))
 vi.mock("@/app/admin/(panel)/productos/acciones", () => ({ crearProductoAccion: vi.fn(), editarProductoAccion: editar }))
 vi.mock("@/app/admin/(panel)/productos/publicacion-acciones", () => ({ cambiarPublicacionAccion: publicar }))
-vi.mock("./carga-imagen-producto", () => ({ CargaImagenProducto: ({ version, alGuardar }: { version: number; alGuardar: (valor: unknown) => void }) => <button onClick={() => alGuardar({ version: version + 1, imagen: { urlSegura: "https://example.test/B.png", ancho: 20, alto: 20 } })}>Confirmar imagen de prueba</button> }))
+vi.mock("./galeria-producto", () => ({ GaleriaProducto: ({ version, alGuardar }: { version: number; alGuardar: (valor: unknown) => void }) => <button onClick={() => alGuardar({ version: version + 1, imagen: { urlSegura: "https://example.test/B.png", ancho: 20, alto: 20 } })}>Confirmar imagen de prueba</button> }))
 const producto: ProductoAdministrativo = { id: "cd12704c-e5a7-4216-b16e-ad6d7ae47490", nombre: "Collar", slug: "collar", precio: "222.00", categoriaCodigo: "collares", categoriaNombre: "Collares", descripcion: null, material: null, medida: null, color: null, cuidados: null, publicado: false, destacado: false, version: 1, tieneImagen: false, imagen: null }
 const categorias = [{ codigo: "collares" as const, nombre: "Collares" }]
 it("publicacion pendiente bloquea solo su producto y vuelve a permitir tras error", async () => {

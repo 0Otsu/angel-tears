@@ -2,6 +2,8 @@
 
 ## Context
 
+Actualizacion autorizada de galeria (01/11/2026, cierre 02/11/2026): `producto_media` hasta siete imagenes, backfill de la anterior a principal y proyeccion compatible en columnas existentes con triggers/constraints diferidos. Uploader multiple reutiliza el control por archivo con cola serial, progreso XHR, retry individual y confirmacion explicita de nuevas tandas. PDP consulta galeria en la misma instantanea SQL; cards/SEO conservan principal. Video no implementado por falta de validacion de contenedor/duracion y politica de limites/hosting. Las decisiones/evidencias de 2.2-2.5 inferiores son historicas y conservan sus garantias; detalle vigente en [galeria](../../../docs/features/PRODUCTOS_GALERIA.md).
+
 Ver proposal y blueprint 3–10/12. Augusto posee Producto, categorías, imagen y proyección pública; no schema/saldo de Inventario. Se reutilizan Boty/shadcn cuando sirvan, sin template como requisito.
 
 ## Goals / Non-Goals

@@ -26,6 +26,8 @@ Entrega responsive por CDN con transformaciones acotadas y URLs versionadas; `ne
 
 ## Consecuencias y pendientes
 
+Actualizacion autorizada del 01/11/2026: la galeria de hasta siete imagenes reutiliza estos limites/adapter y las garantias de compensacion. `producto_media` es la relacion persistida; las columnas anteriores de Producto se conservan como proyeccion de principal, sincronizada y verificada por triggers transaccionales para compatibilidad con endpoints 2.2/2.3 y consumidores. Video requiere otra validacion/politica de upload y sigue pendiente. Detalle/evidencia en [galeria](../features/PRODUCTOS_GALERIA.md).
+
 Reemplazo fallido y conflicto concurrente se prueban antes de cerrar Productos. Fijar credenciales server-only y prefijo por entorno al operar. El adaptador permite migrar proveedor conservando la referencia de aplicación, sin introducir repositorios genéricos ni multicloud.
 
 Fuentes: [Cloudinary, precios](https://cloudinary.com/pricing), [Upload API](https://cloudinary.com/documentation/image_upload_api_reference), [Vercel Blob](https://vercel.com/docs/vercel-blob), [S3](https://aws.amazon.com/s3/). Consultadas el 19/10/2026.

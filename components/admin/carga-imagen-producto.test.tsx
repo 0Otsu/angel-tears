@@ -107,7 +107,7 @@ describe("control accesible de primera imagen", () => {
     expect(enviar).toHaveBeenCalledTimes(1)
     expect(screen.getByAltText(/Vista previa/)).toBeTruthy()
     fireEvent.click(screen.getByRole("button", { name: "Reintentar" }))
-    expect(screen.getByRole("status").textContent).toContain("Subiendo")
+    expect(screen.getByRole("status").textContent).toContain("Reintentando")
     expect((enviar.mock.calls[1][1] as FormData).get("imagen")).toBeInstanceOf(File)
     await act(async () => resolver({ estado: "error", codigo: "error_proveedor", mensaje: mensajesErrorImagen.error_proveedor }))
     expect(enviar).toHaveBeenCalledTimes(2)

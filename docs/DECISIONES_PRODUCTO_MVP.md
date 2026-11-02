@@ -222,7 +222,7 @@ Las reglas aquí aprobadas no convierten los mocks en funciones reales. La aplic
 | Código | Decisión aprobada |
 | --- | --- |
 | L1 | La administradora puede subir/reemplazar la imagen de producto desde Admin. |
-| L2 | Una imagen principal por producto en el MVP. |
+| L2 | Actualizacion expresa del responsable del 01/11/2026: galeria de hasta siete medios vigentes y una unica imagen principal; al publicar se exige al menos una imagen y exactamente una principal valida. P0 implementa imagenes; video solo se admite cuando tenga validacion y entrega completas, pendiente en esta iteracion. Se conserva el registro anterior de una sola imagen en las evidencias 2.2/2.3. |
 | L3 | Si falla la nueva imagen, conservar la anterior, informar el error y no dejar una referencia rota. |
 
 **Razón:** permitir gestión real de productos preservando la imagen disponible ante fallos.

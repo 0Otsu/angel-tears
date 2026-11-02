@@ -1,4 +1,4 @@
-import Image from "next/image"
+import { GaleriaPublica } from "./galeria-publica"
 import Link from "next/link"
 import type { ProductoPublico } from "@/lib/modulos/catalogo/contrato"
 import { formatearPrecioPublico as formatPrice } from "@/lib/modulos/catalogo/presentacion"
@@ -76,9 +76,7 @@ export function DetalleProducto({ product, relacionados }: { product: ProductoPu
           </Link>
 
           <div className="grid items-start gap-12 lg:grid-cols-2 lg:gap-20">
-            <div className="relative aspect-square overflow-hidden rounded-3xl bg-card boty-shadow">
-              {product.imagen ? <Image src={product.imagen.url} alt={product.imagen.alt} fill sizes="(min-width: 1024px) 50vw, 100vw" className="object-cover" priority /> : <span className="flex h-full items-center justify-center text-muted-foreground">Imagen no disponible</span>}
-            </div>
+            <GaleriaPublica principal={product.imagen} medios={product.galeria} />
             <ProductInfo product={product} />
           </div>
 
