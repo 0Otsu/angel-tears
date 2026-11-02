@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState, useTransition, type FormEvent } from "react"
+import { useEffect, useRef, useState, useTransition, type FormEvent, type ReactNode } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { crearProductoAccion, editarProductoAccion } from "@/app/admin/(panel)/productos/acciones"
@@ -40,15 +40,19 @@ function mensaje(resultado: EstadoFormularioProducto) {
   }
 }
 
-export function FormularioProducto({ producto, categorias, cancelar, versionPropia, alGuardar, alCambiarOcupado }: {
+export function FormularioProducto({ producto, categorias, cancelar, versionPropia, alGuardar, alCambiarOcupado, alCambiarBorrador, accionCancelar }: {
   producto?: ProductoAdministrativo
   categorias: ConsultaAdministrativa["categorias"]
   cancelar: () => void
   versionPropia?: number
   alGuardar?: (id: string, datos: Record<NombreCampo, string>) => void
   alCambiarOcupado?: (ocupado: boolean) => void
+  alCambiarBorrador?: (pendiente: boolean) => void
+  accionCancelar?: ReactNode
 }) {
   const [valores, setValores] = useState(() => valoresIniciales(producto))
+  const [guardados, setGuardados] = useState(() => valoresIniciales(producto))
+  useEffect(() => { alCambiarBorrador?.(JSON.stringify(valores) !== JSON.stringify(guardados)) }, [valores, guardados, alCambiarBorrador])
   const [versionEsperada, setVersionEsperada] = useState(producto?.version ?? 0)
   const [resultado, setResultado] = useState<EstadoFormularioProducto>({ estado: "inicial" })
   const [pendiente, iniciar] = useTransition()
@@ -78,6 +82,7 @@ export function FormularioProducto({ producto, categorias, cancelar, versionProp
       }
       setResultado(respuesta)
       if (respuesta.estado === "ok") {
+        setGuardados(valores)
         if (producto) setVersionEsperada(Math.max(versionEsperada, versionPropia ?? 0) + 1)
         alGuardar?.(respuesta.productoId, valores)
         if (producto) router.refresh()
@@ -122,8 +127,8 @@ export function FormularioProducto({ producto, categorias, cancelar, versionProp
         {(resultado.estado === "conflicto_version" || resultado.estado === "no_encontrado") && <Button type="button" variant="outline" onClick={() => { window.location.reload() }}>Recargar listado</Button>}
       </div>}
       <div className="flex flex-wrap gap-3">
+        {accionCancelar ?? <Button type="button" variant="outline" className="border-destructive/35 text-destructive hover:bg-destructive/5" disabled={pendiente} onClick={cancelar}>Cancelar</Button>}
         <Button type="submit" disabled={pendiente || categorias.length === 0} aria-busy={pendiente}>{pendiente ? "Guardando…" : producto ? "Guardar cambios" : "Guardar y continuar"}</Button>
-        {producto && <Button type="button" variant="outline" disabled={pendiente} onClick={cancelar}>Cancelar edición</Button>}
       </div>
     </form>
   </PanelAdmin>

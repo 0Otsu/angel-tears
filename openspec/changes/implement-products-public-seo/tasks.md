@@ -46,6 +46,8 @@ Checkpoint independiente del 31/10/2026: 2.4 cerrada tras recuperar el contenedo
 
 Evidencia 2.5 del 01/11/2026: listado primero/empty state, alta dedicada y editor Datos/Imagen/Finalizar; filtros por nombre/categoria/estado y menu accesible de acciones reales. Precio entero/decimales opcionales ya admitidos; copy tecnico retirado sin cambiar reglas. Borrador preservado entre secciones y version coordinada solo tras operaciones propias; conflictos requieren recarga explicita. 324 unit/component, 161 PostgreSQL y 20 E2E, lint/typecheck/build/DB/OpenSpec/diff correctos. Smoke real alta-imagen-publicar/destacar-reemplazo-editar posterior-ocultar, PDP/OG coherentes, producto/assets descartables limpiados; capturas desktop/mobile revisadas. Sin schema/migrations/dependencias ni cambios a Auth/Inventario/contrato compartido. 4.4 y 5.x conservan su estado.
 
+Polish posterior autorizado del 01/11/2026, sin reabrir 2.5 ni reglas de negocio: UI generica de uploader con ocho fases, wrapper Producto que reutiliza validacion/transporte existentes, preview local/vigente, progreso XHR honesto, retry inline del mismo File desde cero y Cancelar con confirmacion de borrador/conservacion del registro persistido. 337 unit/component, 161 PostgreSQL y 22 E2E relevantes, smoke Cloudinary real con cleanup y capturas desktop/mobile; evidencia y limites en [polish UX](../../../docs/features/PRODUCTOS_UPLOADER_UX.md). 4.4 permanece parcial y 5.x abiertas; no se modifican backend Cloudinary, schema/migrations, Auth, Inventario ni contratos compartidos.
+
 ## 3. Público real
 
 - [x] 3.1 Implementar proyección autorizada con Inventario real y sin N+1; probar publicado/oculto/sin stock y ausencia de datos privados en DTO.

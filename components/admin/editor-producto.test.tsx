@@ -56,3 +56,13 @@ it("guardar oculto confirma el comando y navega sin competir con un refresh", as
  expect(publicar).toHaveBeenCalledWith({id:producto.id,version:1,accion:"ocultar"});
  expect(refrescar).not.toHaveBeenCalled();
 })
+
+it("publicar desde resumen conserva feedback al pasar a acciones de producto publicado", async () => {
+ publicar.mockResolvedValue({estado:"ok",productoId:producto.id,slug:producto.slug,version:2});
+ render(<EditorProducto producto={{...producto,tieneImagen:true,imagen:{urlSegura:"https://example.test/A.png",ancho:20,alto:20}}} categorias={categorias} />);
+ fireEvent.click(screen.getByRole("button",{name:"3. Finalizar"}));
+ fireEvent.click(screen.getByRole("button",{name:"Publicar producto"}));
+ expect(await screen.findByText("Producto publicado.")).toBeTruthy();
+ expect(screen.getByRole("button",{name:"Acciones de Collar"})).toBeTruthy();
+ expect(screen.getByRole("button",{name:"Cancelar"})).toBeTruthy();
+})

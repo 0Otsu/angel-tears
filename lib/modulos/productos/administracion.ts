@@ -16,6 +16,7 @@ const camposAdministrativos = {
   destacado: producto.destacado, version: producto.version,
   tieneImagen: sql<boolean>`${producto.imagenAssetId} IS NOT NULL`,
   imagenUrl: producto.imagenUrlSegura, imagenAncho: producto.imagenAncho, imagenAlto: producto.imagenAlto,
+  imagenFormato: producto.imagenFormato,
 }
 
 export function crearAdministracionProductos(dependencias: {
@@ -34,9 +35,9 @@ export function crearAdministracionProductos(dependencias: {
         .orderBy(asc(producto.nombre), asc(producto.id)),
       db.select().from(categoria).orderBy(asc(categoria.nombre)),
     ])
-    return { productos: productos.map(({ imagenUrl, imagenAncho, imagenAlto, ...datos }) => ({
+    return { productos: productos.map(({ imagenUrl, imagenAncho, imagenAlto, imagenFormato, ...datos }) => ({
       ...datos,
-      imagen: imagenUrl && imagenAncho && imagenAlto ? { urlSegura: imagenUrl, ancho: imagenAncho, alto: imagenAlto } : null,
+      imagen: imagenUrl && imagenAncho && imagenAlto ? { urlSegura: imagenUrl, ancho: imagenAncho, alto: imagenAlto, ...(imagenFormato ? { formato: imagenFormato } : {}) } : null,
     })), categorias }
   }
 
