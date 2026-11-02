@@ -12,7 +12,7 @@ import { PanelAdmin, TituloPanel } from "./piezas-admin"
 type Estado = "vacio" | "seleccionado" | "validando" | "subiendo" | "procesando" | "exito" | "error" | "reintento"
 
 type ImagenActual = { urlSegura: string; ancho: number; alto: number }
-export function CargaImagenProducto({ productoId, nombre, version, tieneImagen, imagenActual = null }: { productoId: string; nombre: string; version: number; tieneImagen: boolean; imagenActual?: ImagenActual | null }) {
+export function CargaImagenProducto({ productoId, nombre, version, tieneImagen, imagenActual = null, alGuardar, alCambiarOcupado, alRecargar }: { productoId: string; nombre: string; version: number; tieneImagen: boolean; imagenActual?: ImagenActual | null; alGuardar?: (resultado: Extract<ResultadoImagen, { estado: "ok" }>) => void; alCambiarOcupado?: (ocupado: boolean) => void; alRecargar?: () => void }) {
   const [estado, setEstado] = useState<Estado>("vacio")
   const [arrastrando, setArrastrando] = useState(false)
   const [archivo, setArchivo] = useState<File | null>(null)
@@ -33,6 +33,7 @@ export function CargaImagenProducto({ productoId, nombre, version, tieneImagen, 
   const id = useId()
   const router = useRouter()
   const ocupado = ["validando", "subiendo", "procesando", "reintento"].includes(estado)
+  useEffect(() => { alCambiarOcupado?.(ocupado) }, [ocupado, alCambiarOcupado])
   const enviando = ["subiendo", "procesando", "reintento"].includes(estado)
   const vigente = confirmada && confirmada.version >= version ? confirmada.imagen : imagenActual
   const versionVigente = Math.max(version, confirmada?.version ?? 0)
@@ -109,6 +110,7 @@ export function CargaImagenProducto({ productoId, nombre, version, tieneImagen, 
     if (turno !== secuencia.current) return
     if (resultado.estado === "ok") {
       setConfirmada({ version: resultado.version, imagen: resultado.imagen })
+      alGuardar?.(resultado)
       setExitoReemplazo(reemplazando)
       setLimpiezaPendiente(Boolean(resultado.limpiezaPendiente))
       setReemplazando(false)
@@ -183,7 +185,7 @@ export function CargaImagenProducto({ productoId, nombre, version, tieneImagen, 
       {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
       {limpiezaPendiente && <p role="note" className="text-sm">La imagen nueva está guardada. Quedó pendiente limpiar el recurso anterior; requiere conciliación operativa.</p>}
       {sesionVencida && <Link href="/admin/login" className="text-sm underline">Iniciar sesión</Link>}
-      {recargaRequerida && <Button type="button" variant="outline" onClick={() => { router.refresh(); cancelar(); setRecargaRequerida(false) }}>Recargar listado</Button>}
+      {recargaRequerida && <Button type="button" variant="outline" onClick={() => { if (alRecargar) { alRecargar(); return }; router.refresh(); cancelar(); setRecargaRequerida(false) }}>{alRecargar ? "Recargar datos actuales" : "Recargar listado"}</Button>}
       {seleccionHabilitada && archivo && <Button type="button" disabled={ocupado || sesionVencida || recargaRequerida} onClick={() => void subir(estado === "error")}>{estado === "error" ? "Reintentar carga" : reemplazando ? "Guardar nueva imagen" : "Subir imagen"}</Button>}
       {seleccionHabilitada && (archivo || reemplazando || estado === "validando") && <Button type="button" variant="outline" disabled={enviando} onClick={cancelar}>Cancelar selección</Button>}
     </div>

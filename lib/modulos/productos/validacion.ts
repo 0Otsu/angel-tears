@@ -23,7 +23,7 @@ export const esquemaDatosProducto = z.object({
   precio: z.string({ error: "El precio es obligatorio." }).transform((texto, contexto) => {
     const precio = normalizarPrecioDecimal(texto)
     if (precio === null) {
-      contexto.addIssue({ code: "custom", message: "Ingresá un decimal válido de hasta dos posiciones, dentro de numeric(18,2)." })
+      contexto.addIssue({ code: "custom", message: "Ingresá un precio válido, con hasta 2 decimales y un máximo de 16 cifras enteras." })
       return z.NEVER
     }
     return precio

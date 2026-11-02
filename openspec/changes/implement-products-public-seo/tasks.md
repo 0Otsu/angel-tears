@@ -1,5 +1,7 @@
 # Tasks
 
+Estado vigente tras cierre de 2.5 del 01/11/2026: 2.1-2.5 completas, 4.4 parcial y 5.x abiertas. UI administrativa final en listado/rutas dedicadas, sin ampliar otros modulos. Las notas siguientes conservan sus checkpoints historicos. Evidencia en [Producto 2.5](../../../docs/features/PRODUCTOS_2_5.md).
+
 Estado vigente tras cierre de 2.3 del 01/11/2026: 2.2 y 2.3 completas con Cloudinary real; 2.5 abierta, 4.4 parcial y 5.x sin marcar. Las notas fechadas inferiores conservan sus checkpoints historicos. Evidencia de reemplazo, pruebas y limites en [Producto 2.3](../../../docs/features/PRODUCTOS_2_3.md).
 
 Sincronizacion del 01/11/2026: la rama `feature/productos-2-2-imagen` incorpora mediante merge normal `origin/main` en `276e5c0`, conservando los cuatro commits propios de imagen y ambas lineas de evidencia. Estado al preparar el smoke: 1.1 y 2.1 completas; 2.2 abierta hasta smoke Cloudinary real; 2.3/2.5 abiertas; 2.4, 3.1-3.4 y 4.1-4.3 completas; 4.4 parcial/abierta. Las notas fechadas anteriores describen sus checkpoints historicos. Configuracion de ejemplo conciliada con SITE_URL y las tres variables Cloudinary, sin secretos. Regresion combinada PostgreSQL verifica primera carga con proveedor controlado, publicacion con version vigente y referencia publica/metadata; no sustituye el smoke real ni cierra 5.x. Evidencia combinada en [Producto 2.2](../../../docs/features/PRODUCTOS_2_2.md).
@@ -40,7 +42,9 @@ Evidencia 2.3 del 01/11/2026: PUT de reemplazo distingue POST de primera carga y
 
 Checkpoint independiente del 31/10/2026: 2.4 cerrada tras recuperar el contenedor PostgreSQL existente, sin reinicializar datos. Sus siete pruebas SQL y la regresión conjunta Producto/Inventario (52 pruebas) pasan: imagen persistida requerida, conservación de datos/saldo, autorización y conflictos/versionado concurrente. Frontera real de Auth reutilizada; sin UI anticipada de 2.5 ni código de upload. Evidencia en [Producto/publico cierre](../../../docs/features/PRODUCTOS_PUBLICO_CIERRE.md). 2.2 permanece bloqueada por credenciales/smoke real en su rama intacta; 2.3 no iniciada.
 
-- [ ] 2.5 Integrar formularios/listado/errores/confirmación accesibles; verificar con RTL estados/conservación de entradas donde aporte valor.
+- [x] 2.5 Integrar formularios/listado/errores/confirmación accesibles; verificar con RTL estados/conservación de entradas donde aporte valor.
+
+Evidencia 2.5 del 01/11/2026: listado primero/empty state, alta dedicada y editor Datos/Imagen/Finalizar; filtros por nombre/categoria/estado y menu accesible de acciones reales. Precio entero/decimales opcionales ya admitidos; copy tecnico retirado sin cambiar reglas. Borrador preservado entre secciones y version coordinada solo tras operaciones propias; conflictos requieren recarga explicita. 324 unit/component, 161 PostgreSQL y 20 E2E, lint/typecheck/build/DB/OpenSpec/diff correctos. Smoke real alta-imagen-publicar/destacar-reemplazo-editar posterior-ocultar, PDP/OG coherentes, producto/assets descartables limpiados; capturas desktop/mobile revisadas. Sin schema/migrations/dependencias ni cambios a Auth/Inventario/contrato compartido. 4.4 y 5.x conservan su estado.
 
 ## 3. Público real
 

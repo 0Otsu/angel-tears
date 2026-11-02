@@ -24,7 +24,7 @@ const navegacion = [
 
 function NavegacionAdmin({ alNavegar }: { alNavegar?: () => void }) {
   const ruta = usePathname()
-  return <nav aria-label="Módulos administrativos" className="space-y-1">{navegacion.map(({ ruta: destino, nombre, icono: Icono }) => <Link key={destino} href={destino} onClick={alNavegar} aria-current={ruta === destino ? "page" : undefined} className={cn("flex min-h-11 items-center gap-3 rounded-xl px-3.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary", ruta === destino ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-card hover:text-foreground")}><Icono className="size-4" aria-hidden="true" /><span>{nombre}</span>{ruta === destino && <ChevronRight className="ml-auto size-3.5" aria-hidden="true" />}</Link>)}</nav>
+  return <nav aria-label="Módulos administrativos" className="space-y-1">{navegacion.map(({ ruta: destino, nombre, icono: Icono }) => <Link key={destino} href={destino} onClick={alNavegar} aria-current={(ruta === destino || (destino === "/admin/productos" && ruta.startsWith("/admin/productos/"))) ? "page" : undefined} className={cn("flex min-h-11 items-center gap-3 rounded-xl px-3.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary", (ruta === destino || (destino === "/admin/productos" && ruta.startsWith("/admin/productos/"))) ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-card hover:text-foreground")}><Icono className="size-4" aria-hidden="true" /><span>{nombre}</span>{(ruta === destino || (destino === "/admin/productos" && ruta.startsWith("/admin/productos/"))) && <ChevronRight className="ml-auto size-3.5" aria-hidden="true" />}</Link>)}</nav>
 }
 
 function MarcaAdmin() {
@@ -35,8 +35,8 @@ function MarcaAdmin() {
 export function EstructuraAdmin({ children, nombre, email }: { children: ReactNode; nombre: string; email: string }) {
   const [menuAbierto, setMenuAbierto] = useState(false)
   const ruta = usePathname()
-  const actual = navegacion.find(item => item.ruta === ruta)?.nombre ?? "Administración"
-  const productosPersistidos = ruta === "/admin/productos"
+  const actual = ruta.startsWith("/admin/productos/") ? "Productos" : navegacion.find(item => item.ruta === ruta)?.nombre ?? "Administración"
+  const productosPersistidos = ruta === "/admin/productos" || ruta.startsWith("/admin/productos/")
   return <div className="min-h-svh bg-background text-foreground">
     <a href="#contenido-admin" className="sr-only z-[60] rounded-lg bg-primary px-4 py-3 text-primary-foreground focus:not-sr-only focus:fixed focus:left-4 focus:top-4">Saltar al contenido</a>
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col overflow-y-auto border-r border-border/70 bg-card/30 p-5 lg:flex">
