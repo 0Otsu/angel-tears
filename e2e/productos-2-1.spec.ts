@@ -173,6 +173,10 @@ for (const [vista, width, height] of [["desktop", 1440, 1000], ["mobile", 390, 8
       expect((await conexion.db.select().from(inventario).where(eq(inventario.productoId, creado.id)))[0].cantidad).toBe(0)
       await page.screenshot({ path: info.outputPath(`cancelar-${vista}.png`), fullPage: true })
       expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
+      await expect(page).toHaveURL(/\/admin\/productos$/)
+      await expect(page.getByText("El producto quedó guardado como oculto.", { exact: true })).toHaveCount(0, { timeout: 7000 })
+      await page.reload()
+      await expect(page.getByText("El producto quedó guardado como oculto.", { exact: true })).toHaveCount(0)
       // Cancelar una edicion publicada tampoco oculta ni elimina.
       await conexion.db.update(producto).set({ publicado: true, version: 2, imagenAssetId: `asset-${creado.id}`, imagenPublicId: `pruebas/${creado.id}`, imagenVersionProveedor: "1", imagenUrlSegura: "https://example.test/imagen.png", imagenAncho: 12, imagenAlto: 8, imagenFormato: "png" }).where(eq(producto.id, creado.id))
       await page.goto(`/admin/productos/${creado.id}/editar`)
