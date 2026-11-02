@@ -5,8 +5,10 @@ import { FileUploader, type FileUploaderProps, type FaseSubida } from "./file-up
 import { Button } from "./button"
 
 // Cola pequena sobre el mismo control/validacion/progreso por archivo, sin endpoints ni dominio.
-export function MultiFileUploader<T>({ maxFiles, count = 0, onSuccess, onBusy, onPending, ...props }: Omit<FileUploaderProps<T>, "initialFile" | "onSuccess" | "onPhase" | "autoUpload"> & {
+export type EstadoCola = { pendientes: number; errores: number }
+export function MultiFileUploader<T>({ maxFiles, count = 0, autoUpload = false, onSuccess, onBusy, onPending, alCambiarCola, ...props }: Omit<FileUploaderProps<T>, "initialFile" | "onSuccess" | "onPhase" | "autoUpload"> & {
   maxFiles: number; count?: number; onSuccess: (resultado: T, archivo: File) => void;
+  autoUpload?: boolean; alCambiarCola?: (estado: EstadoCola) => void;
   onBusy?: (busy: boolean) => void; onPending?: (pending: boolean) => void;
 }) {
   const [archivos, cambiar] = useState<{ id: string; archivo: File; fase: FaseSubida }[]>([])
@@ -15,10 +17,14 @@ export function MultiFileUploader<T>({ maxFiles, count = 0, onSuccess, onBusy, o
   const [error, fallar] = useState("")
   const input = useRef<HTMLInputElement>(null), profundidad = useRef(0), id = useId()
   const activo = archivos.find(a => ["uploading", "retrying", "processing"].includes(a.fase))
-  const siguiente = activo ?? (enviar ? archivos.find(a => a.fase === "selected") : undefined)
+  const cabeza = archivos.find(a => a.fase !== "error" && a.fase !== "success")
+  const siguiente = activo ?? ((autoUpload || enviar) && cabeza?.fase === "selected" ? cabeza : undefined)
   const busy = Boolean(activo) || archivos.some(a => a.fase === "validating")
   useEffect(() => { onBusy?.(busy) }, [busy, onBusy])
   useEffect(() => { onPending?.(archivos.length > 0) }, [archivos.length, onPending])
+  const errores = archivos.filter(a => a.fase === "error").length
+  const pendientes = archivos.length - errores
+  useEffect(() => { alCambiarCola?.({ pendientes, errores }) }, [pendientes, errores, alCambiarCola])
   function seleccionar(lista: FileList | null) {
     profundidad.current = 0; arrastrar(false)
     if (!lista || props.disabled) return
@@ -46,9 +52,9 @@ export function MultiFileUploader<T>({ maxFiles, count = 0, onSuccess, onBusy, o
     </div>}
     <p id={`${id}-ayuda`} className="text-xs text-muted-foreground">Hasta {maxFiles} archivos. {props.instrucciones}</p>
     {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
-    {archivos.some(a => a.fase === "selected") && <Button className="min-h-11" type="button" disabled={props.disabled || busy} onClick={() => { fallar(""); activar(true) }}>Subir archivos</Button>}
+    {!autoUpload && archivos.some(a => a.fase === "selected") && <Button className="min-h-11" type="button" disabled={props.disabled || busy} onClick={() => { fallar(""); activar(true) }}>Subir archivos</Button>}
     <ul aria-label="Archivos seleccionados" className="space-y-4">{archivos.map(a => <li key={a.id} className="min-w-0 rounded-xl border p-4">
-      <FileUploader {...props} initialFile={a.archivo} etiqueta={`${props.etiqueta}: ${a.archivo.name}`} compact showPickerButton={false} showUploadButton={false}
+      <FileUploader {...props} initialFile={a.archivo} etiqueta={`${props.etiqueta}: ${a.archivo.name}`} compact showPickerButton={false} showUploadButton={false} enCola={autoUpload}
         disabled={props.disabled || Boolean(activo && activo.id !== a.id)} autoUpload={siguiente?.id === a.id}
         onPhase={nueva => fase(a.id, nueva)} onRemove={() => { fallar(""); cambiar(prev => prev.filter(p => p.id !== a.id)) }}
         onSuccess={(resultado, archivo) => { fallar(""); onSuccess(resultado, archivo); cambiar(prev => prev.filter(p => p.id !== a.id)) }} />

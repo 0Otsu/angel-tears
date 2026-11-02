@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { ImagenProducto as Image } from "@/components/ui/imagen-producto"
-import { MultiFileUploader } from "@/components/ui/multi-file-uploader"
+import { MultiFileUploader, type EstadoCola } from "@/components/ui/multi-file-uploader"
 import { FileUploader } from "@/components/ui/file-uploader"
 import { PendingButton } from "@/components/ui/pending-button"
 import { Button } from "@/components/ui/button"
@@ -13,9 +13,10 @@ import { validarImagenSeleccionada } from "@/lib/modulos/productos/imagen-valida
 import { PanelAdmin } from "./piezas-admin"
 import { AvisoProductoGuardado } from "./aviso-producto-guardado"
 
-export function GaleriaProducto({ productoId, nombre, version, alGuardar, alCambiarOcupado, alCambiarPendiente }: {
+export function GaleriaProducto({ productoId, nombre, version, alGuardar, alCambiarOcupado, alCambiarPendiente, alCambiarGuardando }: {
   productoId: string; nombre: string; version: number; alGuardar: (r: DatosGaleria) => void;
   alCambiarOcupado: (busy: boolean) => void; alCambiarPendiente: (pending: boolean) => void;
+  alCambiarGuardando?: (cantidad: number) => void;
 }) {
   const [datos, guardar] = useState<DatosGaleria | null>(null), [error, fallar] = useState("")
   const [detalles, guardarDetalles] = useState<Record<string, { nombre: string; tamano: number }>>({})
@@ -24,6 +25,7 @@ export function GaleriaProducto({ productoId, nombre, version, alGuardar, alCamb
   const [reemplazo, reemplazar] = useState<string | null>(null), [comando, procesar] = useState<string | null>(null)
   const [colaBusy, ocuparCola] = useState(false), [reemplazoBusy, ocuparReemplazo] = useState(false)
   const [colaPendiente, pendienteCola] = useState(false), [reemplazoPendiente, pendienteReemplazo] = useState(false)
+  const [estadoCola, informarCola] = useState<EstadoCola>({ pendientes: 0, errores: 0 })
   const versionActual = useRef(version), router = useRouter()
   useEffect(() => { versionActual.current = Math.max(versionActual.current, version) }, [version])
   useEffect(() => {
@@ -38,6 +40,7 @@ export function GaleriaProducto({ productoId, nombre, version, alGuardar, alCamb
   const busy = cargando || colaBusy || reemplazoBusy || comando !== null
   useEffect(() => { alCambiarOcupado(busy) }, [busy, alCambiarOcupado])
   useEffect(() => { alCambiarPendiente(colaPendiente || reemplazoPendiente) }, [colaPendiente, reemplazoPendiente, alCambiarPendiente])
+  useEffect(() => { alCambiarGuardando?.(estadoCola.pendientes + (reemplazoBusy ? 1 : 0)) }, [estadoCola.pendientes, reemplazoBusy, alCambiarGuardando])
   function fallo(e: unknown, inline = false) {
     if (!inline) fallar(e instanceof ErrorGaleria ? e.message : "No pudimos confirmar la operación. Recargá los datos actuales.")
     if (!(e instanceof ErrorGaleria) || ["sesion_requerida", "conflicto_version", "version_desactualizada", "error_tecnico", "error_persistencia", "medio_inexistente"].includes(e.codigo)) bloquear(true)
@@ -61,19 +64,19 @@ export function GaleriaProducto({ productoId, nombre, version, alGuardar, alCamb
       <ul aria-label="Imágenes guardadas" className="grid gap-4 sm:grid-cols-2">{datos.medios.map((m, i) => <li key={m.id} className="min-w-0 space-y-3 rounded-xl border p-4">
         <Image src={m.urlSegura} sizes="256px" width={m.ancho} height={m.alto} alt={m.principal ? `Imagen actual de ${nombre}` : `Imagen ${i + 1} de ${nombre}`} className="h-36 w-full rounded-lg object-contain" />
         {detalles[m.id] && <p className="break-all text-xs text-muted-foreground">{detalles[m.id].nombre} · {(detalles[m.id].tamano / (1024 * 1024)).toFixed(2)} MiB</p>}
-        <p className="text-sm">{m.principal ? "✓ Imagen principal" : `Imagen ${i + 1}`} · {m.formato.toUpperCase()}</p>
+        <div className="flex flex-wrap items-center gap-2"><span className="text-xs text-primary">✓ Cargada</span><p className="text-sm">{m.principal ? "✓ Imagen principal" : `Imagen ${i + 1}`} · {m.formato.toUpperCase()}</p></div>
         <div className="flex flex-wrap gap-2">
           {!m.principal && <PendingButton pending={comando === `${m.id}-principal`} pendingLabel="Actualizando…" disabled={busy || bloqueado || reemplazoPendiente} variant="outline" onClick={() => cambiar(m.id, "principal")}>Hacer principal</PendingButton>}
           <Button disabled={busy || bloqueado || reemplazoPendiente && reemplazo !== m.id} variant="outline" onClick={() => reemplazar(m.id)}>Reemplazar</Button>
           <PendingButton pending={comando === `${m.id}-quitar`} pendingLabel="Quitando…" disabled={busy || bloqueado || reemplazoPendiente} variant="outline" onClick={() => cambiar(m.id, "quitar")}>Quitar imagen</PendingButton>
         </div>
-        {reemplazo === m.id && <FileUploader {...comunes} textoCambiar="Elegir reemplazo" textoSubir="Guardar reemplazo" disabled={bloqueado || colaBusy || comando !== null}
+        {reemplazo === m.id && <FileUploader {...comunes} autoUpload enCola showPickerButton={false} showUploadButton={false} textoIdle="Arrastrá una imagen hasta acá" textoCambiar="Elegir reemplazo" disabled={bloqueado || colaBusy || comando !== null}
           alCambiarOcupado={ocuparReemplazo} alCambiarPendiente={pendienteReemplazo}
           upload={async (file, eventos, signal) => { try { const r = await cargarMedio(productoId, versionActual.current, file, eventos, signal, m.id); return { vista: { url: r.medios.find(p => p.id === m.id)!.urlSegura }, resultado: { galeria: r, nombre: file.name, tamano: file.size } } } catch (e) { fallo(e, true); throw e } }}
           onSuccess={r => { guardarDetalles(prev => ({ ...prev, [m.id]: { nombre: r.nombre, tamano: r.tamano } })); confirmar(r.galeria, "Imagen reemplazada."); reemplazar(null); ocuparReemplazo(false); pendienteReemplazo(false) }} />}
       </li>)}</ul>
-      <MultiFileUploader {...comunes} maxFiles={MAXIMO_MEDIOS} count={datos.medios.length} disabled={bloqueado || reemplazoBusy || comando !== null}
-        onBusy={ocuparCola} onPending={pendienteCola}
+      <MultiFileUploader {...comunes} autoUpload maxFiles={MAXIMO_MEDIOS} count={datos.medios.length} disabled={bloqueado || reemplazoBusy || comando !== null}
+        onBusy={ocuparCola} onPending={pendienteCola} alCambiarCola={informarCola}
         upload={async (file, eventos, signal) => { try { const r = await cargarMedio(productoId, versionActual.current, file, eventos, signal); const nuevo = r.medios.find(m => !datos.medios.some(p => p.id === m.id))!; return { vista: { url: nuevo.urlSegura }, resultado: r } } catch (e) { fallo(e, true); throw e } }}
         onSuccess={(r, file) => { const nuevo = r.medios.find(m => !datos.medios.some(p => p.id === m.id)); if (nuevo) guardarDetalles(prev => ({ ...prev, [nuevo.id]: { nombre: file.name, tamano: file.size } })); confirmar(r, "Imagen cargada.") }} />
     </>}

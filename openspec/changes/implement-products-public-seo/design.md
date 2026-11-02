@@ -12,6 +12,8 @@ Producto real de extremo a extremo, fuentes públicas frescas y SEO veraz. Sin C
 
 ## Decisions
 
+- Ajuste autorizado del 02/11/2026: Datos/Imagenes/Vista previa; auto-upload opt-in en la cola generica, serial y con retry por archivo. Producto bloquea avance mientras queden pendientes/errores. VistaDetalleProducto comparte la presentacion pura del PDP entre su RSC publico y la isla interactiva de preview, sin Auth/queries/SEO en ella. Lectura administrativa con exigirAdministradora y version, misma consulta/proyeccion SQL de galeria/disponibilidad que el PDP; nunca publica para visualizar. Enlace Ver producto solo para publicados. No se modifica schema, adapter, Inventario o reglas de indexabilidad; 5.x no se inicia.
+
 - Cierre tecnico 4.4 del 02/11/2026: derivar entrega Cloudinary versionada/acotada con c_limit, q_auto y f_auto sin cambiar referencias persistidas; loader next/image directo al CDN para Producto y optimizador Next para locales, sin proxy remoto arbitrario. Sizes/lazy/prioridad por superficie, fallback con caja estable y medicion real local de produccion. Detalle, responsive/accesibilidad y limites de CWV de campo en [4.4](../../../docs/features/PUBLICO_4_4.md); no cambia negocio, upload ni ownership.
 
 - P0: schema Producto/Categoria y DTO interno; categorías lookup con los siete códigos aprobados. ID UUID y slug único legible/estable; colisión añade sufijo estable al crear, nunca renombra URLs existentes. Nombre/precio/categoría requeridos, opcionales A6 sin valores inventados.

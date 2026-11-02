@@ -1,0 +1,7 @@
+.contenedor { container-type: inline-size; }
+.detalle { display: grid; align-items: start; gap: 3rem; }
+@media (min-width: 64rem) {
+  @container (min-width: 60rem) {
+    .detalle { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 5rem; }
+  }
+}

@@ -13,7 +13,7 @@ El sistema SHALL priorizar el listado persistido con filtros y acciones accesibl
 
 #### Scenario: Alta guiada
 - **WHEN** la administradora guarda los datos de un producto nuevo
-- **THEN** continua con imagen y resumen sobre el ID persistido, puede finalizar oculto y solo publicar cuando el servidor acepta la referencia de imagen.
+- **THEN** continua con Imagenes y Vista previa sobre el ID persistido, puede finalizar oculto y solo publicar cuando el servidor acepta la referencia de imagen.
 
 #### Scenario: Imagen y borrador de datos
 - **WHEN** confirma una carga o reemplazo propio mientras conserva un borrador de datos
@@ -42,7 +42,26 @@ Por ampliacion expresa del responsable del 01/11/2026, el sistema SHALL admitir 
 
 #### Scenario: Seleccion multiple y fallo individual
 - **WHEN** se seleccionan varias imagenes dentro del cupo disponible
-- **THEN** cada archivo tiene identidad, preview, progreso de transferencia real, processing y error/retry propios; un fallo no reinicia los exitosos y el retry reenvia solo ese archivo completo desde cero.
+- **THEN** se inicia automaticamente la cola serial, sin otro boton global de subir; cada archivo tiene identidad, preview local, Pendiente/Subiendo/Procesando/Cargada/Error y progreso de transferencia real. Un fallo no reinicia los exitosos y el retry reenvia solo ese archivo completo desde cero.
+
+#### Scenario: Avanzar con imagenes pendientes
+- **WHEN** hay archivos pendientes, transferencias/procesamiento o errores sin resolver
+- **THEN** no se avanza a Vista previa hasta confirmar las cargas o quitar los errores; no se presenta una seleccion local como referencia persistida.
+
+### Requirement: Vista previa administrativa del PDP
+Por ajuste expreso del responsable del 02/11/2026, el sistema SHALL ofrecer una vista previa autorizada de los datos persistidos, galeria/principal y disponibilidad real, reutilizando la presentacion y proyeccion del PDP sin publicar temporalmente ni duplicar stock. La lectura exige sesion antes de consultar y comprueba la version abierta; el publico conserva filtro de publicado/404 y SEO propios.
+
+#### Scenario: Revisar un producto oculto
+- **WHEN** la administradora abre Vista previa de un producto oculto con version vigente
+- **THEN** ve sus datos/imagenes confirmados y disponibilidad de Inventario, puede volver a Datos/Imagenes sin crear otro Producto y su URL publica sigue respondiendo 404.
+
+#### Scenario: Ver el producto publicado
+- **WHEN** se confirma Publicar desde la vista previa o se abre el menu de un producto publicado
+- **THEN** el pending termina y se ofrece Ver producto hacia el slug real, en otra pestaña anunciada accesiblemente; un oculto ofrece Vista previa administrativa en lugar de ese enlace publico.
+
+#### Scenario: Sesion o version dejan de ser validas
+- **WHEN** se solicita la vista previa sin sesion o con una version desactualizada
+- **THEN** no se revelan datos sin autorizacion ni se adopta una version ajena sobre el borrador; se informa login/recarga segun corresponda.
 
 #### Scenario: Seleccion excede el cupo
 - **WHEN** imagenes guardadas mas seleccionadas superan siete

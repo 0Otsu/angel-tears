@@ -36,6 +36,7 @@ export function reducirSubida(estado: Estado, evento: Evento): Estado {
 export type FileUploaderProps<T> = {
   initialFile?: File
   autoUpload?: boolean
+  enCola?: boolean
   compact?: boolean
   onPhase?: (fase: FaseSubida) => void
   onRemove?: () => void
@@ -69,7 +70,7 @@ export type FileUploaderProps<T> = {
 const tamanoLegible = (bytes: number) => bytes < 1024 ? `${bytes} B` : bytes < 1024 * 1024 ? `${(bytes / 1024).toFixed(1)} KiB` : `${(bytes / (1024 * 1024)).toFixed(2)} MiB`
 
 // Solo una seleccion. El caller valida y transporta; no hay endpoints ni reglas comerciales aqui.
-export function FileUploader<T>({ initialFile, autoUpload = false, compact = false, onPhase, onRemove, showPickerButton = true, showUploadButton = true, accept, maxBytes, instrucciones, etiqueta, textoIdle = "Arrastrá un archivo hasta acá", textoSeleccionar = "Seleccionar archivo", textoSubir = "Subir archivo", textoProcesando = "Procesando archivo…", textoExito = "Archivo guardado correctamente.", textoConfirmado = "Archivo cargado", textoCambiar = "Cambiar archivo", textoElegirOtro = "Elegir otro archivo", textoAlternativa = "o elegilo desde tu dispositivo", altVigente = "Archivo vigente", altLocal = "Vista previa local seleccionada", textoTamanoInvalido = "El archivo supera el tamaño permitido.", currentPreview, disabled = false, validar, upload, onSuccess, onError, alCambiarOcupado, alCambiarPendiente }: FileUploaderProps<T>) {
+export function FileUploader<T>({ initialFile, autoUpload = false, enCola = false, compact = false, onPhase, onRemove, showPickerButton = true, showUploadButton = true, accept, maxBytes, instrucciones, etiqueta, textoIdle = "Arrastrá un archivo hasta acá", textoSeleccionar = "Seleccionar archivo", textoSubir = "Subir archivo", textoProcesando = "Procesando archivo…", textoExito = "Archivo guardado correctamente.", textoConfirmado = "Archivo cargado", textoCambiar = "Cambiar archivo", textoElegirOtro = "Elegir otro archivo", textoAlternativa = "o elegilo desde tu dispositivo", altVigente = "Archivo vigente", altLocal = "Vista previa local seleccionada", textoTamanoInvalido = "El archivo supera el tamaño permitido.", currentPreview, disabled = false, validar, upload, onSuccess, onError, alCambiarOcupado, alCambiarPendiente }: FileUploaderProps<T>) {
   const [estado, enviar] = useReducer(reducirSubida, inicial)
   const [edicion, editar] = useReducer(() => true, false)
   const id = useId()
@@ -78,6 +79,7 @@ export function FileUploader<T>({ initialFile, autoUpload = false, compact = fal
   const secuencia = useRef(0)
   const control = useRef<AbortController | null>(null)
   const profundidad = useRef(0)
+  const inicializado = useRef<File | null>(null)
   const ocupado = ["validating", "uploading", "retrying", "processing"].includes(estado.fase)
   const transfiriendo = ["uploading", "retrying", "processing"].includes(estado.fase)
   const bloqueado = ocupado || disabled
@@ -86,12 +88,17 @@ export function FileUploader<T>({ initialFile, autoUpload = false, compact = fal
   const mostrarSelector = !vigente || edicion && estado.fase !== "success"
   const seleccionado = estado.archivo ?? estado.rechazado
   useEffect(() => { alCambiarOcupado?.(ocupado) }, [ocupado, alCambiarOcupado])
-  useEffect(() => { alCambiarPendiente?.(estado.archivo !== null) }, [estado.archivo, alCambiarPendiente])
-  useEffect(() => () => { secuencia.current++; control.current?.abort(); if (url.current) URL.revokeObjectURL(url.current) }, [])
+  useEffect(() => { alCambiarPendiente?.(estado.archivo !== null || enCola && Boolean(estado.rechazado)) }, [estado.archivo, estado.rechazado, enCola, alCambiarPendiente])
+  useEffect(() => () => { secuencia.current++; inicializado.current = null; control.current?.abort(); if (url.current) URL.revokeObjectURL(url.current) }, [])
 
   const iniciarArchivo = useEffectEvent((archivo: File) => { void seleccionar(archivo) })
   const enviarAutomatico = useEffectEvent(() => { void subir() })
-  useEffect(() => { if (initialFile) iniciarArchivo(initialFile) }, [initialFile])
+  useEffect(() => {
+    if (initialFile && !disabled && inicializado.current !== initialFile) {
+      inicializado.current = initialFile
+      iniciarArchivo(initialFile)
+    }
+  }, [initialFile, disabled])
   useEffect(() => { if (autoUpload && estado.fase === "selected") enviarAutomatico() }, [autoUpload, estado.fase])
   useEffect(() => { onPhase?.(estado.fase) }, [estado.fase, onPhase])
 
@@ -150,8 +157,9 @@ export function FileUploader<T>({ initialFile, autoUpload = false, compact = fal
     void seleccionar(archivos[0])
   }
   const mensajes: Record<FaseSubida, string> = { retrying: estado.porcentaje === null ? "Reintentando archivo…" : `Reenviando archivo: ${estado.porcentaje} %`, idle: "Todavía no seleccionaste un archivo.", "drag-over": "Soltá para cargar", selected: "Archivo seleccionado. Listo para subir.", validating: "Validando el archivo seleccionado…", uploading: estado.porcentaje === null ? "Subiendo archivo…" : `Enviando archivo: ${estado.porcentaje} %`, processing: textoProcesando, success: textoExito, error: "No se pudo completar la carga." }
+  const estadoCola = estado.fase === "idle" ? initialFile ? "Pendiente" : "" : estado.fase === "selected" ? "Pendiente" : estado.fase === "validating" ? "Validando…" : estado.fase === "uploading" || estado.fase === "retrying" ? estado.porcentaje === null ? "Subiendo…" : `Subiendo ${estado.porcentaje} %` : estado.fase === "processing" ? "Procesando…" : estado.fase === "error" ? "Error" : estado.fase === "success" ? "Cargada" : mensajes[estado.fase]
   return <div data-estado={estado.fase} className="min-w-0 space-y-4">
-    <p role="status" aria-live="polite" className={compact && !ocupado ? "sr-only" : "text-sm"}>{estado.fase === "error" ? "" : mensajes[estado.fase]}</p>
+    <p role="status" aria-live="polite" className={compact && !ocupado && !enCola ? "sr-only" : "text-sm"}>{enCola ? estadoCola : estado.fase === "error" ? "" : mensajes[estado.fase]}</p>
     {vigente && <div className="grid min-w-0 grid-cols-[4rem_minmax(0,1fr)] items-center gap-3 rounded-xl border border-primary/25 bg-primary/5 p-4 sm:flex sm:flex-wrap sm:gap-4">
       {/* Las previews son URLs locales o persistidas aportadas por el caller. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -189,7 +197,7 @@ export function FileUploader<T>({ initialFile, autoUpload = false, compact = fal
       {estado.error && <div className="space-y-2"><p role="alert" className="text-sm text-destructive">{estado.error}</p>{estado.archivo && <p className="text-xs text-muted-foreground">{compact ? "Se volverá a enviar desde el inicio." : "Conservamos el archivo. Reintentar lo vuelve a enviar completo desde el inicio."}</p>}</div>}
       <div className="flex flex-wrap gap-2">
         {estado.archivo && estado.fase !== "validating" && (showUploadButton || estado.fase === "error") && <Button className="min-h-11" type="button" disabled={bloqueado} onClick={() => void subir()}>{estado.fase === "error" ? "Reintentar" : textoSubir}</Button>}
-        {(showPickerButton || !compact && (estado.archivo || estado.fase === "error")) && <Button className="min-h-11" type="button" variant="outline" disabled={bloqueado} onClick={() => input.current?.click()}>{estado.archivo || estado.fase === "error" ? textoElegirOtro : textoSeleccionar}</Button>}
+        {!enCola && (showPickerButton || !compact && (estado.archivo || estado.fase === "error")) && <Button className="min-h-11" type="button" variant="outline" disabled={bloqueado} onClick={() => input.current?.click()}>{estado.archivo || estado.fase === "error" ? textoElegirOtro : textoSeleccionar}</Button>}
         {(seleccionado || edicion) && <Button className="min-h-11" type="button" variant="outline" disabled={transfiriendo} onClick={quitar}>{compact ? "Quitar archivo" : "Quitar selección"}</Button>}
       </div>
     </>}

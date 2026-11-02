@@ -92,6 +92,8 @@ Checkpoint parcial 4.4 del 31/10/2026: desktop/notebook/mobile y 320 px con nomb
 
 ## 5. Integración y aceptación
 
+Ajuste acotado posterior del 02/11/2026: Imagenes inicia la cola automaticamente, serializa transferencias y bloquea Vista previa hasta resolver pendientes/errores. Preview administrativa autorizada reutiliza presentacion/proyeccion del PDP, conserva 404 publico de ocultos y ofrece Ver producto en otra pestaña solo para publicados. Smoke real de siete imagenes, publicacion/contenido coincidente y cleanup comprobados; evidencia en [preview y auto-upload](../../../docs/features/PRODUCTOS_PREVIEW_AUTO_UPLOAD.md). No reabre tareas aceptadas, no altera el cierre tecnico 4.4 ni marca 5.x.
+
 - [ ] 5.1 Ejecutar E2E alta → imagen → publicar → compra/ajuste → Home/catálogo/PDP → agotar/ocultar/reponer con dependencias reales.
 - [ ] 5.2 Ejecutar tests/lint/typecheck/build y OpenSpec estricto; actualizar mapa/docs y registrar dominio/contenido o RF/CU aún pendientes.
 - [ ] 5.3 Integrar por [flujo Git vigente](../../../docs/GIT_WORKFLOW.md), coordinando contratos/archivos con owners sin PR/aprobación cruzada obligatorios; revisión adicional recomendable. Ninguna task se marca por el solo hecho de planificar y no se archiva antes de aceptación técnica con evidencia.
