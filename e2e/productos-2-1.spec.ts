@@ -104,7 +104,7 @@ for (const [nombreVista, width, height] of [["desktop", 1440, 1000], ["notebook"
         const origenAjeno = await page.request.post(`/api/admin/productos/${creado.id}/imagen`, { headers: { origin: "https://ajeno.test" }, multipart: { version: "2", imagen: { name: "collar.png", mimeType: "image/png", buffer: await crearImagenPrueba() } } })
         expect(origenAjeno.status()).toBe(403)
       }
-      await imagen.getByLabel("Archivo de imagen principal").setInputFiles({ name: "collar.png", mimeType: "image/png", buffer: await crearImagenPrueba() })
+      await imagen.locator('input[multiple]').setInputFiles({ name: "collar.png", mimeType: "image/png", buffer: await crearImagenPrueba() })
       await expect(imagen.getByAltText(/Vista previa/)).toBeVisible()
       await imagen.getByRole("button", { name: "Subir imagen" }).click()
       await expect(imagen.getByRole("alert")).toContainText("La carga de imágenes no está disponible")
@@ -176,7 +176,7 @@ for (const [vista, width, height] of [["desktop", 1440, 1000], ["mobile", 390, 8
       const [creado] = await conexion.db.select().from(producto).where(eq(producto.nombre, nombre))
       ids.push(creado.id)
       const imagen = page.getByRole("region", { name: `Imagen de ${nombre}` })
-      await imagen.getByLabel("Archivo de imagen principal").setInputFiles({ name: "sin-subir.png", mimeType: "image/png", buffer: await crearImagenPrueba() })
+      await imagen.locator('input[multiple]').setInputFiles({ name: "sin-subir.png", mimeType: "image/png", buffer: await crearImagenPrueba() })
       await expect(imagen.getByAltText(/Vista previa/)).toBeVisible()
       await page.getByRole("button", { name: "Cancelar", exact: true }).click()
       await expect(page.getByRole("dialog")).toBeVisible()

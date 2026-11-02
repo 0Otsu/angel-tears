@@ -16,5 +16,6 @@ export type ProductoPublico = {
   cuidados: string | null
   disponible: boolean
   destacado: boolean
+  galeria?: { url: string; ancho: number; alto: number; alt: string }[]
   imagen: { url: string; ancho: number; alto: number; alt: string } | null
 }

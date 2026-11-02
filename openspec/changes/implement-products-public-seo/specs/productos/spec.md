@@ -37,6 +37,26 @@ El sistema SHALL permitir guardar oculto sin imagen y exigir una imagen principa
 - **WHEN** se intenta publicar sin imagen válida
 - **THEN** no se publica y se conserva el producto oculto con un error comprensible.
 
+### Requirement: Galeria acotada de Producto
+Por ampliacion expresa del responsable del 01/11/2026, el sistema SHALL admitir hasta siete imagenes vigentes por producto en una relacion explicita; conservar las imagenes existentes como primera/principal, sin recrear assets ni modificar datos comerciales. Los limites y validacion real JPEG/PNG/WebP de 2.2 siguen vigentes. Video queda pendiente y SHALL NOT aceptarse mediante el flujo de imagenes.
+
+#### Scenario: Seleccion multiple y fallo individual
+- **WHEN** se seleccionan varias imagenes dentro del cupo disponible
+- **THEN** cada archivo tiene identidad, preview, progreso de transferencia real, processing y error/retry propios; un fallo no reinicia los exitosos y el retry reenvia solo ese archivo completo desde cero.
+
+#### Scenario: Seleccion excede el cupo
+- **WHEN** imagenes guardadas mas seleccionadas superan siete
+- **THEN** se rechaza toda la nueva seleccion con un mensaje; el backend tambien preserva el limite ante concurrencia.
+
+#### Scenario: Gestion de principal y eliminacion
+- **WHEN** se cambia la principal o se quita una imagen
+- **THEN** la transaccion conserva como maximo una principal, proyectada al catalogo/Home/relacionados/SEO; quitar la principal promueve otra si existe, y quitar la ultima publicada se rechaza hasta ocultar el producto.
+
+#### Scenario: Compatibilidad y limpieza
+- **WHEN** se agrega, reemplaza o quita un medio
+- **THEN** se confirma PostgreSQL antes de destruir recursos no referenciados; un fallo de cleanup conserva la galeria valida e informa conciliacion pendiente. Los endpoints historicos conservan su semantica de primera carga/reemplazo de principal.
+
+
 ### Requirement: Reemplazo que conserva referencia
 El sistema SHALL permitir subir/reemplazar la imagen desde Admin y conservar la anterior si falla la nueva carga o su guardado, sin dejar una referencia rota.
 

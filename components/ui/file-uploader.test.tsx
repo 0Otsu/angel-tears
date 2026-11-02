@@ -71,7 +71,7 @@ it("progreso del transporte, processing indeterminado sin regresion por evento t
   expect(screen.getByText("Archivo cargado")).toBeTruthy()
   expect(screen.getByAltText("Archivo vigente").getAttribute("src")).toBe("https://example.test/guardado.png")
   expect(screen.getByText("foto.png")).toBeTruthy(); expect(screen.getByText(/image\/png · 5 B/)).toBeTruthy()
-  expect(confirmado).toHaveBeenCalledWith("confirmado")
+  expect(confirmado).toHaveBeenCalledWith("confirmado", upload.mock.calls[0][0])
   expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:foto.png")
 })
 it("error conserva File; reintenta desde inicio, elegir otro/quitar liberan URL", async () => {

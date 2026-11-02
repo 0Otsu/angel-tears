@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto"
 import { and, eq, isNull } from "drizzle-orm"
 import type { NodePgDatabase } from "drizzle-orm/node-postgres"
 import type { ExigirAdministradora } from "@/lib/modulos/autenticacion/contrato"
+import { productoMedia } from "@/lib/infraestructura/esquemas/producto-media"
 import { producto } from "@/lib/infraestructura/esquemas/producto"
 import { esquemaReferenciaEdicion } from "./validacion-administrativa"
 import { ErrorImagen, esquemaReferenciaImagen, type AlmacenImagen, type ImagenGuardada } from "./imagen-contrato"
@@ -18,7 +19,8 @@ function crearGuardadoImagenProducto({ db, exigir, almacen }: DependenciasImagen
   async function limpiarSinReferencia(publicId: string): Promise<boolean> {
     try {
       const [referencia] = await db.select({ id: producto.id }).from(producto).where(eq(producto.imagenPublicId, publicId)).limit(1)
-      if (!referencia) await almacen.eliminarImagen(publicId)
+      const [medio] = await db.select({ id: productoMedia.id }).from(productoMedia).where(eq(productoMedia.publicId, publicId)).limit(1)
+      if (!referencia && !medio) await almacen.eliminarImagen(publicId)
       return false
     } catch {
       console.error("[productos.imagen] limpieza pendiente", { recurso: publicId })

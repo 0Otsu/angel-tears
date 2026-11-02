@@ -19,6 +19,9 @@ export interface AlmacenImagen {
 }
 
 export const mensajesErrorImagen = {
+  limite_medios: "El producto admite hasta 7 imágenes. Quitá una antes de agregar otra.",
+  medio_inexistente: "La imagen ya no está disponible. Recargá los datos actuales.",
+  ultima_imagen_publicada: "Ocultá el producto antes de quitar su última imagen.",
   sesion_requerida: "Tu sesión venció. Volvé a iniciar sesión antes de subir la imagen.",
   origen_invalido: "No se pudo autorizar esta solicitud. Recargá la página e intentá nuevamente.",
   solicitud_invalida: "La solicitud de imagen no es válida. Seleccioná el archivo nuevamente.",

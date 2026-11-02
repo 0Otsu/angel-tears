@@ -59,9 +59,9 @@ for(const [vista,width,height] of [["desktop",1440,1000],["notebook",1280,800],[
       const panel=page.getByRole("region",{name:`Imagen de ${nombre}`})
       const actual=panel.getByAltText(`Imagen actual de ${nombre}`)
       await expect(actual).toBeVisible()
-      const boton=panel.getByRole("button",{name:"Cambiar imagen",exact:true})
+      const boton=panel.getByRole("button",{name:"Reemplazar",exact:true})
       await boton.focus(); await expect(boton).toBeFocused(); await page.keyboard.press("Enter")
-      const archivo=panel.getByLabel("Archivo de imagen principal")
+      const archivo=panel.getByLabel("Archivo de imagen",{exact:true})
       const zona=panel.getByRole("button",{name:"Seleccionar archivo para cargar"})
       await panel.screenshot({path:info.outputPath(`uploader-idle-${vista}.png`)})
       const arrastre=await page.evaluateHandle(bytes=>{const dt=new DataTransfer();dt.items.add(new File([new Uint8Array(bytes)],"nueva.png",{type:"image/png"}));return dt},[...png])
@@ -75,7 +75,6 @@ for(const [vista,width,height] of [["desktop",1440,1000],["notebook",1280,800],[
       await panel.getByRole("button",{name:"Quitar selección"}).click()
       await expect(panel.getByAltText(/Vista previa/)).toHaveCount(0)
       await expect(actual).toHaveAttribute("src",antes.imagenUrlSegura!)
-      await boton.click()
       if(vista==="desktop") {
         const multipart={version:"2",imagen:{name:"nueva.png",mimeType:"image/png",buffer:png}}
         const origenAjeno=await page.request.put(`/api/admin/productos/${id}/imagen`,{headers:{origin:"https://ajeno.test"},multipart})
@@ -84,8 +83,8 @@ for(const [vista,width,height] of [["desktop",1440,1000],["notebook",1280,800],[
         expect(stale.status()).toBe(409); expect((await stale.json()).codigo).toBe("version_desactualizada")
       }
       await archivo.setInputFiles({name:"nueva.png",mimeType:"image/png",buffer:png})
-      const respuesta=page.waitForResponse(r=>r.request().method()==="PUT" && r.url().endsWith(`/api/admin/productos/${id}/imagen`))
-      await panel.getByRole("button",{name:"Guardar nueva imagen"}).click()
+      const respuesta=page.waitForResponse(r=>r.request().method()==="PUT" && r.url().includes(`/api/admin/productos/${id}/medios/`))
+      await panel.getByRole("button",{name:"Guardar reemplazo"}).click()
       expect((await respuesta).status()).toBe(503)
       await expect(panel.getByRole("alert")).toContainText("La carga de imágenes no está disponible")
       await expect(actual).toHaveAttribute("src",antes.imagenUrlSegura!)

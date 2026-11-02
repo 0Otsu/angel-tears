@@ -197,6 +197,8 @@ Auth: schema generado/revisado de Better Auth, provisión inicial controlada e i
 
 Imágenes: primero guardar oculto con los datos obligatorios, luego adjuntar imagen y publicar. Una principal; JPEG/PNG/WebP, 3 MiB/20 MP, decoder y autorización servidor. Cloudinary servidor con ID nuevo; fallo conserva anterior; limpieza segura después del commit. Nunca secretos de proveedor, costos o datos privados en props RSC públicas. Las transformaciones CDN son acotadas, no URLs de upload arbitrarias. Ver ADR-007.
 
+Ampliacion expresa del responsable del 01/11/2026: hasta siete imagenes relacionadas en `producto_media`, con backfill a primera/principal y proyeccion compatible en las columnas anteriores. Uploader multiple con cola acotada/estado por archivo y galeria PDP; cards/Home/relacionados/SEO usan la unica principal. Publicado exige una principal valida, y quitar la ultima requiere ocultar primero. Video pendiente hasta validacion/limites/hosting completos, sin admitirlo a medias. Diseno, migration y evidencia en [galeria](features/PRODUCTOS_GALERIA.md); contratos compartidos ProductoInterno/Inventario no cambian.
+
 [SEGURIDAD](SEGURIDAD.md) contiene los controles transversales; no se duplican implementaciones de CSRF, hashing o validación de origen de Better Auth. Actions/Handlers son fronteras públicas aun si el botón no se muestra. Zod para formato, permisos y dominio revalidados en servidor; Drizzle parametriza valores. Identificadores/orden SQL dinámicos solo allowlist, nunca interpolación libre.
 
 ## 10. Público, SEO local y rendimiento

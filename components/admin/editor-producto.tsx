@@ -6,7 +6,7 @@ import type { ConsultaAdministrativa, ProductoAdministrativo } from "@/lib/modul
 import { Button } from "@/components/ui/button"
 import { EncabezadoAdmin, PanelAdmin } from "./piezas-admin"
 import { FormularioProducto } from "./formulario-producto"
-import { CargaImagenProducto } from "./carga-imagen-producto"
+import { GaleriaProducto } from "./galeria-producto"
 import { AccionesProducto } from "./acciones-producto"
 import { CancelarProducto } from "./cancelar-producto"
 
@@ -39,7 +39,7 @@ export function EditorProducto({ producto, categorias, pasoInicial = "datos", al
       <FormularioProducto producto={producto} versionPropia={actual.version} alCambiarOcupado={setDatosOcupados} alCambiarBorrador={setBorradorDatos} accionCancelar={cancelar()} categorias={categorias} cancelar={() => setPaso("resumen")} alGuardar={(_id, datos) => setActual(prev => ({ ...prev, ...datos, categoriaCodigo: prev.categoriaCodigo === datos.categoriaCodigo ? prev.categoriaCodigo : categorias.find(c => c.codigo === datos.categoriaCodigo)!.codigo, categoriaNombre: categorias.find(c => c.codigo === datos.categoriaCodigo)?.nombre ?? prev.categoriaNombre, version: prev.version + 1 }))} />
     </div>
     <div hidden={paso !== "imagen"}>
-      <CargaImagenProducto productoId={actual.id} nombre={actual.nombre} version={actual.version} tieneImagen={actual.tieneImagen} imagenActual={actual.imagen} alRecargar={() => window.location.reload()} alCambiarOcupado={setImagenOcupada} alCambiarPendiente={setBorradorImagen} alGuardar={r => setActual(prev => ({ ...prev, version: r.version, tieneImagen: true, imagen: r.imagen }))} />
+      <GaleriaProducto productoId={actual.id} nombre={actual.nombre} version={actual.version} alCambiarOcupado={setImagenOcupada} alCambiarPendiente={setBorradorImagen} alGuardar={r => setActual(prev => ({ ...prev, version: r.version, tieneImagen: Boolean(r.imagen), imagen: r.imagen }))} />
       <div className="mt-4 flex flex-wrap gap-3">{cancelar()}<Button disabled={imagenOcupada} onClick={() => setPaso("resumen")}>Continuar al resumen</Button></div>
     </div>
     {paso === "resumen" && <PanelAdmin className="space-y-4 p-5">

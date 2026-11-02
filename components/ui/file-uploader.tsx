@@ -1,12 +1,12 @@
 "use client"
 
-import { useEffect, useId, useReducer, useRef, type DragEvent } from "react"
+import { useEffect, useEffectEvent, useId, useReducer, useRef, type DragEvent } from "react"
 import { Upload, Check, ImageIcon } from "lucide-react"
 import { Button } from "./button"
 
 export type VistaArchivo = { url: string; nombre?: string; tipo?: string; tamano?: number }
 export type EventosSubida = { alProgreso: (porcentaje: number | null) => void; alProcesar: () => void }
-export type FaseSubida = "idle" | "drag-over" | "selected" | "validating" | "uploading" | "processing" | "success" | "error"
+export type FaseSubida = "idle" | "drag-over" | "selected" | "validating" | "uploading" | "processing" | "success" | "error" | "retrying"
 type Estado = { fase: FaseSubida; anterior: FaseSubida; archivo: File | null; preview: string | null; porcentaje: number | null; error: string; arrastrado?: { nombre: string; tamano: number }; confirmada?: { vista: VistaArchivo; base?: string } }
 const inicial: Estado = { fase: "idle", anterior: "idle", archivo: null, preview: null, porcentaje: null, error: "" }
 type Evento =
@@ -25,15 +25,21 @@ export function reducirSubida(estado: Estado, evento: Evento): Estado {
     case "quitar": return { ...inicial, confirmada: estado.confirmada }
     case "validar": return { ...inicial, confirmada: estado.confirmada, fase: "validating", archivo: evento.archivo }
     case "seleccionar": return { ...estado, fase: "selected", preview: evento.preview }
-    case "subir": return { ...estado, fase: "uploading", porcentaje: null, error: "" }
-    case "progreso": return estado.fase !== "uploading" ? estado : { ...estado, porcentaje: evento.porcentaje === null ? null : Math.max(0, Math.min(100, evento.porcentaje)) }
+    case "subir": return { ...estado, fase: estado.fase === "error" ? "retrying" : "uploading", porcentaje: null, error: "" }
+    case "progreso": return !["uploading", "retrying"].includes(estado.fase) ? estado : { ...estado, porcentaje: evento.porcentaje === null ? null : Math.max(0, Math.min(100, evento.porcentaje)) }
     case "procesar": return { ...estado, fase: "processing", porcentaje: null }
     case "error": return { ...estado, fase: "error", error: evento.mensaje, porcentaje: null, ...(evento.validacion ? { archivo: null, preview: null } : {}) }
     case "exito": return { ...inicial, fase: "success", confirmada: { vista: evento.vista, base: evento.base } }
   }
 }
 
-type Props<T> = {
+export type FileUploaderProps<T> = {
+  initialFile?: File
+  autoUpload?: boolean
+  compact?: boolean
+  onPhase?: (fase: FaseSubida) => void
+  onRemove?: () => void
+  showPickerButton?: boolean
   accept: string
   maxBytes: number
   instrucciones: string
@@ -54,7 +60,7 @@ type Props<T> = {
   disabled?: boolean
   validar: (archivo: File, preview: string) => Promise<void>
   upload: (archivo: File, eventos: EventosSubida, signal: AbortSignal) => Promise<{ vista: VistaArchivo; resultado: T }>
-  onSuccess: (resultado: T) => void
+  onSuccess: (resultado: T, archivo: File) => void
   onError?: (mensaje: string) => void
   alCambiarOcupado?: (ocupado: boolean) => void
   alCambiarPendiente?: (pendiente: boolean) => void
@@ -62,7 +68,7 @@ type Props<T> = {
 const tamanoLegible = (bytes: number) => bytes < 1024 ? `${bytes} B` : bytes < 1024 * 1024 ? `${(bytes / 1024).toFixed(1)} KiB` : `${(bytes / (1024 * 1024)).toFixed(2)} MiB`
 
 // Solo una seleccion. El caller valida y transporta; no hay endpoints ni reglas comerciales aqui.
-export function FileUploader<T>({ accept, maxBytes, instrucciones, etiqueta, textoIdle = "Arrastrá un archivo hasta acá", textoSeleccionar = "Seleccionar archivo", textoSubir = "Subir archivo", textoProcesando = "Procesando archivo…", textoExito = "Archivo guardado correctamente.", textoConfirmado = "Archivo cargado", textoCambiar = "Cambiar archivo", textoElegirOtro = "Elegir otro archivo", textoAlternativa = "o elegilo desde tu dispositivo", altVigente = "Archivo vigente", altLocal = "Vista previa local seleccionada", textoTamanoInvalido = "El archivo supera el tamaño permitido.", currentPreview, disabled = false, validar, upload, onSuccess, onError, alCambiarOcupado, alCambiarPendiente }: Props<T>) {
+export function FileUploader<T>({ initialFile, autoUpload = false, compact = false, onPhase, onRemove, showPickerButton = true, accept, maxBytes, instrucciones, etiqueta, textoIdle = "Arrastrá un archivo hasta acá", textoSeleccionar = "Seleccionar archivo", textoSubir = "Subir archivo", textoProcesando = "Procesando archivo…", textoExito = "Archivo guardado correctamente.", textoConfirmado = "Archivo cargado", textoCambiar = "Cambiar archivo", textoElegirOtro = "Elegir otro archivo", textoAlternativa = "o elegilo desde tu dispositivo", altVigente = "Archivo vigente", altLocal = "Vista previa local seleccionada", textoTamanoInvalido = "El archivo supera el tamaño permitido.", currentPreview, disabled = false, validar, upload, onSuccess, onError, alCambiarOcupado, alCambiarPendiente }: FileUploaderProps<T>) {
   const [estado, enviar] = useReducer(reducirSubida, inicial)
   const [edicion, editar] = useReducer(() => true, false)
   const id = useId()
@@ -71,8 +77,8 @@ export function FileUploader<T>({ accept, maxBytes, instrucciones, etiqueta, tex
   const secuencia = useRef(0)
   const control = useRef<AbortController | null>(null)
   const profundidad = useRef(0)
-  const ocupado = ["validating", "uploading", "processing"].includes(estado.fase)
-  const transfiriendo = ["uploading", "processing"].includes(estado.fase)
+  const ocupado = ["validating", "uploading", "retrying", "processing"].includes(estado.fase)
+  const transfiriendo = ["uploading", "retrying", "processing"].includes(estado.fase)
   const bloqueado = ocupado || disabled
   const propia = estado.confirmada
   const vigente = propia && (!currentPreview || currentPreview.url === propia.base || currentPreview.url === propia.vista.url) ? propia.vista : currentPreview
@@ -81,8 +87,14 @@ export function FileUploader<T>({ accept, maxBytes, instrucciones, etiqueta, tex
   useEffect(() => { alCambiarPendiente?.(estado.archivo !== null) }, [estado.archivo, alCambiarPendiente])
   useEffect(() => () => { secuencia.current++; control.current?.abort(); if (url.current) URL.revokeObjectURL(url.current) }, [])
 
+  const iniciarArchivo = useEffectEvent((archivo: File) => { void seleccionar(archivo) })
+  const enviarAutomatico = useEffectEvent(() => { void subir() })
+  useEffect(() => { if (initialFile) iniciarArchivo(initialFile) }, [initialFile])
+  useEffect(() => { if (autoUpload && estado.fase === "selected") enviarAutomatico() }, [autoUpload, estado.fase])
+  useEffect(() => { onPhase?.(estado.fase) }, [estado.fase, onPhase])
+
   function liberar() { if (url.current) URL.revokeObjectURL(url.current); url.current = null }
-  function quitar() { if (transfiriendo) return; secuencia.current++; liberar(); profundidad.current = 0; enviar({ tipo: "quitar" }) }
+  function quitar() { if (transfiriendo) return; secuencia.current++; liberar(); profundidad.current = 0; enviar({ tipo: "quitar" }); onRemove?.() }
   async function seleccionar(archivo: File) {
     if (bloqueado) return
     const turno = ++secuencia.current
@@ -107,7 +119,7 @@ export function FileUploader<T>({ accept, maxBytes, instrucciones, etiqueta, tex
     const archivo = estado.archivo, turno = secuencia.current
     const aborto = new AbortController(); control.current = aborto
     enviar({ tipo: "subir" })
-    let recibido: Awaited<ReturnType<Props<T>["upload"]>>
+    let recibido: Awaited<ReturnType<FileUploaderProps<T>["upload"]>>
     try {
       recibido = await upload(archivo, {
         alProgreso: porcentaje => { if (turno === secuencia.current) enviar({ tipo: "progreso", porcentaje }) },
@@ -122,7 +134,7 @@ export function FileUploader<T>({ accept, maxBytes, instrucciones, etiqueta, tex
     if (turno !== secuencia.current) return
     liberar()
     enviar({ tipo: "exito", vista: { nombre: archivo.name, tipo: archivo.type, tamano: archivo.size, ...recibido.vista }, base: currentPreview?.url })
-    onSuccess(recibido.resultado)
+    onSuccess(recibido.resultado, archivo)
   }
   function feedbackArrastre(e: DragEvent<HTMLDivElement>) {
     const archivo = e.dataTransfer.files?.[0]
@@ -135,7 +147,7 @@ export function FileUploader<T>({ accept, maxBytes, instrucciones, etiqueta, tex
     if (archivos.length !== 1) { quitar(); enviar({ tipo: "error", mensaje: "Seleccioná un solo archivo.", validacion: true }); return }
     void seleccionar(archivos[0])
   }
-  const mensajes: Record<FaseSubida, string> = { idle: "Todavía no seleccionaste un archivo.", "drag-over": "Soltá para cargar", selected: "Archivo seleccionado. Listo para subir.", validating: "Validando el archivo seleccionado…", uploading: estado.porcentaje === null ? "Subiendo archivo…" : `Enviando archivo: ${estado.porcentaje} %`, processing: textoProcesando, success: textoExito, error: "No se pudo completar la carga." }
+  const mensajes: Record<FaseSubida, string> = { retrying: estado.porcentaje === null ? "Reintentando archivo…" : `Reenviando archivo: ${estado.porcentaje} %`, idle: "Todavía no seleccionaste un archivo.", "drag-over": "Soltá para cargar", selected: "Archivo seleccionado. Listo para subir.", validating: "Validando el archivo seleccionado…", uploading: estado.porcentaje === null ? "Subiendo archivo…" : `Enviando archivo: ${estado.porcentaje} %`, processing: textoProcesando, success: textoExito, error: "No se pudo completar la carga." }
   return <div data-estado={estado.fase} className="min-w-0 space-y-4">
     <p role="status" aria-live="polite" className="text-sm">{mensajes[estado.fase]}</p>
     {vigente && <div className="grid min-w-0 grid-cols-[4rem_minmax(0,1fr)] items-center gap-3 rounded-xl border border-primary/25 bg-primary/5 p-4 sm:flex sm:flex-wrap sm:gap-4">
@@ -151,7 +163,7 @@ export function FileUploader<T>({ accept, maxBytes, instrucciones, etiqueta, tex
     {mostrarSelector && <>
       <label htmlFor={id} className="sr-only">{etiqueta}</label>
       <input ref={input} id={id} type="file" accept={accept} disabled={bloqueado} className="sr-only" tabIndex={-1} aria-describedby={`${id}-ayuda`} onChange={e => { const elegido = e.target.files?.[0]; e.target.value = ""; if (elegido) void seleccionar(elegido) }} />
-      <div role="button" tabIndex={bloqueado ? -1 : 0} aria-label="Seleccionar archivo para cargar" aria-disabled={bloqueado} aria-describedby={`${id}-ayuda`}
+      {(!compact || !estado.archivo) && <div role="button" tabIndex={bloqueado ? -1 : 0} aria-label="Seleccionar archivo para cargar" aria-disabled={bloqueado} aria-describedby={`${id}-ayuda`}
         onClick={() => { if (!bloqueado) input.current?.click() }} onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); if (!bloqueado) input.current?.click() } }}
         onDragEnter={e => { e.preventDefault(); if (!bloqueado) { profundidad.current++; feedbackArrastre(e) } }}
         onDragOver={e => { e.preventDefault(); if (!bloqueado) { e.dataTransfer.dropEffect = "copy"; feedbackArrastre(e) } }}
@@ -161,7 +173,7 @@ export function FileUploader<T>({ accept, maxBytes, instrucciones, etiqueta, tex
         <p className="font-medium">{estado.fase === "drag-over" ? "Soltá para cargar" : textoIdle}</p>
         <p className="mt-1 text-sm text-muted-foreground">{estado.fase === "drag-over" ? "Un solo archivo" : textoAlternativa}</p>
         {estado.fase === "drag-over" && estado.arrastrado && <p className="mt-2 break-all text-xs">{estado.arrastrado.nombre} · {tamanoLegible(estado.arrastrado.tamano)}</p>}
-      </div>
+      </div>}
       <p id={`${id}-ayuda`} className="text-xs text-muted-foreground">{instrucciones}</p>
       {estado.archivo && <div className="flex min-w-0 items-center gap-4 rounded-xl border border-border p-3">
         {estado.preview && estado.archivo.type.startsWith("image/") ? <>
@@ -171,11 +183,11 @@ export function FileUploader<T>({ accept, maxBytes, instrucciones, etiqueta, tex
         </> : <ImageIcon className="size-8 shrink-0 text-primary" aria-hidden="true" />}
         <div className="min-w-0 space-y-1"><p className="break-all text-sm font-medium">{estado.archivo.name}</p><p className="break-all text-xs text-muted-foreground">{estado.archivo.type || "Tipo no informado"} · {tamanoLegible(estado.archivo.size)}</p><p className="text-xs">Selección local · todavía no guardada</p></div>
       </div>}
-      {transfiriendo && <div className="space-y-2"><progress aria-label="Progreso de envío" max={100} value={estado.fase === "uploading" && estado.porcentaje !== null ? estado.porcentaje : undefined} className="h-2 w-full appearance-none overflow-hidden rounded-full bg-primary/10 accent-primary [&::-webkit-progress-bar]:bg-primary/10 [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-value]:bg-primary [&::-webkit-progress-value]:rounded-full [&::-moz-progress-bar]:bg-primary" /><p className="text-xs text-muted-foreground">{estado.fase === "processing" ? "Archivo transferido. Esperando confirmación del servidor." : "El porcentaje mide la transferencia, no la confirmación de guardado."}</p></div>}
+      {transfiriendo && <div className="space-y-2"><progress aria-label="Progreso de envío" max={100} value={["uploading", "retrying"].includes(estado.fase) && estado.porcentaje !== null ? estado.porcentaje : undefined} className="h-2 w-full appearance-none overflow-hidden rounded-full bg-primary/10 accent-primary [&::-webkit-progress-bar]:bg-primary/10 [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-value]:transition-[width] [&::-webkit-progress-value]:duration-150 motion-reduce:[&::-webkit-progress-value]:transition-none [&::-webkit-progress-value]:bg-primary [&::-webkit-progress-value]:rounded-full [&::-moz-progress-bar]:bg-primary" /><p className="text-xs text-muted-foreground">{estado.fase === "processing" ? "Archivo transferido. Esperando confirmación del servidor." : "El porcentaje mide la transferencia, no la confirmación de guardado."}</p></div>}
       {estado.error && <div className="space-y-2"><p role="alert" className="text-sm text-destructive">{estado.error}</p>{estado.archivo && <p className="text-xs text-muted-foreground">Conservamos el archivo. Reintentar lo vuelve a enviar completo desde el inicio.</p>}</div>}
       <div className="flex flex-wrap gap-2">
         {estado.archivo && estado.fase !== "validating" && <Button type="button" disabled={bloqueado} onClick={() => void subir()}>{estado.fase === "error" ? "Reintentar" : textoSubir}</Button>}
-        <Button type="button" variant="outline" disabled={bloqueado} onClick={() => input.current?.click()}>{estado.archivo || estado.fase === "error" ? textoElegirOtro : textoSeleccionar}</Button>
+        {(showPickerButton || estado.archivo || estado.fase === "error") && <Button type="button" variant="outline" disabled={bloqueado} onClick={() => input.current?.click()}>{estado.archivo || estado.fase === "error" ? textoElegirOtro : textoSeleccionar}</Button>}
         {(estado.archivo || edicion) && <Button type="button" variant="outline" disabled={transfiriendo} onClick={quitar}>Quitar selección</Button>}
       </div>
     </>}
