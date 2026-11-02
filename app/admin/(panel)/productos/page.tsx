@@ -7,7 +7,7 @@ import { obtenerAdministracionProductos } from "@/lib/modulos/productos/administ
 import { esErrorSesionRequerida } from "@/lib/modulos/autenticacion/contrato"
 import type { ConsultaAdministrativa } from "@/lib/modulos/productos/administracion-contrato"
 
-export default async function PaginaProductos() {
+export default async function PaginaProductos({ searchParams }: { searchParams: Promise<{ cancelado?: string }> }) {
   await exigirAdministradoraEnPagina()
   let consulta: ConsultaAdministrativa = { productos: [], categorias: [] }
   let errorCarga = false
@@ -18,7 +18,9 @@ export default async function PaginaProductos() {
     console.error("[productos] fallo de consulta", { tipo: error instanceof Error ? error.name : typeof error })
     errorCarga = true
   }
-  return <ProductosAdmin consulta={consulta} errorCarga={errorCarga} />
+  const { cancelado } = await searchParams
+  const conservado = consulta.productos.find(p => p.id === cancelado)
+  return <ProductosAdmin consulta={consulta} errorCarga={errorCarga} aviso={conservado ? conservado.publicado ? "El producto conserva su último estado guardado." : "El producto quedó guardado como oculto." : undefined} />
 }
 
 export const metadata: Metadata = { title: "Productos" }
