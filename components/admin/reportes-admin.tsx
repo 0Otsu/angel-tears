@@ -14,7 +14,7 @@ export function ReportesAdmin() {
   const ventas = muestra.series.reduce((s, d) => s + d.ventas, 0)
   const compras = muestra.series.reduce((s, d) => s + d.compras, 0)
   const egresos = muestra.series.reduce((s, d) => s + d.egresos, 0)
-  return <><EncabezadoAdmin titulo="Reportes" descripcion="Visualizaciones de muestra sobre conceptos del alcance actual."><SelectorPeriodo valor={periodo} alCambiar={setPeriodo} /></EncabezadoAdmin><AvisoDemo />
+  return <><EncabezadoAdmin titulo="Resumen financiero" descripcion="Visualizaciones de muestra sobre conceptos del alcance actual."><SelectorPeriodo valor={periodo} alCambiar={setPeriodo} /></EncabezadoAdmin><AvisoDemo />
     <Tabs defaultValue="economico" className="gap-5">
       <TabsList className="h-10 max-w-full rounded-full"><TabsTrigger value="economico" className="rounded-full px-4 text-xs">Resumen económico</TabsTrigger><TabsTrigger value="exploracion" className="rounded-full px-4 text-xs">Exploración visual</TabsTrigger></TabsList>
       <TabsContent value="economico" className="space-y-5">
