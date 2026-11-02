@@ -84,7 +84,7 @@ for(const [vista,width,height] of [["desktop",1440,1000],["notebook",1280,800],[
       }
       await archivo.setInputFiles({name:"nueva.png",mimeType:"image/png",buffer:png})
       const respuesta=page.waitForResponse(r=>r.request().method()==="PUT" && r.url().includes(`/api/admin/productos/${id}/medios/`))
-      await panel.getByRole("button",{name:"Guardar reemplazo"}).click()
+      await expect(panel.getByRole("button", { name: "Guardar reemplazo" })).toHaveCount(0)
       expect((await respuesta).status()).toBe(503)
       await expect(panel.getByRole("alert")).toContainText("La carga de imágenes no está disponible")
       await expect(actual).toHaveAttribute("src",antes.imagenUrlSegura!)

@@ -13,5 +13,5 @@ export default async function PaginaEditarProducto({ params, searchParams }: { p
   const producto = consulta.productos[0]
   if (!producto) notFound()
   const buscar = await searchParams
-  return <EditorProducto key={id} producto={producto} categorias={consulta.categorias} pasoInicial={buscar.paso === "imagen" ? "imagen" : "datos"} alta={buscar.alta === "1"} />
+  return <EditorProducto key={id} producto={producto} categorias={consulta.categorias} pasoInicial={buscar.paso === "vista-previa" ? "vista-previa" : buscar.paso === "imagen" ? "imagen" : "datos"} alta={buscar.alta === "1"} />
 }

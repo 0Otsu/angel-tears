@@ -1,7 +1,7 @@
 "use client"
 import { startTransition, useRef, useState, useTransition, type ReactNode } from "react"
 import Link from "next/link"
-import { MoreVertical } from "lucide-react"
+import { ExternalLink, MoreVertical } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { cambiarPublicacionAccion } from "@/app/admin/(panel)/productos/publicacion-acciones"
 import type { ProductoAdministrativo } from "@/lib/modulos/productos/administracion-contrato"
@@ -14,7 +14,7 @@ import { AvisoProductoGuardado } from "./aviso-producto-guardado"
 
 type Accion = "publicar" | "ocultar" | "destacar" | "quitar_destacado"
 const etiquetas = { publicar: "Publicando…", ocultar: "Ocultando…", destacar: "Destacando…", quitar_destacado: "Quitando destacado…" }
-export function AccionesProducto({ producto, alGuardar, alNotificar, finalizar = false, disabled = false, alEditar, alImagen, accionCancelar }: { producto: ProductoAdministrativo; alGuardar?: (producto: ProductoAdministrativo) => void; alNotificar?: (texto: string) => void; finalizar?: boolean; disabled?: boolean; alEditar?: () => void; alImagen?: () => void; accionCancelar?: (pendiente: boolean) => ReactNode }) {
+export function AccionesProducto({ producto, alGuardar, alNotificar, finalizar = false, disabled = false, enVistaPrevia = false, alEditar, alImagen, accionCancelar }: { producto: ProductoAdministrativo; alGuardar?: (producto: ProductoAdministrativo) => void; alNotificar?: (texto: string) => void; finalizar?: boolean; disabled?: boolean; enVistaPrevia?: boolean; alEditar?: () => void; alImagen?: () => void; accionCancelar?: (pendiente: boolean) => ReactNode }) {
   const [operacion, setOperacion] = useState<Accion | null>(null)
   const ejecutando = useRef(false)
   const [navegando, navegar] = useTransition()
@@ -33,7 +33,9 @@ export function AccionesProducto({ producto, alGuardar, alNotificar, finalizar =
       const r = await cambiarPublicacionAccion({ id: actual.id, version: actual.version, accion })
       if (r.estado !== "ok") { setError(r.estado); return }
       const siguiente = { ...actual, version: r.version, ...(accion === "publicar" || accion === "ocultar" ? { publicado: accion === "publicar" } : { destacado: accion === "destacar" }) }
-      setLocal(siguiente); alGuardar?.(siguiente)
+      setLocal(siguiente)
+      // Al salir no se inicia otra consulta de preview: competiria con la navegacion.
+      if (!(finalizar && accion === "ocultar")) alGuardar?.(siguiente)
       const texto = { publicar: "Producto publicado.", ocultar: "Producto ocultado.", destacar: "Producto destacado.", quitar_destacado: "Se quitó de destacados." }[accion]
       if (alNotificar) alNotificar(texto)
       else notificar(prev => ({ texto, numero: (prev?.numero ?? 0) + 1 }))
@@ -55,6 +57,7 @@ export function AccionesProducto({ producto, alGuardar, alNotificar, finalizar =
       {!actual.tieneImagen && <p className="w-full text-xs text-muted-foreground">Para publicar, agregá una imagen.</p>}
     </div> : <>{accionCancelar?.(pendiente)}<DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline" className={pendiente ? "size-11 shrink-0 gap-2 p-0 sm:w-auto sm:px-3" : "size-11 shrink-0 p-0"} disabled={pendiente || disabled} aria-busy={pendiente} aria-label={`Acciones de ${actual.nombre}`}>{pendiente ? <><Spinner /><span className="sr-only sm:not-sr-only">{operacion ? etiquetas[operacion] : "Cargando…"}</span></> : <MoreVertical aria-hidden="true" />}</Button></DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-52">
+        {!enVistaPrevia && (actual.publicado ? <DropdownMenuItem asChild className="min-h-11"><a href={`/catalogo/${actual.slug}`} target="_blank" rel="noopener noreferrer" aria-label="Ver producto (abre otra pestaña)">Ver producto<ExternalLink aria-hidden="true" /></a></DropdownMenuItem> : <DropdownMenuItem className="min-h-11" onSelect={() => navegar(() => router.push(`/admin/productos/${actual.id}/editar?paso=vista-previa`))}>Vista previa</DropdownMenuItem>)}
         <DropdownMenuItem className="min-h-11" onSelect={() => { if (alEditar) alEditar(); else navegar(() => router.push(`/admin/productos/${actual.id}/editar`)) }}>Editar</DropdownMenuItem>
         <DropdownMenuItem className="min-h-11" onSelect={imagenes}>Gestionar imágenes</DropdownMenuItem>
         <DropdownMenuSeparator />
