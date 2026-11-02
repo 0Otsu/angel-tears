@@ -25,11 +25,12 @@ export function crearAdministracionProductos(dependencias: {
 }) {
   const { db, exigir, crearSaldoCero } = dependencias
 
-  async function consultar(encabezados: Headers): Promise<ConsultaAdministrativa> {
+  async function consultar(encabezados: Headers, productoId?: string): Promise<ConsultaAdministrativa> {
     await exigir(encabezados)
     const [productos, categorias] = await Promise.all([
       db.select(camposAdministrativos).from(producto)
         .innerJoin(categoria, eq(producto.categoriaCodigo, categoria.codigo))
+        .where(productoId ? eq(producto.id, productoId) : undefined)
         .orderBy(asc(producto.nombre), asc(producto.id)),
       db.select().from(categoria).orderBy(asc(categoria.nombre)),
     ])

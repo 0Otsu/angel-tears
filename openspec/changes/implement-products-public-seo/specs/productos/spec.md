@@ -8,6 +8,21 @@ Fuente A/C/L y actualización 8; RF-04..07 de referencia, imagen/destacado con g
 
 ## ADDED Requirements
 
+### Requirement: Administracion clara y operaciones coordinadas
+El sistema SHALL priorizar el listado persistido con filtros y acciones accesibles, ofrecer alta y edicion dedicadas y reutilizar los comandos reales de datos/imagen/publicacion. El alta permanece oculta hasta publicacion explicita con imagen valida.
+
+#### Scenario: Alta guiada
+- **WHEN** la administradora guarda los datos de un producto nuevo
+- **THEN** continua con imagen y resumen sobre el ID persistido, puede finalizar oculto y solo publicar cuando el servidor acepta la referencia de imagen.
+
+#### Scenario: Imagen y borrador de datos
+- **WHEN** confirma una carga o reemplazo propio mientras conserva un borrador de datos
+- **THEN** se conserva el borrador y la edicion posterior utiliza la version confirmada, sin adoptar cambios ajenos silenciosamente.
+
+#### Scenario: Acciones de listado
+- **WHEN** la administradora publica/oculta o destaca/quita destacado desde el menu
+- **THEN** se ejecuta el comando autorizado/versionado, se informa su resultado y los conflictos ofrecen recarga explicita sin borrado fisico.
+
 ### Requirement: Campos reales y categoría fija
 El sistema SHALL requerir nombre, precio y categoría, y admitir descripción/material/medida/color/cuidados opcionales, sin inventar valores. Las categorías son las siete aprobadas, sin CRUD adicional; disponibilidad se deriva del stock.
 
