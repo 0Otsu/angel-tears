@@ -107,7 +107,6 @@ export function FormularioLogin() {
           aria-required="true"
           aria-invalid={errores.email ? true : undefined}
           aria-describedby={errores.email ? "error-email" : undefined}
-          placeholder="Tu correo"
           className="h-12 rounded-xl border-border bg-background px-4 text-base shadow-none focus-visible:ring-2 focus-visible:ring-primary/20 md:text-base"
         />
         {errores.email && (
@@ -130,7 +129,6 @@ export function FormularioLogin() {
           aria-required="true"
           aria-invalid={errores.contrasena ? true : undefined}
           aria-describedby={errores.contrasena ? "error-contrasena" : undefined}
-          placeholder="Tu contraseña"
           className="h-12 rounded-xl border-border bg-background px-4 text-base shadow-none focus-visible:ring-2 focus-visible:ring-primary/20 md:text-base"
         />
         {errores.contrasena && (

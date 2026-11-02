@@ -66,7 +66,7 @@ for (const [nombreVista, width, height] of [["desktop", 1440, 1000], ["notebook"
     await page.getByLabel("Precio de venta (ARS) *").fill("0")
     await page.getByLabel("Categoría *").selectOption("collares")
     await formulario.getByRole("button", { name: "Guardar y continuar" }).click()
-    await expect(formulario.getByText("El precio debe ser mayor que cero.")).toBeVisible()
+    await expect(formulario.getByText("Ingresá un precio mayor a $0.")).toBeVisible()
     await expect(page.getByLabel("Precio de venta (ARS) *")).toBeFocused()
     await page.getByLabel("Precio de venta (ARS) *").fill("1250.50")
     await page.getByLabel("Material", { exact: true }).fill("Acero")

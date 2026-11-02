@@ -8,19 +8,37 @@ import type { ConsultaAdministrativa, EstadoFormularioProducto, ProductoAdminist
 import { PendingButton } from "@/components/ui/pending-button"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
+import { normalizarPrecioDecimal } from "@/lib/modulos/productos/validacion"
 import { PanelAdmin, TituloPanel } from "./piezas-admin"
 import { AvisoProductoGuardado } from "./aviso-producto-guardado"
 
 const campos = [
-  { nombre: "nombre", etiqueta: "Nombre", requerido: true },
-  { nombre: "precio", etiqueta: "Precio de venta (ARS)", requerido: true },
-  { nombre: "descripcion", etiqueta: "Descripción" },
-  { nombre: "material", etiqueta: "Material" },
-  { nombre: "medida", etiqueta: "Medidas" },
-  { nombre: "color", etiqueta: "Color" },
-  { nombre: "cuidados", etiqueta: "Cuidados" },
+  { nombre: "nombre", etiqueta: "Nombre", requerido: true, ejemplo: "Ej: Pulsera Olivia" },
+  { nombre: "precio", etiqueta: "Precio de venta (ARS)", requerido: true, ejemplo: "Ej: 33000" },
+  { nombre: "descripcion", etiqueta: "Descripción", ejemplo: "Ej: Pulsera regulable con detalles dorados" },
+  { nombre: "material", etiqueta: "Material", ejemplo: "Ej: Acero inoxidable" },
+  { nombre: "medida", etiqueta: "Medidas", ejemplo: "Ej: 18 cm" },
+  { nombre: "color", etiqueta: "Color", ejemplo: "Ej: Dorado" },
+  { nombre: "cuidados", etiqueta: "Cuidados", ejemplo: "Ej: Evitar contacto con agua y perfume" },
 ] as const
+
+// Adaptacion de entrada humana; el servidor sigue validando las mismas reglas exactas.
+function precioParaEnviar(texto: string) {
+  const decimal = texto.trim().replace(",", ".")
+  return normalizarPrecioDecimal(decimal) ?? decimal
+}
+function errorPrecio(texto: string, mensajeServidor: string) {
+  if (!texto.trim()) return "Ingresá un precio de venta."
+  const decimal = precioParaEnviar(texto)
+  const precio = normalizarPrecioDecimal(decimal)
+  if (precio === "0.00" || precio?.startsWith("-")) return "Ingresá un precio mayor a $0."
+  if (/^-?\d+[.,]\d{3,}$/.test(texto.trim())) return "El precio admite hasta dos decimales."
+  if (precio === null && /^-?\d+(?:\.\d{1,2})?$/.test(decimal)) return "El precio es demasiado alto. Ingresá un importe menor."
+  if (precio === null) return "Ingresá un precio válido, por ejemplo 33000 o 33000,50."
+  return mensajeServidor
+}
 
 type NombreCampo = typeof campos[number]["nombre"] | "categoriaCodigo"
 function valoresIniciales(producto?: ProductoAdministrativo): Record<NombreCampo, string> {
@@ -78,6 +96,8 @@ export function FormularioProducto({ producto, categorias, cancelar, versionProp
     if (pendiente || enviando.current) return
     const formulario = evento.currentTarget
     const datos = new FormData(formulario)
+    const valoresEnviados = { ...valores, precio: precioParaEnviar(valores.precio) }
+    datos.set("precio", valoresEnviados.precio)
     enviando.current = true; ocupar(true)
     try {
       let respuesta: EstadoFormularioProducto
@@ -86,14 +106,16 @@ export function FormularioProducto({ producto, categorias, cancelar, versionProp
       } catch {
         respuesta = { estado: "error_tecnico" }
       }
-      setResultado(respuesta)
+      setResultado(respuesta.estado === "datos_invalidos" && respuesta.errores.precio
+        ? { ...respuesta, errores: { ...respuesta.errores, precio: errorPrecio(valores.precio, respuesta.errores.precio) } }
+        : respuesta)
       if (respuesta.estado === "ok") {
         setGuardados(valores)
         if (producto) setVersionEsperada(Math.max(versionEsperada, versionPropia ?? 0) + 1)
         if (producto) {
-          alGuardar?.(respuesta.productoId, valores)
+          alGuardar?.(respuesta.productoId, valoresEnviados)
           startTransition(() => router.refresh())
-        } else navegar(() => alGuardar?.(respuesta.productoId, valores))
+        } else navegar(() => alGuardar?.(respuesta.productoId, valoresEnviados))
       }
     } finally { enviando.current = false; ocupar(false) }
   }
@@ -105,14 +127,14 @@ export function FormularioProducto({ producto, categorias, cancelar, versionProp
       <fieldset disabled={pendiente} className="grid min-w-0 gap-5 sm:grid-cols-2">
         {campos.map((campo) => {
           const requerido = "requerido" in campo && campo.requerido
+          const Control = campo.nombre === "descripcion" || campo.nombre === "cuidados" ? Textarea : Input
           return <div key={campo.nombre} className="min-w-0 space-y-2">
             <Label htmlFor={`producto-${campo.nombre}`}>{campo.etiqueta}{requerido ? " *" : ""}</Label>
-            <Input id={`producto-${campo.nombre}`} name={campo.nombre} value={valores[campo.nombre]}
+            <Control id={`producto-${campo.nombre}`} name={campo.nombre} value={valores[campo.nombre]} placeholder={campo.ejemplo}
               onChange={(e) => setValores({ ...valores, [campo.nombre]: e.target.value })}
               required={requerido} aria-invalid={Boolean(errores[campo.nombre])}
-              aria-describedby={errores[campo.nombre] ? `error-${campo.nombre}` : campo.nombre === "precio" ? "ayuda-precio" : undefined}
-              inputMode={campo.nombre === "precio" ? "decimal" : undefined} className="h-11 bg-background" />
-            {campo.nombre === "precio" && <p id="ayuda-precio" className="text-xs text-muted-foreground">Mayor que $0. Hasta dos decimales, con punto: 33000.50.</p>}
+              aria-describedby={errores[campo.nombre] ? `error-${campo.nombre}` : undefined}
+              inputMode={campo.nombre === "precio" ? "decimal" : undefined} className={Control === Input ? "min-h-11 bg-background" : "bg-background"} />
             {errores[campo.nombre] && <p id={`error-${campo.nombre}`} className="text-sm text-destructive">{errores[campo.nombre]}</p>}
           </div>
         })}

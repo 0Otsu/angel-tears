@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { NuevoProducto, EditorProducto } from "./editor-producto"
 import { ProductosAdmin } from "./productos-admin"
 import type { ConsultaAdministrativa, ResultadoGuardarProducto } from "@/lib/modulos/productos/administracion-contrato"
+import { FormularioProducto } from "./formulario-producto"
+import { esquemaProductoAdministrativo, erroresProducto } from "@/lib/modulos/productos/validacion-administrativa"
 
 const { crear, editar, refresh, push } = vi.hoisted(() => ({ crear: vi.fn(), editar: vi.fn(), refresh: vi.fn(), push: vi.fn() }))
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh, push }) }))
@@ -21,6 +23,67 @@ function completar() {
   fireEvent.change(screen.getByLabelText("Categoría *"), { target: { value: "collares" } })
 }
 beforeEach(() => { crear.mockReset(); editar.mockReset(); refresh.mockReset(); push.mockReset() })
+
+function servidorConValidacionActual() {
+  crear.mockImplementation(async (datos: FormData) => {
+    const r = esquemaProductoAdministrativo.safeParse(Object.fromEntries(datos))
+    return r.success ? { estado: "ok", productoId: "nuevo" } : { estado: "datos_invalidos", errores: erroresProducto(r.error) }
+  })
+}
+
+it("labels persisten al escribir, ejemplos no los sustituyen y textos largos son textarea", () => {
+  render(<NuevoProducto categorias={consulta.categorias} />)
+  expect(nombre().required).toBe(true); expect(precio().required).toBe(true)
+  expect((screen.getByLabelText("Categoría *") as HTMLSelectElement).required).toBe(true)
+  expect(precio().inputMode).toBe("decimal")
+  expect(precio().placeholder).toBe("Ej: 33000")
+  fireEvent.change(nombre(), { target: { value: "Pulsera Olivia" } })
+  expect(screen.getByText("Nombre *").getAttribute("for")).toBe(nombre().id)
+  expect(screen.getByLabelText("Descripción").tagName).toBe("TEXTAREA")
+  expect(screen.getByLabelText("Cuidados").tagName).toBe("TEXTAREA")
+  expect(screen.queryByText(/Hasta dos decimales, con punto/)).toBeNull()
+  expect(precio().getAttribute("aria-describedby")).toBeNull()
+})
+
+it.each([
+  ["33000", "33000.00"], ["33000,50", "33000.50"], ["33000.50", "33000.50"],
+  ["90071992547409,93", "90071992547409.93"], ["9999999999999999,99", "9999999999999999.99"],
+])("entrada %s llega exacta al servidor como %s", async (entrada, esperado) => {
+  servidorConValidacionActual()
+  render(<NuevoProducto categorias={consulta.categorias} />)
+  completar(); fireEvent.change(precio(), { target: { value: entrada } }); enviar()
+  await waitFor(() => expect(push).toHaveBeenCalled())
+  expect(crear.mock.calls[0][0].get("precio")).toBe(esperado)
+})
+
+it.each([
+  ["", "Ingresá un precio de venta."], ["0", "Ingresá un precio mayor a $0."],
+  ["-1,50", "Ingresá un precio mayor a $0."], ["33000,555", "El precio admite hasta dos decimales."],
+  ["33000.555", "El precio admite hasta dos decimales."],
+  ["10000000000000000", "El precio es demasiado alto. Ingresá un importe menor."],
+  ["33.000,50", "Ingresá un precio válido, por ejemplo 33000 o 33000,50."],
+  ["1e3", "Ingresá un precio válido, por ejemplo 33000 o 33000,50."],
+])("entrada invalida %s conserva valor y muestra correccion contextual", async (entrada, mensaje) => {
+  servidorConValidacionActual()
+  render(<NuevoProducto categorias={consulta.categorias} />)
+  completar(); fireEvent.change(precio(), { target: { value: entrada } }); enviar()
+  const error = await screen.findByText(mensaje)
+  await waitFor(() => expect(document.activeElement).toBe(precio()))
+  expect(precio().getAttribute("aria-describedby")).toBe(error.id)
+  expect(precio().getAttribute("aria-invalid")).toBe("true")
+  expect(precio().value).toBe(entrada); expect(push).not.toHaveBeenCalled()
+})
+
+it("edicion comunica decimal normalizado al editor sin dejar un borrador falso", async () => {
+  editar.mockResolvedValue({ estado: "ok", productoId: consulta.productos[0].id })
+  const alGuardar = vi.fn(), alCambiarBorrador = vi.fn()
+  render(<FormularioProducto producto={consulta.productos[0]} categorias={consulta.categorias} cancelar={vi.fn()} alGuardar={alGuardar} alCambiarBorrador={alCambiarBorrador} />)
+  fireEvent.change(precio(), { target: { value: "33000,50" } }); enviar()
+  await waitFor(() => expect(alGuardar).toHaveBeenCalled())
+  expect(alGuardar.mock.calls[0][1].precio).toBe("33000.50")
+  expect(alCambiarBorrador).toHaveBeenLastCalledWith(false)
+  expect(precio().value).toBe("33000,50")
+})
 
 describe("productos administrativos", () => {
   it("lista los registros recibidos, incluidos ocultos, y diferencia error de consulta de lista vacia", () => {
@@ -55,7 +118,7 @@ describe("productos administrativos", () => {
     completar()
     fireEvent.change(precio(), { target: { value: "0" } })
     enviar()
-    expect(await screen.findByText("El precio debe ser mayor que cero.")).toBeTruthy()
+    expect(await screen.findByText("Ingresá un precio mayor a $0.")).toBeTruthy()
     await waitFor(() => expect(document.activeElement).toBe(precio()))
     expect(precio().getAttribute("aria-invalid")).toBe("true")
     expect(nombre().value).toBe("Pulsera de muestra")

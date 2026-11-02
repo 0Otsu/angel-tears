@@ -23,6 +23,10 @@ El sistema SHALL priorizar el listado persistido con filtros y acciones accesibl
 - **WHEN** la administradora publica/oculta o destaca/quita destacado desde el menu
 - **THEN** se ejecuta el comando autorizado/versionado, se informa su resultado y los conflictos ofrecen recarga explicita sin borrado fisico.
 
+#### Scenario: Etiquetas persistentes y precio natural
+- **WHEN** se completan o corrigen los datos administrativos de Producto
+- **THEN** los campos conservan etiquetas visibles y errores asociados; los ejemplos no sustituyen etiquetas ni se muestran reglas tecnicas permanentes. La UI adapta coma decimal al formato exacto existente, sin redondear ni relajar la validacion de precio del servidor.
+
 ### Requirement: Campos reales y categoría fija
 El sistema SHALL requerir nombre, precio y categoría, y admitir descripción/material/medida/color/cuidados opcionales, sin inventar valores. Las categorías son las siete aprobadas, sin CRUD adicional; disponibilidad se deriva del stock.
 
