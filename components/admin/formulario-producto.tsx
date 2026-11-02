@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { crearProductoAccion, editarProductoAccion } from "@/app/admin/(panel)/productos/acciones"
 import type { ConsultaAdministrativa, EstadoFormularioProducto, ProductoAdministrativo } from "@/lib/modulos/productos/administracion-contrato"
+import { PendingButton } from "@/components/ui/pending-button"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -128,7 +129,7 @@ export function FormularioProducto({ producto, categorias, cancelar, versionProp
       </div>}
       <div className="flex flex-wrap gap-3">
         {accionCancelar ?? <Button type="button" variant="outline" className="border-destructive/35 text-destructive hover:bg-destructive/5" disabled={pendiente} onClick={cancelar}>Cancelar</Button>}
-        <Button type="submit" disabled={pendiente || categorias.length === 0} aria-busy={pendiente}>{pendiente ? "Guardando…" : producto ? "Guardar cambios" : "Guardar y continuar"}</Button>
+        <PendingButton pending={pendiente} pendingLabel="Guardando…" type="submit" disabled={pendiente || categorias.length === 0} aria-busy={pendiente}>{pendiente ? "Guardando…" : producto ? "Guardar cambios" : "Guardar y continuar"}</PendingButton>
       </div>
     </form>
   </PanelAdmin>

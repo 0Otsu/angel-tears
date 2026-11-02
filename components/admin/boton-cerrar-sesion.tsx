@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useTransition, useState } from "react"
 import { useRouter } from "next/navigation"
+import { Spinner } from "@/components/ui/spinner"
 import { LogOut } from "lucide-react"
 import { authClient } from "@/lib/infraestructura/auth-cliente"
 
@@ -10,11 +11,12 @@ import { authClient } from "@/lib/infraestructura/auth-cliente"
 // abierta y se avisa, en vez de aparentar que se cerro.
 export function BotonCerrarSesion() {
   const router = useRouter()
+  const [navegando, navegar] = useTransition()
   const [cerrando, setCerrando] = useState(false)
   const [fallo, setFallo] = useState(false)
 
   async function cerrarSesion() {
-    if (cerrando) return
+    if (cerrando || navegando) return
     setCerrando(true)
     setFallo(false)
     try {
@@ -23,8 +25,7 @@ export function BotonCerrarSesion() {
         setFallo(true)
         return
       }
-      router.push("/admin/login")
-      router.refresh()
+      navegar(() => { router.push("/admin/login"); router.refresh() })
     } catch {
       setFallo(true)
     } finally {
@@ -37,12 +38,12 @@ export function BotonCerrarSesion() {
       <button
         type="button"
         onClick={cerrarSesion}
-        disabled={cerrando}
-        aria-busy={cerrando}
+        disabled={cerrando || navegando}
+        aria-busy={cerrando || navegando}
         className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3.5 text-left text-sm text-muted-foreground hover:bg-card hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-60"
       >
-        <LogOut className="size-4" aria-hidden="true" />
-        Cerrar sesión
+        {cerrando || navegando ? <Spinner /> : <LogOut className="size-4" aria-hidden="true" />}
+        {cerrando || navegando ? "Cerrando sesión…" : "Cerrar sesión"}
       </button>
       {fallo && (
         <p role="alert" className="px-3.5 pt-1 text-xs text-destructive">

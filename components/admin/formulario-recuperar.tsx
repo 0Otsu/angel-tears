@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
+import { PendingButton } from "@/components/ui/pending-button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { authClient } from "@/lib/infraestructura/auth-cliente"
@@ -88,14 +88,15 @@ export function FormularioRecuperar() {
           </p>
         )}
 
-        <Button
+        <PendingButton
+          pending={enviando} pendingLabel="Enviando…"
           type="submit"
           disabled={enviando}
           aria-busy={enviando}
           className="mt-2 h-13 w-full rounded-full px-8 text-sm font-normal tracking-wide boty-shadow boty-transition focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           {enviando ? "Enviando…" : "Enviarme el enlace"}
-        </Button>
+        </PendingButton>
       </form>
 
       <p className="text-sm">

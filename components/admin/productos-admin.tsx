@@ -3,7 +3,7 @@ import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import type { ConsultaAdministrativa } from "@/lib/modulos/productos/administracion-contrato"
-import { Button } from "@/components/ui/button"
+import { NavigationButton } from "@/components/ui/navigation-button"
 import { Input } from "@/components/ui/input"
 import { EncabezadoAdmin, PanelAdmin, EtiquetaEstado } from "./piezas-admin"
 import { AccionesProducto } from "./acciones-producto"
@@ -12,9 +12,9 @@ export function ProductosAdmin({ consulta, errorCarga = false, aviso }: { consul
  const [busqueda, buscar] = useState(""); const [categoria, filtrarCategoria] = useState(""); const [estado, filtrarEstado] = useState("")
  const productos = consulta.productos.filter(p => p.nombre.toLocaleLowerCase().includes(busqueda.toLocaleLowerCase()) && (!categoria || p.categoriaCodigo === categoria) && (!estado || (estado === "publicado") === p.publicado))
  return <>
-  <EncabezadoAdmin titulo="Productos" descripcion="Tus productos, imágenes y visibilidad en el sitio."><Button asChild><Link href="/admin/productos/nuevo">Nuevo producto</Link></Button></EncabezadoAdmin>
+  <EncabezadoAdmin titulo="Productos" descripcion="Tus productos, imágenes y visibilidad en el sitio."><NavigationButton href="/admin/productos/nuevo">Nuevo producto</NavigationButton></EncabezadoAdmin>
   {aviso && <AvisoProductoGuardado key={aviso} texto={aviso} />}
-  {errorCarga ? <PanelAdmin className="space-y-3 p-5"><p role="alert">No pudimos consultar los productos. Probá recargar la página.</p><Link href="/admin/productos" className="underline">Reintentar consulta</Link></PanelAdmin> : consulta.productos.length === 0 ? <PanelAdmin className="space-y-3 p-6"><h2>Todavía no hay productos registrados.</h2><p className="text-sm text-muted-foreground">Creá el primero; podés conservarlo oculto hasta tener su imagen lista.</p><Link href="/admin/productos/nuevo" className="text-primary underline">Nuevo producto</Link></PanelAdmin> : <>
+  {errorCarga ? <PanelAdmin className="space-y-3 p-5"><p role="alert">No pudimos consultar los productos. Probá recargar la página.</p><Link href="/admin/productos" className="underline">Reintentar consulta</Link></PanelAdmin> : consulta.productos.length === 0 ? <PanelAdmin className="space-y-3 p-6"><h2>Todavía no hay productos registrados.</h2><p className="text-sm text-muted-foreground">Creá el primero; podés conservarlo oculto hasta tener su imagen lista.</p><NavigationButton href="/admin/productos/nuevo" variant="outline">Nuevo producto</NavigationButton></PanelAdmin> : <>
   <div className="grid gap-3 sm:grid-cols-3">
    <label className="text-sm">Buscar por nombre<Input value={busqueda} onChange={e=>buscar(e.target.value)} /></label>
    <label className="text-sm">Categoría<select className="mt-1 h-11 w-full rounded-md border bg-background px-3" value={categoria} onChange={e=>filtrarCategoria(e.target.value)}><option value="">Todas las categorías</option>{consulta.categorias.map(c=><option key={c.codigo} value={c.codigo}>{c.nombre}</option>)}</select></label>

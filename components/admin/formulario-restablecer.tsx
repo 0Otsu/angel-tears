@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react"
 import Link from "next/link"
+import { PendingButton } from "@/components/ui/pending-button"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -168,14 +169,15 @@ export function FormularioRestablecer({ token, enlaceInvalido }: { token?: strin
         </p>
       )}
 
-      <Button
+      <PendingButton
+        pending={enviando} pendingLabel="Guardando…"
         type="submit"
         disabled={enviando}
         aria-busy={enviando}
         className="mt-2 h-13 w-full rounded-full px-8 text-sm font-normal tracking-wide boty-shadow boty-transition focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       >
         {enviando ? "Guardando…" : "Cambiar contraseña"}
-      </Button>
+      </PendingButton>
     </form>
   )
 }
