@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import Image from "next/image"
+import Image, { getImageProps } from "next/image"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 
@@ -13,8 +13,11 @@ export function MarcoAcceso({
   descripcion: string
   children: ReactNode
 }) {
+  const { props: imagen } = getImageProps({ src: "/images/admin/casa-login.jpg", alt: "", fill: true, sizes: "56vw" })
   return (
     <main className="grid min-h-svh bg-background lg:grid-cols-[44%_56%]">
+      {/* Precarga solo donde la imagen decorativa es visible; mobile no la descarga. */}
+      <link rel="preload" as="image" imageSrcSet={imagen.srcSet} imageSizes={imagen.sizes} media="(min-width: 1024px)" fetchPriority="high" />
       <aside
         className="relative hidden overflow-hidden bg-card lg:order-2 lg:block"
         aria-label="Identidad de Angel Tears"
@@ -25,7 +28,7 @@ export function MarcoAcceso({
           fill
           sizes="56vw"
           className="object-cover object-[50%_65%]"
-          priority
+          loading="lazy"
         />
       </aside>
 

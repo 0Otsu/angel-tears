@@ -1,0 +1,415 @@
+{
+  "fecha": "2026-11-02",
+  "base": "194d4aaa71a9e6baf53bb886b54070fff037469f",
+  "entorno": "Next build/start local, Chromium, Cloudinary real; no deployment",
+  "metodo": {
+    "mobile": {
+      "ancho": 390,
+      "alto": 844,
+      "dpr": 2,
+      "cpu": 4,
+      "latenciaMs": 150,
+      "bajadaBytesSegundo": 200000,
+      "subidaBytesSegundo": 93750,
+      "corridas": 2
+    },
+    "desktop": {
+      "ancho": 1366,
+      "alto": 900,
+      "corridas": 1
+    },
+    "cacheBrowser": false,
+    "cacheCdn": "no controlada",
+    "eventTiming": "muestras controladas, umbral 16ms; no INP de campo",
+    "lighthouse": "no disponible; no ejecutado"
+  },
+  "paginas": [
+    {
+      "pagina": "Home",
+      "perfil": "mobile-4G-CPU4x",
+      "antes": {
+        "lcpMs": [
+          1080,
+          936
+        ],
+        "cls": [
+          0,
+          0
+        ],
+        "imagenBytes": [
+          5572038,
+          5571384
+        ],
+        "scriptBytes": [
+          157060,
+          157060
+        ],
+        "fontBytes": [
+          76040,
+          76040
+        ],
+        "eventTimingMs": [],
+        "violacionesAxe": [
+          "color-contrast"
+        ],
+        "incompletosAxe": [
+          "color-contrast"
+        ],
+        "overflow": false
+      },
+      "despues": {
+        "lcpMs": [
+          1048,
+          1116
+        ],
+        "cls": [
+          0,
+          0
+        ],
+        "imagenBytes": [
+          107016,
+          107016
+        ],
+        "scriptBytes": [
+          157635,
+          157635
+        ],
+        "fontBytes": [
+          76040,
+          76040
+        ],
+        "eventTimingMs": [
+          24
+        ],
+        "violacionesAxe": [],
+        "incompletosAxe": [
+          "color-contrast"
+        ],
+        "overflow": false,
+        "fallbacks": [
+          0,
+          0
+        ],
+        "erroresImagen": []
+      }
+    },
+    {
+      "pagina": "Catalogo",
+      "perfil": "mobile-4G-CPU4x",
+      "antes": {
+        "lcpMs": [
+          10044,
+          10052
+        ],
+        "cls": [
+          0,
+          0
+        ],
+        "imagenBytes": [
+          1641155,
+          1640159
+        ],
+        "scriptBytes": [
+          163468,
+          163468
+        ],
+        "fontBytes": [
+          76040,
+          76040
+        ],
+        "eventTimingMs": [
+          16,
+          16
+        ],
+        "violacionesAxe": [],
+        "incompletosAxe": [
+          "color-contrast"
+        ],
+        "overflow": false
+      },
+      "despues": {
+        "lcpMs": [
+          1296,
+          1320
+        ],
+        "cls": [
+          0,
+          0
+        ],
+        "imagenBytes": [
+          28783,
+          28783
+        ],
+        "scriptBytes": [
+          164133,
+          164133
+        ],
+        "fontBytes": [
+          76040,
+          76040
+        ],
+        "eventTimingMs": [
+          24,
+          16
+        ],
+        "violacionesAxe": [],
+        "incompletosAxe": [
+          "color-contrast"
+        ],
+        "overflow": false,
+        "fallbacks": [
+          0,
+          0
+        ],
+        "erroresImagen": []
+      }
+    },
+    {
+      "pagina": "PDP",
+      "perfil": "mobile-4G-CPU4x",
+      "antes": {
+        "lcpMs": [
+          57592,
+          57492
+        ],
+        "cls": [
+          0,
+          0
+        ],
+        "imagenBytes": [
+          11606326,
+          11597996
+        ],
+        "scriptBytes": [
+          166372,
+          166372
+        ],
+        "fontBytes": [
+          76040,
+          76040
+        ],
+        "eventTimingMs": [
+          16
+        ],
+        "violacionesAxe": [],
+        "incompletosAxe": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ],
+        "overflow": false
+      },
+      "despues": {
+        "lcpMs": [
+          1308,
+          1324
+        ],
+        "cls": [
+          0,
+          0
+        ],
+        "imagenBytes": [
+          46781,
+          46757
+        ],
+        "scriptBytes": [
+          167050,
+          167050
+        ],
+        "fontBytes": [
+          76040,
+          76040
+        ],
+        "eventTimingMs": [
+          32,
+          24
+        ],
+        "violacionesAxe": [],
+        "incompletosAxe": [
+          "color-contrast"
+        ],
+        "overflow": false,
+        "fallbacks": [
+          0,
+          0
+        ],
+        "erroresImagen": []
+      }
+    },
+    {
+      "pagina": "Login",
+      "perfil": "desktop",
+      "antes": {
+        "lcpMs": [
+          104
+        ],
+        "cls": [
+          0
+        ],
+        "imagenBytes": [
+          605302
+        ],
+        "scriptBytes": [
+          260677
+        ],
+        "fontBytes": [
+          76040
+        ],
+        "eventTimingMs": [],
+        "violacionesAxe": [],
+        "incompletosAxe": [],
+        "overflow": false
+      },
+      "despues": {
+        "lcpMs": [
+          144
+        ],
+        "cls": [
+          0
+        ],
+        "imagenBytes": [
+          110889
+        ],
+        "scriptBytes": [
+          260684
+        ],
+        "fontBytes": [
+          76040
+        ],
+        "eventTimingMs": [],
+        "violacionesAxe": [],
+        "incompletosAxe": [],
+        "overflow": false,
+        "fallbacks": [
+          0
+        ],
+        "erroresImagen": []
+      }
+    },
+    {
+      "pagina": "Admin listado",
+      "perfil": "desktop",
+      "antes": {
+        "lcpMs": [
+          96
+        ],
+        "cls": [
+          0
+        ],
+        "imagenBytes": [
+          4148451
+        ],
+        "scriptBytes": [
+          207094
+        ],
+        "fontBytes": [
+          76040
+        ],
+        "eventTimingMs": [],
+        "violacionesAxe": [],
+        "incompletosAxe": [
+          "color-contrast"
+        ],
+        "overflow": false
+      },
+      "despues": {
+        "lcpMs": [
+          104
+        ],
+        "cls": [
+          0
+        ],
+        "imagenBytes": [
+          5394
+        ],
+        "scriptBytes": [
+          207698
+        ],
+        "fontBytes": [
+          76040
+        ],
+        "eventTimingMs": [],
+        "violacionesAxe": [],
+        "incompletosAxe": [
+          "color-contrast"
+        ],
+        "overflow": false,
+        "fallbacks": [
+          0
+        ],
+        "erroresImagen": []
+      }
+    },
+    {
+      "pagina": "Admin galeria",
+      "perfil": "desktop",
+      "antes": {
+        "lcpMs": [
+          648
+        ],
+        "cls": [
+          0.06681858164572654
+        ],
+        "imagenBytes": [
+          11603830
+        ],
+        "scriptBytes": [
+          309360
+        ],
+        "fontBytes": [
+          76040
+        ],
+        "eventTimingMs": [],
+        "violacionesAxe": [
+          "color-contrast"
+        ],
+        "incompletosAxe": [],
+        "overflow": false
+      },
+      "despues": {
+        "lcpMs": [
+          372
+        ],
+        "cls": [
+          0.06681858164572654
+        ],
+        "imagenBytes": [
+          45308
+        ],
+        "scriptBytes": [
+          309929
+        ],
+        "fontBytes": [
+          76040
+        ],
+        "eventTimingMs": [],
+        "violacionesAxe": [],
+        "incompletosAxe": [],
+        "overflow": false,
+        "fallbacks": [
+          0
+        ],
+        "erroresImagen": []
+      }
+    }
+  ],
+  "limpieza": {
+    "productoDescartableRetirado": true,
+    "assetsDescartablesRetirados": 7,
+    "baselineLiteralCoincide": false,
+    "motivo": "Una imagen fue agregada a un producto existente durante la medicion; se conservo esa edicion ajena.",
+    "baselineReconstituidaSoloEnMemoria": true,
+    "restoFilasPreviasCoinciden": true
+  },
+  "checks": {
+    "unitComponent": 359,
+    "postgresql": 172,
+    "e2eCompleto": 60,
+    "e2eTrasAjusteSemantico": 3
+  },
+  "pendientes": [
+    "5.x",
+    "video",
+    "deployment y medicion CWV de campo",
+    "dominio/contenido final y trazabilidad academica"
+  ]
+}

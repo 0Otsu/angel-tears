@@ -65,6 +65,7 @@ it("cola serial, progreso independiente, fallo aislado y retry solo del mismo ar
   const a = file("A.png"), b = file("B.png")
   fireEvent.change(input(), { target: { files: [a, b] } })
   await waitFor(() => expect(screen.getAllByText("Archivo seleccionado. Listo para subir.")).toHaveLength(2))
+  await waitFor(() => expect((screen.getByRole("button", { name: "Subir archivos" }) as HTMLButtonElement).disabled).toBe(false))
   fireEvent.click(screen.getByRole("button", { name: "Subir archivos" }))
   await waitFor(() => expect(upload).toHaveBeenCalledTimes(1))
   await waitFor(() => expect(screen.getAllByRole("button", { name: "Subir archivo" }).every(b => (b as HTMLButtonElement).disabled)).toBe(true))

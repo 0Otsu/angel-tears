@@ -25,7 +25,7 @@ export function Contacto() {
               <MessageCircle className="w-4 h-4" aria-hidden="true" />
             </a>
           </div>
-          <p className="text-sm text-primary-foreground/60 mt-6">WhatsApp · {negocioPublico.telefonoWhatsApp}</p>
+          <p className="text-sm text-primary-foreground/85 mt-6">WhatsApp · {negocioPublico.telefonoWhatsApp}</p>
         </div>
       </div>
     </section>

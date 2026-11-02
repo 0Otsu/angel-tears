@@ -20,7 +20,7 @@
   --muted-foreground: #6B6560;
   --accent: #B8ADA3; /* Soft Taupe */
   --accent-foreground: #2C2C2C;
-  --destructive: #A65D57;
+  --destructive: #914A45;
   --destructive-foreground: #F7F4EF;
   --border: #D8CFC4;
   --input: #EDE6DC;
@@ -173,4 +173,9 @@
 
 .animate-scale-fade-in {
   animation: scale-fade-in 0.6s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }

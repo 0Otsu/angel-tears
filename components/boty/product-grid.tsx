@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import Image from "next/image"
+import { ImagenProducto as Image } from "@/components/ui/imagen-producto"
 import Link from "next/link"
 import type { ProductoPublico } from "@/lib/modulos/catalogo/contrato"
 import { formatearPrecioPublico } from "@/lib/modulos/catalogo/presentacion"
@@ -29,7 +29,7 @@ export function ProductGrid({ seleccion }: { seleccion: ProductoPublico[] }) {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {productos.map(producto => <Link key={producto.id} href={`/catalogo/${producto.slug}`} prefetch={false} className="group min-w-0 rounded-3xl [overflow-wrap:anywhere]">
             <article className="overflow-hidden rounded-3xl bg-background boty-shadow boty-transition group-hover:scale-[1.02]">
-              <div className="relative aspect-square overflow-hidden bg-muted">{producto.imagen ? <Image src={producto.imagen.url} alt={producto.imagen.alt} fill sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" className="object-cover boty-transition group-hover:scale-105" /> : <span className="flex h-full items-center justify-center text-sm text-muted-foreground">Imagen no disponible</span>}</div>
+              <div className="relative aspect-square overflow-hidden bg-muted">{producto.imagen ? <Image src={producto.imagen.url} alt={producto.imagen.alt} fill sizes="(min-width: 1280px) 286px, (min-width: 1024px) calc((100vw - 136px) / 4), (min-width: 640px) calc((100vw - 72px) / 2), calc(100vw - 48px)" className="object-cover boty-transition group-hover:scale-105" /> : <span className="flex h-full items-center justify-center text-sm text-muted-foreground">Imagen no disponible</span>}</div>
               <div className="p-5"><h3 className="mb-1 font-serif text-lg text-foreground">{producto.nombre}</h3><p className="mb-3 text-sm text-muted-foreground">{producto.categoriaNombre} · Disponible</p><span className="font-medium text-foreground">{formatearPrecioPublico(producto.precio)}</span></div>
             </article>
           </Link>)}
