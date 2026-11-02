@@ -65,4 +65,6 @@ Lint/typecheck, build de produccion del arnes E2E, db:check y db:generate (11 ta
 
 ## Limites y continuidad
 
+Ajuste posterior de feedback del 01/11/2026: la confirmacion al salir del editor se muestra una sola vez como aviso flotante con check, durante cinco segundos, sin desplazar el listado. Consume `cancelado` mediante replaceState conservando otros parametros/hash y el estado del historial; al recargar no reaparece. El mismo comportamiento aplica al aviso de conservar una edicion publicada. Test de componente con reloj controlado y E2E desktop/mobile verifican desaparicion, URL limpia y ausencia tras recargar; no cambia el estado del producto.
+
 2.5 permanece aceptada; esta evidencia no reabre tasks ni cierra capacidades adicionales. 4.4 sigue parcial: imagen responsive/entrega optimizada y medicion productiva pendientes. 5.x sigue abierta. Se conservan los limites distribuidos/conciliacion operativa de [2.3](PRODUCTOS_2_3.md), los datos comerciales/dominio pendientes y la regresion historica de importes cuando Compras/Ventas esten persistidas. Esta pasada no equivale a certificacion WCAG completa ni implementa navegacion protegida universal fuera de las acciones del editor.

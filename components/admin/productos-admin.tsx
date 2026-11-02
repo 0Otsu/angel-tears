@@ -7,12 +7,13 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { EncabezadoAdmin, PanelAdmin, EtiquetaEstado } from "./piezas-admin"
 import { AccionesProducto } from "./acciones-producto"
+import { AvisoProductoGuardado } from "./aviso-producto-guardado"
 export function ProductosAdmin({ consulta, errorCarga = false, aviso }: { consulta: ConsultaAdministrativa; errorCarga?: boolean; aviso?: string }) {
  const [busqueda, buscar] = useState(""); const [categoria, filtrarCategoria] = useState(""); const [estado, filtrarEstado] = useState("")
  const productos = consulta.productos.filter(p => p.nombre.toLocaleLowerCase().includes(busqueda.toLocaleLowerCase()) && (!categoria || p.categoriaCodigo === categoria) && (!estado || (estado === "publicado") === p.publicado))
  return <>
   <EncabezadoAdmin titulo="Productos" descripcion="Tus productos, imágenes y visibilidad en el sitio."><Button asChild><Link href="/admin/productos/nuevo">Nuevo producto</Link></Button></EncabezadoAdmin>
-  {aviso && <p role="status" className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm">{aviso}</p>}
+  {aviso && <AvisoProductoGuardado key={aviso} texto={aviso} />}
   {errorCarga ? <PanelAdmin className="space-y-3 p-5"><p role="alert">No pudimos consultar los productos. Probá recargar la página.</p><Link href="/admin/productos" className="underline">Reintentar consulta</Link></PanelAdmin> : consulta.productos.length === 0 ? <PanelAdmin className="space-y-3 p-6"><h2>Todavía no hay productos registrados.</h2><p className="text-sm text-muted-foreground">Creá el primero; podés conservarlo oculto hasta tener su imagen lista.</p><Link href="/admin/productos/nuevo" className="text-primary underline">Nuevo producto</Link></PanelAdmin> : <>
   <div className="grid gap-3 sm:grid-cols-3">
    <label className="text-sm">Buscar por nombre<Input value={busqueda} onChange={e=>buscar(e.target.value)} /></label>
