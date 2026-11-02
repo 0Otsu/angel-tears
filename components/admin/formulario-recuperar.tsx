@@ -65,7 +65,6 @@ export function FormularioRecuperar() {
             aria-required="true"
             aria-invalid={errorEmail ? true : undefined}
             aria-describedby={errorEmail ? "error-email" : undefined}
-            placeholder="Tu correo"
             className="h-12 rounded-xl border-border bg-background px-4 text-base shadow-none focus-visible:ring-2 focus-visible:ring-primary/20 md:text-base"
           />
           {errorEmail && (
