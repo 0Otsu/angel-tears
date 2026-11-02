@@ -22,7 +22,7 @@ Reemplazo: subir con ID nuevo sin sobrescribir → validar resultado del proveed
 
 Alta: guardar oculto sin imagen, luego adjuntar imagen a su ID; publicar solo cuando existe referencia válida. Así no se necesitan uploads huérfanos preproducto ni un gestor de medios. Un crash puede dejar objeto huérfano: reconciliación operativa por prefijo/antigüedad y referencias de BD antes de eliminar, sin panel nuevo.
 
-Entrega responsive por CDN con transformaciones acotadas y URLs versionadas; `next/image` con loader controlado a Cloudinary para productos, evitando doble optimización. OG usa URL HTTPS absoluta del mismo recurso. No modificar ahora `next.config.mjs` ni `unoptimized: true` de la UI actual. Los recursos históricos del local no se suben automáticamente. Ocultar protege la ficha pública; no promete retirar copias ya compartidas de una imagen pública del CDN.
+Entrega responsive por CDN con transformaciones acotadas y URLs versionadas; `next/image` con loader controlado a Cloudinary para productos, evitando doble optimización. OG usa URL HTTPS absoluta del mismo recurso. La restriccion inicial de no modificar `next.config.mjs`/`unoptimized: true` queda sustituida por la tarea 4.4 autorizada del 02/11/2026: loader seguro con c_limit/q_auto/f_auto y anchos cerrados para Producto; optimizador Next para locales, sin proxy remoto arbitrario. Referencias originales y assets se conservan. Evidencia real, limites y politica de URLs historicas en [4.4](../features/PUBLICO_4_4.md). Los recursos históricos del local no se suben automáticamente. Ocultar protege la ficha pública; no promete retirar copias ya compartidas de una imagen pública del CDN.
 
 ## Consecuencias y pendientes
 

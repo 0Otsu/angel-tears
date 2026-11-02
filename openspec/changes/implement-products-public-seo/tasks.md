@@ -1,6 +1,8 @@
 # Tasks
 
-Estado vigente tras cierre de 2.5 del 01/11/2026: 2.1-2.5 completas, 4.4 parcial y 5.x abiertas. UI administrativa final en listado/rutas dedicadas, sin ampliar otros modulos. Las notas siguientes conservan sus checkpoints historicos. Evidencia en [Producto 2.5](../../../docs/features/PRODUCTOS_2_5.md).
+Estado vigente del 02/11/2026: 2.1-2.5, G1, 3.1-3.4 y 4.1-4.4 completas en su alcance tecnico. 4.4 incorpora CDN responsive real y mediciones sobre build de produccion local, responsive/teclado/contraste/fuentes/JS; no certifica CWV de campo ni deployment. 5.x y video siguen pendientes. Evidencia en [cierre 4.4](../../../docs/features/PUBLICO_4_4.md). Las notas siguientes conservan sus checkpoints historicos.
+
+Estado tras cierre de 2.5 del 01/11/2026: 2.1-2.5 completas, 4.4 parcial y 5.x abiertas. UI administrativa final en listado/rutas dedicadas, sin ampliar otros modulos. Evidencia en [Producto 2.5](../../../docs/features/PRODUCTOS_2_5.md).
 
 Estado vigente tras cierre de 2.3 del 01/11/2026: 2.2 y 2.3 completas con Cloudinary real; 2.5 abierta, 4.4 parcial y 5.x sin marcar. Las notas fechadas inferiores conservan sus checkpoints historicos. Evidencia de reemplazo, pruebas y limites en [Producto 2.3](../../../docs/features/PRODUCTOS_2_3.md).
 
@@ -80,7 +82,9 @@ Evidencia 4.2 del 31/10/2026: Product/Offer con decimal exacto/ARS y InStock/Out
 - [x] 4.3 Implementar sitemap/robots y reglas de indexación; probar publicadas agotadas incluidas, ocultos/admin/reset excluidos y guard independiente de robots.
 
 Evidencia técnica 4.3 del 31/10/2026: sitemap/robots dinámicos sin caché persistente, origen SITE_URL validado; Home/catálogo y PDP publicadas incluidas, también agotadas; ocultos/admin/API/recovery/reset fuera. lastModified usa fechas reales de Producto/Inventario. Sin dominio: sitemap vacío y robots disallow-all, sin localhost inventado. Seis PostgreSQL de proyección y E2E con dominio reservado verifican retiro de oculto en siguiente solicitud y guard admin real sin sesión. Dominio/configuración productiva siguen pendientes.
-- [ ] 4.4 Verificar responsive, teclado/foco/labels/alt/contraste, sizes/lazy/LCP y JS enviado; registrar medición y corregir defectos del slice sin rediseño global.
+- [x] 4.4 Verificar responsive, teclado/foco/labels/alt/contraste, sizes/lazy/LCP y JS enviado; registrar medición y corregir defectos del slice sin rediseño global.
+
+Cierre tecnico 4.4 del 02/11/2026: loader Cloudinary acotado/versionado, q_auto/f_auto/c_limit, sizes reales, thumbnails pequenos/lazy y prioridad solo candidatos LCP. Next optimiza imagenes locales y rechaza remotas arbitrarias; persistencia/metadata/reglas sin cambios. Dos corridas mobile de produccion local antes/despues con siete assets reales, auditoria automatica y revision responsive/teclado a cinco anchos. 359 unit/component, 172 PostgreSQL y 60 E2E, lint/typecheck/build/DB/OpenSpec/diff correctos. Muestra/recursos descartables retirados comprobando datos previos intactos. Evidencia y limites de medicion de campo en [4.4](../../../docs/features/PUBLICO_4_4.md); no cierra 5.x ni video.
 
 Checkpoint parcial 4.4 del 31/10/2026: desktop/notebook/mobile y 320 px con nombres/precio largos, teclado/foco/alt/contraste básico y medición local verificados. Se corrige únicamente desborde de contenido real en tarjetas/PDP/Home. E2E pasa y registra LCP/CLS/JS; no equivale a CWV productivos. Permanece abierta: configuración existente unoptimized entrega originales, sin srcset efectivo de CDN; la entrega responsive/optimizada y medición con assets reales requiere retomar imágenes/Cloudinary fuera de esta rama. No se modifica proveedor/configuración global ni se falsea esa aceptación. Evidencia/límites en [cierre público](../../../docs/features/PRODUCTOS_PUBLICO_CIERRE.md).
 

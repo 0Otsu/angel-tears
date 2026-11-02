@@ -51,8 +51,8 @@ export function Catalogo({ productos }: { productos: ProductoPublico[] }) {
 
           <p role="status" className="mb-6 text-sm text-muted-foreground">{filteredProducts.length === 0 ? (productos.length === 0 ? "No hay productos disponibles por el momento." : "No hay productos disponibles en esta categoría.") : `${filteredProducts.length} productos disponibles`}</p>
           <div className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredProducts.map((product) => (
-              <TarjetaProducto key={product.id} product={product} />
+            {filteredProducts.map((product, indice) => (
+              <TarjetaProducto key={product.id} product={product} prioridad={selectedCategory === "Todos" && indice === 0} />
             ))}
           </div>
         </div>

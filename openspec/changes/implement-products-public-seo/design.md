@@ -12,6 +12,8 @@ Producto real de extremo a extremo, fuentes públicas frescas y SEO veraz. Sin C
 
 ## Decisions
 
+- Cierre tecnico 4.4 del 02/11/2026: derivar entrega Cloudinary versionada/acotada con c_limit, q_auto y f_auto sin cambiar referencias persistidas; loader next/image directo al CDN para Producto y optimizador Next para locales, sin proxy remoto arbitrario. Sizes/lazy/prioridad por superficie, fallback con caja estable y medicion real local de produccion. Detalle, responsive/accesibilidad y limites de CWV de campo en [4.4](../../../docs/features/PUBLICO_4_4.md); no cambia negocio, upload ni ownership.
+
 - P0: schema Producto/Categoria y DTO interno; categorías lookup con los siete códigos aprobados. ID UUID y slug único legible/estable; colisión añade sufijo estable al crear, nunca renombra URLs existentes. Nombre/precio/categoría requeridos, opcionales A6 sin valores inventados.
 - Alta oculta + crearSaldoCero de C0 en misma tx. Precio actual no altera líneas históricas. Escritura con versión para evitar sobrescribir imagen/datos concurrentes; publicación valida imagen en servidor. Destacado solo flag, no motor de merchandising.
 - Cloudinary vía adaptador/Handler autenticado y límites del ADR-007. Guardar oculto → adjuntar imagen → publicar. Reemplazo con ID nuevo, control de versión, compensación y cleanup postcommit; tests con doble, sin recursos comerciales.

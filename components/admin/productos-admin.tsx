@@ -1,7 +1,7 @@
 "use client"
 import { useState } from "react"
 import Link from "next/link"
-import Image from "next/image"
+import { ImagenProducto as Image } from "@/components/ui/imagen-producto"
 import type { ConsultaAdministrativa } from "@/lib/modulos/productos/administracion-contrato"
 import { NavigationButton } from "@/components/ui/navigation-button"
 import { Input } from "@/components/ui/input"
@@ -23,7 +23,7 @@ export function ProductosAdmin({ consulta, errorCarga = false, aviso }: { consul
   <p role="status" className="text-sm">{productos.length} productos</p>
   {productos.length === 0 && <p>No hay productos que coincidan con estos filtros.</p>}
   <ul aria-label="Productos registrados" className="space-y-3">{productos.map(p=><li key={p.id}><PanelAdmin className="grid min-w-0 grid-cols-[4rem_1fr_auto] items-start gap-3 p-4 sm:grid-cols-[5rem_1fr_auto]">
-   {p.imagen ? <Image unoptimized src={p.imagen.urlSegura} width={80} height={80} alt={p.nombre} className="aspect-square w-full rounded-lg object-cover" /> : <span className="flex aspect-square items-center justify-center rounded-lg bg-card text-center text-xs">Sin imagen</span>}
+   {p.imagen ? <Image src={p.imagen.urlSegura} sizes="80px" width={80} height={80} alt={p.nombre} className="aspect-square w-full rounded-lg object-cover" /> : <span className="flex aspect-square items-center justify-center rounded-lg bg-card text-center text-xs">Sin imagen</span>}
    <div className="min-w-0 space-y-1"><h2 className="break-words font-medium">{p.nombre}</h2><p className="text-sm text-muted-foreground">{p.categoriaNombre}</p><p className="break-all text-sm">ARS $ {p.precio}</p><div className="flex flex-wrap gap-2"><EtiquetaEstado>{p.publicado ? "Publicado" : "Oculto"}</EtiquetaEstado>{p.destacado && <EtiquetaEstado tono="oliva">Destacado</EtiquetaEstado>}</div></div>
    <AccionesProducto producto={p} />
   </PanelAdmin></li>)}</ul></>}
