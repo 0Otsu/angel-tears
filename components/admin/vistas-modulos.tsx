@@ -4,12 +4,11 @@ import { Settings } from "lucide-react"
 import { proveedoresDemo, comprasDemo, ventasDemo, egresosDemo } from "@/lib/mock/admin"
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
 import { TablaDemo, type FilaDemo } from "./tabla-demo"
-import { filasProductos, filasStock, filasMovimientos } from "./filas-demo"
+import { filasProductos, filasMovimientos } from "./filas-demo"
 import { EncabezadoAdmin, AvisoDemo, PanelAdmin, EtiquetaEstado } from "./piezas-admin"
 
 const definiciones = {
   productos: { titulo: "Productos", descripcion: "Listado de accesorios y su visibilidad pública. Solo muestra visual.", columnas: ["Producto", "Categoría", "Precio mock", "Visibilidad"], filas: filasProductos },
-  stock: { titulo: "Inventario", descripcion: "Existencias y mínimos opcionales de una muestra estática.", columnas: ["Producto", "Stock mock", "Mínimo mock", "Estado mock"], filas: filasStock },
   proveedores: { titulo: "Proveedores", descripcion: "Referencias ficticias para explorar la composición del listado.", columnas: ["Referencia", "Proveedor", "Nota de muestra"], filas: proveedoresDemo.map(p => ({ id: p.id, buscar: `${p.id} ${p.nombre} ${p.nota}`, celdas: [p.id, <span key="nombre" className="font-medium">{p.nombre}</span>, p.nota], detalle: [{ nombre: "Referencia", valor: p.id }, { nombre: "Nombre de muestra", valor: p.nombre }, { nombre: "Nota", valor: p.nota }] })) as FilaDemo[] },
   compras: { titulo: "Compras", descripcion: "Historial mock de octubre. No registra compras ni modifica stock.", columnas: ["Referencia", "Fecha", "Detalle", "Importe", "Estado"], filas: filasMovimientos(comprasDemo) },
   ventas: { titulo: "Ventas", descripcion: "Historial mock de octubre, con ejemplos vigentes y anulados.", columnas: ["Referencia", "Fecha", "Detalle", "Importe", "Estado"], filas: filasMovimientos(ventasDemo) },
@@ -18,7 +17,7 @@ const definiciones = {
 
 export function VistaModulo({ modulo }: { modulo: keyof typeof definiciones }) {
   const vista = definiciones[modulo]
-  return <><EncabezadoAdmin titulo={vista.titulo} descripcion={vista.descripcion} /><AvisoDemo />{modulo === "stock" && <p className="text-xs leading-relaxed text-muted-foreground">Los estados están predefinidos para esta muestra; no implementan el criterio pendiente de stock bajo. Los productos sin mínimo no forman parte de esa consulta.</p>}<TablaDemo key={modulo} titulo={`${vista.titulo} de muestra`} descripcion="Campos y composición de prototipo; requieren validación con la SRS." columnas={vista.columnas} filas={vista.filas} /></>
+  return <><EncabezadoAdmin titulo={vista.titulo} descripcion={vista.descripcion} /><AvisoDemo /><TablaDemo key={modulo} titulo={`${vista.titulo} de muestra`} descripcion="Campos y composición de prototipo; requieren validación con la SRS." columnas={vista.columnas} filas={vista.filas} /></>
 }
 
 export function ConfiguracionDemo() {

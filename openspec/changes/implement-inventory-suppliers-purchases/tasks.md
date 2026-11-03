@@ -9,11 +9,11 @@
 
 ## 2. Stock, mínimos y ajustes
 
-- [ ] 2.1 Implementar consulta saldo/mínimo/stock bajo <=; probar null, cero, igualdad y saldo agotado, y documentar estados.
-- [ ] 2.2 Implementar cambio de mínimo con validación/permisos; probar quitar mínimo, valores inválidos y conservación de saldo.
-- [ ] 2.3 Implementar ajustes y saldo inicial identificados con motivo, actor/historia y deduplicación; probar decremento insuficiente y ausencia de compra/efecto económico.
+- [x] 2.1 Implementar consulta saldo/mínimo/stock bajo <=; probar null, cero, igualdad y saldo agotado, y documentar estados.
+- [x] 2.2 Implementar cambio de mínimo con validación/permisos; probar quitar mínimo, valores inválidos y conservación de saldo.
+- [x] 2.3 Implementar ajustes y saldo inicial identificados con motivo, actor/historia y deduplicación; probar decremento insuficiente y ausencia de compra/efecto económico.
 - [ ] 2.4 Implementar locks/movimientos/reversas del contrato; probar concurrencia, rollback, misma clave/mismo payload y misma clave/payload diferente.
-- [ ] 2.5 Integrar UI Stock/historia autorizada; verificar error/vacío/foco y que el saldo nunca se sustituye sin registro; actualizar evidencia.
+- [x] 2.5 Integrar UI Stock/historia autorizada; verificar error/vacío/foco y que el saldo nunca se sustituye sin registro; actualizar evidencia.
 
 ## 3. Proveedores
 
