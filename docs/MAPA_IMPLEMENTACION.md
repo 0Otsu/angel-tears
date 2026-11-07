@@ -972,7 +972,7 @@ El backlog no autoriza comenzar ninguno de estos épicos. Actualización del 19/
 | Auth / Cuenta | ✅ IMPLEMENTADO y probado en local (26/10/2026): login, sesión de 30 días, guardia en las 10 páginas del panel, logout, `/admin/cuenta`, cambio de contraseña y recuperación por correo. Pendiente de operación: clave y dominio de Resend, hosting, alta en producción | Emi R1, Better Auth/Resend/Drizzle. Cuenta separada de Configuración; provisión controlada, sin signup público. Evidencia en `openspec/changes/implement-admin-auth-account/design.md` y `docs/DESARROLLO.md`. |
 | Productos | 🟣 UI/MOCK | Augusto R1, Producto único/categorías/imagen/slug/visibilidad/destacado; no borrar historia. |
 | Stock | 🟣 UI/MOCK | Claudio R1, saldo/mínimo `<=`/ajustes/historia/contrato transaccional; no saldo duplicado en Producto. |
-| Proveedores | 🟣 UI/MOCK | Claudio R1, datos mínimos/inactivación; baja sin historia pendiente. |
+| Proveedores | ✅ UI REAL | Claudio R1: alta, edición, inactivación/reactivación y listado reales en `/admin/proveedores`; baja sin historia pendiente (no habilitada). |
 | Compras | 🟣 UI/MOCK | Claudio R1, múltiples líneas/costos históricos/tx/reversión única sin negativos. |
 | Ventas | 🟣 UI/MOCK | R2 sin owner, diseño completo en blueprint; sin change activo. |
 | Finanzas — Egresos | 🟣 UI/MOCK en ruta actual `/admin/egresos` | R2; agrupar navegación bajo Finanzas, conservar historia y no duplicar compras. |

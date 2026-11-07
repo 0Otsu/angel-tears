@@ -20,9 +20,9 @@ Clasificación de análisis solicitada: **A** cobertura candidata por RF/RNF exi
 | RF-06 Modificar producto | Productos, Augusto R1 | implement-products-public-seo | Slug estable y precios históricos intactos; conflictos controlados. |
 | RF-07 Gestionar visibilidad pública | Productos/Público, Augusto R1 | implement-products-public-seo | Publicado/oculto, agotados y 404 conforme a A. |
 | RF-08 Stock bajo | Inventario, Claudio R1 | implement-inventory-suppliers-purchases | `<=`, null excluido, cero real; no usar etiqueta de fixture. |
-| RF-09 Registrar proveedor | Proveedores, Claudio R1 | implement-inventory-suppliers-purchases | Nombre requerido, contactos opcionales. |
-| RF-10 Modificar proveedor | Proveedores, Claudio R1 | implement-inventory-suppliers-purchases | Historia preservada e inactivación según gap. |
-| RF-11 Consultar proveedores | Proveedores, Claudio R1 | implement-inventory-suppliers-purchases | Lectura real con activo/inactivo y vacío/error diferenciados. |
+| RF-09 Registrar proveedor | Proveedores, Claudio R1 | implement-inventory-suppliers-purchases | Nombre requerido, contactos opcionales. UI real en `/admin/proveedores` con Server Action autorizada. |
+| RF-10 Modificar proveedor | Proveedores, Claudio R1 | implement-inventory-suppliers-purchases | Historia preservada e inactivación según gap. Edición con control de versión; sin baja (no aprobada). |
+| RF-11 Consultar proveedores | Proveedores, Claudio R1 | implement-inventory-suppliers-purchases | Lectura real con activo/inactivo y vacío/error diferenciados. Implementado en `/admin/proveedores`. |
 | RF-12 Registrar compra | Compras, Claudio R1 | implement-inventory-suppliers-purchases | Cabecera/líneas/importes/movimientos en una tx. |
 | RF-13 Consultar compras | Compras, Claudio R1 | implement-inventory-suppliers-purchases | Fecha real, costos/supplier snapshot y estado histórico. |
 | RF-14 Anular compra | Compras, Claudio R1 | implement-inventory-suppliers-purchases | Reversión única, completa o rechazada por negativo. |

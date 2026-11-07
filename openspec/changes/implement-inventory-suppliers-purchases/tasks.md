@@ -17,9 +17,9 @@
 
 ## 3. Proveedores
 
-- [ ] 3.1 Implementar alta/consulta/modificación con nombre obligatorio y contactos opcionales; probar permisos/formato y documentar campos reales.
-- [ ] 3.2 Implementar inactivación y exclusión en selección nueva sin perder historia; probar cambio de nombre/histórico y no exponer baja no aprobada.
-- [ ] 3.3 Integrar listado/formulario/vacíos/errores accesibles; verificar comportamiento con RTL donde aporte y actualizar trazabilidad provisional.
+- [x] 3.1 Implementar alta/consulta/modificación con nombre obligatorio y contactos opcionales; probar permisos/formato y documentar campos reales.
+- [x] 3.2 Implementar inactivación y exclusión en selección nueva sin perder historia; probar cambio de nombre/histórico y no exponer baja no aprobada.
+- [x] 3.3 Integrar listado/formulario/vacíos/errores accesibles; verificar comportamiento con RTL donde aporte y actualizar trazabilidad provisional.
 
 ## 4. Compras
 

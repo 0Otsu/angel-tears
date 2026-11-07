@@ -75,11 +75,6 @@ export const productosDemo = inventarioDemo.map(({ slug, ...inventario }) => {
 
 // Estados de stock predefinidos para dibujar la UI; no deciden el umbral pendiente (< o <=).
 export const stockBajoDemo = productosDemo.filter(p => ["Stock bajo", "Sin stock"].includes(p.estadoStock))
-export const proveedoresDemo = [
-  { id: "PR-001", nombre: "Proveedor de accesorios A", nota: "Referencia ficticia · bijouterie" },
-  { id: "PR-002", nombre: "Proveedor de accesorios B", nota: "Referencia ficticia · complementos" },
-  { id: "PR-003", nombre: "Proveedor de accesorios C", nota: "Referencia ficticia · regalos" },
-]
 
 export type MovimientoDemo = { id: string; fecha: string; detalle: string; importe: number; estado: "Vigente" | "Anulada" | "Anulado" }
 export const ventasDemo: MovimientoDemo[] = [
