@@ -19,7 +19,15 @@ export type TransaccionLlamador = object
  */
 export type OrigenMovimiento = { readonly tipo: "AJUSTE"; readonly ajusteId: string }
 
-export type VariacionConOrigen = VariacionStock & { readonly origen: OrigenMovimiento }
+export type VariacionConOrigen = VariacionStock & {
+  readonly origen: OrigenMovimiento
+  /**
+   * ID del movimiento ORIGINAL que esta variacion revierte (anulaciones). La reversa conserva el
+   * origen del original y su delta debe ser exactamente el opuesto; cada movimiento se revierte
+   * una sola vez. Sin este campo, la variacion es un movimiento original.
+   */
+  readonly reversaDe?: string
+}
 
 export type ComandoAplicarMovimientos = {
   readonly variaciones: readonly VariacionConOrigen[]
@@ -32,9 +40,18 @@ export type SaldoAfectado = {
   readonly saldoResultante: number
 }
 
+/** Movimiento registrado; el resultado los entrega en el orden de las variaciones del comando. */
+export type MovimientoRegistrado = {
+  readonly id: string
+  readonly productoId: string
+  readonly delta: number
+  readonly tipo: "ORIGINAL" | "REVERSA"
+}
+
 /** `productosAfectados` permite al limite Next refrescar Home/catalogo/PDP despues del commit. */
 export type ResultadoAplicacion = {
   readonly saldos: readonly SaldoAfectado[]
+  readonly movimientos: readonly MovimientoRegistrado[]
   readonly productosAfectados: readonly string[]
 }
 
@@ -76,6 +93,40 @@ export class ErrorProductoSinSaldo extends Error {
   }
 }
 
+export const CODIGO_REVERSA_INVALIDA = "REVERSA_INVALIDA" as const
+
+export type MotivoReversaInvalida =
+  /** El movimiento a revertir no existe. */
+  | "NO_ENCONTRADO"
+  /** Solo se revierte un movimiento ORIGINAL, no otra reversa. */
+  | "NO_ES_ORIGINAL"
+  | "PRODUCTO_DISTINTO"
+  | "ORIGEN_DISTINTO"
+  /** El delta de la reversa no es exactamente el opuesto al del original. */
+  | "DELTA_NO_OPUESTO"
+  /** Ya existe una reversa de ese movimiento, o el comando la repite. */
+  | "YA_REVERTIDO"
+
+/**
+ * La reversa pedida no cumple el contrato. Se rechaza toda la operacion sin efectos; el
+ * llamador debe revertir su transaccion. `YA_REVERTIDO` garantiza el "exactamente una vez".
+ */
+export class ErrorReversaInvalida extends Error {
+  readonly codigo = CODIGO_REVERSA_INVALIDA
+
+  constructor(
+    readonly movimientoId: string,
+    readonly motivo: MotivoReversaInvalida,
+  ) {
+    super("La reversa de stock solicitada no es valida.")
+    this.name = "ErrorReversaInvalida"
+  }
+}
+
+export function esErrorReversaInvalida(error: unknown): error is ErrorReversaInvalida {
+  return error instanceof ErrorReversaInvalida
+}
+
 export function esErrorStockInsuficiente(error: unknown): error is ErrorStockInsuficiente {
   return error instanceof ErrorStockInsuficiente
 }
@@ -93,7 +144,7 @@ export type CrearSaldoCero = (tx: TransaccionLlamador, productoId: string) => Pr
 /**
  * Aplica variaciones firmadas bajo lock de filas ordenadas por producto, verifica no
  * negatividad de todas antes de modificar y registra movimientos. Lanza
- * `ErrorStockInsuficiente` o `ErrorProductoSinSaldo` sin efectos parciales.
+ * `ErrorStockInsuficiente`, `ErrorProductoSinSaldo` o `ErrorReversaInvalida` sin efectos parciales.
  */
 export type AplicarMovimientos = (
   tx: TransaccionLlamador,
@@ -105,8 +156,24 @@ export type ConsultarDisponibilidad = (
   productoIds: readonly string[],
 ) => Promise<readonly DisponibilidadProducto[]>
 
+/** Movimiento ORIGINAL de un origen y si ya fue revertido; permite a una anulacion hallar su `reversaDe`. */
+export type MovimientoDeOrigen = {
+  readonly id: string
+  readonly origen: OrigenMovimiento
+  readonly productoId: string
+  readonly delta: number
+  readonly revertido: boolean
+}
+
+/** Lectura en la transaccion del llamador de los movimientos ORIGINAL de esos origenes. */
+export type ConsultarMovimientosDeOrigen = (
+  tx: TransaccionLlamador,
+  origenes: readonly OrigenMovimiento[],
+) => Promise<readonly MovimientoDeOrigen[]>
+
 export type ContratoInventario = {
   readonly crearSaldoCero: CrearSaldoCero
   readonly aplicarMovimientos: AplicarMovimientos
   readonly consultarDisponibilidad: ConsultarDisponibilidad
+  readonly consultarMovimientosDeOrigen: ConsultarMovimientosDeOrigen
 }

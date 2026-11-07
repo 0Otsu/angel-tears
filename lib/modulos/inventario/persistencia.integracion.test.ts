@@ -6,10 +6,11 @@ import { producto } from "@/lib/infraestructura/esquemas/producto"
 import { registrarAjuste } from "@/lib/modulos/inventario/ajustes"
 import {
   esErrorProductoSinSaldo,
+  esErrorReversaInvalida,
   esErrorStockInsuficiente,
   type VariacionConOrigen,
 } from "@/lib/modulos/inventario/contrato"
-import { crearContratoInventario } from "@/lib/modulos/inventario/persistencia"
+import { crearContratoInventario, movimientoYaRevertidoDe } from "@/lib/modulos/inventario/persistencia"
 import { insertarProductoOcultoConSaldo, sembrarCategorias } from "@/lib/modulos/productos/persistencia"
 import { crearConexionPruebas } from "@/pruebas/arnes-bd"
 
@@ -367,6 +368,163 @@ describe("inventario sobre PostgreSQL", () => {
 
       // No existe ni el Producto: la FK del ajuste lo rechaza antes de llegar al saldo.
       expect(resultado).toBeInstanceOf(Error)
+    })
+  })
+  describe("reversas", () => {
+    // Aplica un movimiento original y devuelve su ID y su origen para revertirlo.
+    async function original(productoId: string, delta: number) {
+      const [origen] = await crearOrigenes(1, productoId)
+      const resultado = await db().transaction((tx) =>
+        contrato().aplicarMovimientos(tx, { actorId: ACTOR, variaciones: [variacion(productoId, delta, origen)] }))
+      return { id: resultado.movimientos[0].id, origen }
+    }
+    const revertir = (productoId: string, delta: number, origen: VariacionConOrigen["origen"], reversaDe: string) =>
+      db().transaction((tx) =>
+        contrato().aplicarMovimientos(tx, { actorId: ACTOR, variaciones: [{ ...variacion(productoId, delta, origen), reversaDe }] }))
+    async function motivoDe(promesa: Promise<unknown>) {
+      try { await promesa } catch (error) {
+        if (esErrorReversaInvalida(error)) return error.motivo
+        throw error
+      }
+      return "sin error"
+    }
+
+    it("revierte un ingreso: resta, registra REVERSA ligada al original y conserva el origen", async () => {
+      await fijarSaldo(PRODUCTO_A, 10)
+      const o = await original(PRODUCTO_A, 5)
+
+      const resultado = await revertir(PRODUCTO_A, -5, o.origen, o.id)
+
+      expect(resultado.saldos).toEqual([{ productoId: PRODUCTO_A, saldoAnterior: 15, saldoResultante: 10 }])
+      expect(resultado.movimientos).toEqual([{ id: expect.any(String), productoId: PRODUCTO_A, delta: -5, tipo: "REVERSA" }])
+      const [reversa] = await db().select().from(movimientoStock).where(eq(movimientoStock.id, resultado.movimientos[0].id))
+      expect(reversa).toMatchObject({ tipo: "REVERSA", reversaDe: o.id, ajusteId: o.origen.ajusteId, saldoResultante: 10 })
+      expect(await saldoDe(PRODUCTO_A)).toBe(10)
+    })
+
+    it("revierte un egreso: reintegra las unidades", async () => {
+      await fijarSaldo(PRODUCTO_A, 10)
+      const o = await original(PRODUCTO_A, -4)
+
+      await revertir(PRODUCTO_A, 4, o.origen, o.id)
+
+      expect(await saldoDe(PRODUCTO_A)).toBe(10)
+    })
+
+    it("reintegra exactamente una vez: la segunda reversa se rechaza sin efectos", async () => {
+      await fijarSaldo(PRODUCTO_A, 10)
+      const o = await original(PRODUCTO_A, -4)
+      await revertir(PRODUCTO_A, 4, o.origen, o.id)
+
+      expect(await motivoDe(revertir(PRODUCTO_A, 4, o.origen, o.id))).toBe("YA_REVERTIDO")
+
+      expect(await saldoDe(PRODUCTO_A)).toBe(10)
+      expect(await db().select().from(movimientoStock).where(eq(movimientoStock.reversaDe, o.id))).toHaveLength(1)
+    })
+
+    it("dos reversas simultaneas del mismo movimiento: solo una se aplica", async () => {
+      await fijarSaldo(PRODUCTO_A, 10)
+      const o = await original(PRODUCTO_A, -4)
+
+      const resultados = await Promise.allSettled(Array.from({ length: 4 }, () => revertir(PRODUCTO_A, 4, o.origen, o.id)))
+
+      expect(resultados.filter((r) => r.status === "fulfilled")).toHaveLength(1)
+      for (const r of resultados) if (r.status === "rejected") expect(esErrorReversaInvalida(r.reason)).toBe(true)
+      expect(await saldoDe(PRODUCTO_A)).toBe(10)
+    })
+
+    it("bloquea revertir un ingreso si el saldo ya no alcanza, sin efectos parciales", async () => {
+      await fijarSaldo(PRODUCTO_A, 0)
+      const o = await original(PRODUCTO_A, 5)
+      const [otro] = await crearOrigenes(1, PRODUCTO_A)
+      await db().transaction((tx) => contrato().aplicarMovimientos(tx, { actorId: ACTOR, variaciones: [variacion(PRODUCTO_A, -3, otro)] }))
+
+      const error = await revertir(PRODUCTO_A, -5, o.origen, o.id).catch((e: unknown) => e)
+
+      expect(esErrorStockInsuficiente(error)).toBe(true)
+      expect(error).toMatchObject({ disponible: 2, requerido: 5 })
+      expect(await saldoDe(PRODUCTO_A)).toBe(2)
+      expect(await db().select().from(movimientoStock).where(eq(movimientoStock.reversaDe, o.id))).toHaveLength(0)
+    })
+
+    it("revierte varias lineas de productos distintos en una sola operacion, todo o nada", async () => {
+      await fijarSaldo(PRODUCTO_A, 10)
+      await fijarSaldo(PRODUCTO_B, 10)
+      const a = await original(PRODUCTO_A, 3)
+      const b = await original(PRODUCTO_B, 2)
+      await fijarSaldo(PRODUCTO_B, 1) // la reversa de B ya no alcanza
+
+      const error = await db().transaction((tx) =>
+        contrato().aplicarMovimientos(tx, {
+          actorId: ACTOR,
+          variaciones: [
+            { ...variacion(PRODUCTO_A, -3, a.origen), reversaDe: a.id },
+            { ...variacion(PRODUCTO_B, -2, b.origen), reversaDe: b.id },
+          ],
+        })).catch((e: unknown) => e)
+
+      expect(esErrorStockInsuficiente(error)).toBe(true)
+      expect(await saldoDe(PRODUCTO_A)).toBe(13)
+      expect(await db().select().from(movimientoStock).where(inArray(movimientoStock.reversaDe, [a.id, b.id]))).toHaveLength(0)
+    })
+
+    it("rechaza reversas que no cumplen el contrato", async () => {
+      await fijarSaldo(PRODUCTO_A, 10)
+      await fijarSaldo(PRODUCTO_B, 10)
+      const o = await original(PRODUCTO_A, 5)
+      const [ajenoOrigen] = await crearOrigenes(1, PRODUCTO_A)
+
+      expect(await motivoDe(revertir(PRODUCTO_A, -5, o.origen, crypto.randomUUID()))).toBe("NO_ENCONTRADO")
+      expect(await motivoDe(revertir(PRODUCTO_B, -5, o.origen, o.id))).toBe("PRODUCTO_DISTINTO")
+      expect(await motivoDe(revertir(PRODUCTO_A, -5, ajenoOrigen, o.id))).toBe("ORIGEN_DISTINTO")
+      expect(await motivoDe(revertir(PRODUCTO_A, -4, o.origen, o.id))).toBe("DELTA_NO_OPUESTO")
+      expect(await motivoDe(revertir(PRODUCTO_A, 5, o.origen, o.id))).toBe("DELTA_NO_OPUESTO")
+      expect(await saldoDe(PRODUCTO_A)).toBe(15)
+
+      const reversa = await revertir(PRODUCTO_A, -5, o.origen, o.id)
+      expect(await motivoDe(revertir(PRODUCTO_A, 5, o.origen, reversa.movimientos[0].id))).toBe("NO_ES_ORIGINAL")
+    })
+
+    it("otra violacion de unicidad no se informa como reversa ya hecha", async () => {
+      await fijarSaldo(PRODUCTO_A, 10)
+      const o = await original(PRODUCTO_A, 5)
+
+      // La reversa es valida, pero la segunda variacion repite el origen de un ORIGINAL existente
+      // y viola otra unica (ajuste_id, tipo): el error de la base debe llegar sin disfrazarse.
+      const error = await db().transaction((tx) =>
+        contrato().aplicarMovimientos(tx, {
+          actorId: ACTOR,
+          variaciones: [
+            { ...variacion(PRODUCTO_A, -5, o.origen), reversaDe: o.id },
+            variacion(PRODUCTO_B, 1, o.origen),
+          ],
+        })).catch((e: unknown) => e)
+
+      expect(esErrorReversaInvalida(error)).toBe(false)
+      expect(error).toBeInstanceOf(Error)
+      expect(await saldoDe(PRODUCTO_A)).toBe(15)
+      expect(await db().select().from(movimientoStock).where(eq(movimientoStock.reversaDe, o.id))).toHaveLength(0)
+    })
+
+    it("solo reconoce como YA_REVERTIDO la unica de reversa_de, directa o dentro de cause", () => {
+      const reversa = { code: "23505", constraint: "movimiento_stock_reversa_de_unica", detail: "Key (reversa_de)=(abc-123) already exists." }
+      expect(movimientoYaRevertidoDe(reversa)).toBe("abc-123")
+      expect(movimientoYaRevertidoDe(new Error("x", { cause: reversa }))).toBe("abc-123")
+      expect(movimientoYaRevertidoDe({ cause: reversa })).toBe("abc-123")
+      expect(movimientoYaRevertidoDe({ code: "23505", constraint: "movimiento_stock_ajuste_tipo_unico" })).toBeNull()
+      expect(movimientoYaRevertidoDe({ code: "23514", constraint: "movimiento_stock_reversa_de_unica" })).toBeNull()
+      expect(movimientoYaRevertidoDe(new Error("otro"))).toBeNull()
+      expect(movimientoYaRevertidoDe(null)).toBeNull()
+    })
+
+    it("consultarMovimientosDeOrigen entrega el ID del original y si ya fue revertido", async () => {
+      await fijarSaldo(PRODUCTO_A, 10)
+      const o = await original(PRODUCTO_A, 5)
+      const consultar = () => db().transaction((tx) => contrato().consultarMovimientosDeOrigen(tx, [o.origen]))
+
+      expect(await consultar()).toEqual([{ id: o.id, origen: o.origen, productoId: PRODUCTO_A, delta: 5, revertido: false }])
+      await revertir(PRODUCTO_A, -5, o.origen, o.id)
+      expect(await consultar()).toEqual([{ id: o.id, origen: o.origen, productoId: PRODUCTO_A, delta: 5, revertido: true }])
     })
   })
 })
