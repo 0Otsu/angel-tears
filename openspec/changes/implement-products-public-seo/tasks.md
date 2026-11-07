@@ -96,7 +96,15 @@ Ajuste acotado posterior del 02/11/2026: Imagenes inicia la cola automaticamente
 
 - [ ] 5.1 Ejecutar E2E alta → imagen → publicar → compra/ajuste → Home/catálogo/PDP → agotar/ocultar/reponer con dependencias reales.
 - [x] 5.2 Ejecutar tests/lint/typecheck/build y OpenSpec estricto; actualizar mapa/docs y registrar dominio/contenido o RF/CU aún pendientes.
-- [ ] 5.3 Integrar por [flujo Git vigente](../../../docs/GIT_WORKFLOW.md), coordinando contratos/archivos con owners sin PR/aprobación cruzada obligatorios; revisión adicional recomendable. Ninguna task se marca por el solo hecho de planificar y no se archiva antes de aceptación técnica con evidencia.
+- [x] 5.3 Integrar por [flujo Git vigente](../../../docs/GIT_WORKFLOW.md), coordinando contratos/archivos con owners sin PR/aprobación cruzada obligatorios; revisión adicional recomendable. Ninguna task se marca por el solo hecho de planificar y no se archiva antes de aceptación técnica con evidencia.
+
+Integracion realizada y verificada el 07/11/2026, despues de autorizacion expresa:
+commit 4215c6972b4c7b03a868eb5097f80569904ab769 con exactamente 21 archivos aprobados,
+desde fix/productos-cierre-tecnico; fast-forward de main desde 2117c57, push normal
+sin force y comprobacion ls-remote = HEAD local. Arbol limpio tras ese push. Solo
+despues de esa comprobacion se marca 5.3 en este seguimiento documental. 5.1 sigue
+abierta; no se ejecuto su E2E ni se declara cerrado todo el modulo. Sin operaciones
+PostgreSQL/Cloudinary ni cambios funcionales durante la integracion.
 
 ## Workflow follow-up
 

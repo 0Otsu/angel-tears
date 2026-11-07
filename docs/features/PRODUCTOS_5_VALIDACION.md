@@ -147,7 +147,13 @@ academicos/dominio se conservan explicitamente, sin inventar RF/CU.
 se ejecutaron en esta ronda; pruebas PostgreSQL por modulo y aceptacion visual no
 equivalen a ese recorrido integrado. Coordinacion con Claudio para dependencias,
 sin desarrollar otro stock ni implementar Compras en esta tarea.
-5.3 abierta por instruccion (no commit/merge/push). No declarar todas las 5.x cerradas
-antes de cumplir esos dos puntos. La UX de Productos queda aceptada por el responsable;
+5.3 completada posteriormente bajo autorizacion expresa: commit
+4215c6972b4c7b03a868eb5097f80569904ab769 con exactamente 21 archivos aprobados,
+integrado desde fix/productos-cierre-tecnico a main por fast-forward desde 2117c57.
+Push sin force correcto; ls-remote confirma main remoto igual a HEAD local y arbol
+limpio. La evidencia de 5.3 se actualiza en un commit documental posterior a esa
+verificacion, no antes de realizar la integracion. 5.1 sigue abierta; no se ejecuta
+el E2E integrado en esta operacion. No declarar todas las 5.x cerradas mientras
+falte esa aceptacion. La UX de Productos queda aceptada por el responsable;
 no se propone mas funcionalidad ni redisenos. 4.4 conserva cierre tecnico y limites
 de campo; video/deploy/security siguen fuera de esta tarea.
