@@ -11,7 +11,7 @@ import { PanelAdmin } from "./piezas-admin"
 
 export function VistaPreviaProducto({ productoId, version, publicado, slug, editarDatos, gestionarImagenes, acciones }: {
   productoId: string; version: number; publicado: boolean; slug: string;
-  editarDatos: () => void; gestionarImagenes: () => void; acciones: (listo: boolean) => ReactNode;
+  editarDatos: () => void; gestionarImagenes: () => void; acciones: (listo: boolean, disponible?: boolean) => ReactNode;
 }) {
   const [resultado, recibir] = useState<ResultadoVistaPrevia | null>(null)
   const [intento, reintentar] = useState(0)
@@ -36,6 +36,6 @@ export function VistaPreviaProducto({ productoId, version, publicado, slug, edit
         {conflicto ? <Button variant="outline" onClick={() => window.location.reload()}>Recargar datos</Button> : resultado?.estado === "sesion_requerida" ? <Link href="/admin/login" className="underline">Iniciar sesión</Link> : <Button variant="outline" onClick={() => { recibir(null); reintentar(n => n + 1) }}>Reintentar consulta</Button>}
       </div>}
     </PanelAdmin>
-    {acciones(listo)}
+    {acciones(listo, listo ? resultado.producto.disponible : undefined)}
   </section>
 }

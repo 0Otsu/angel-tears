@@ -37,7 +37,7 @@ export function EditorProducto({ producto, categorias, pasoInicial = "datos", al
   const [borradorImagen, setBorradorImagen] = useState(false)
   const cambios = borradorDatos || borradorImagen
   const cancelar = (pendiente = false) => <CancelarProducto productoId={actual.id} hayCambios={cambios} ocupado={imagenOcupada || datosOcupados || pendiente} />
-  const acciones = (listo: boolean) => <AccionesProducto producto={actual} alGuardar={setActual} disabled={!listo || cambios || imagenOcupada || datosOcupados} finalizar={!actual.publicado} enVistaPrevia accionCancelar={cancelar} alEditar={() => setPaso("datos")} alImagen={() => setPaso("imagen")} />
+  const acciones = (listo: boolean, disponible?: boolean) => <AccionesProducto producto={actual} disponible={disponible} alGuardar={setActual} disabled={!listo || cambios || imagenOcupada || datosOcupados} finalizar={!actual.publicado} enVistaPrevia accionCancelar={cancelar} alEditar={() => setPaso("datos")} alImagen={() => setPaso("imagen")} />
   return <>
     <EncabezadoAdmin titulo={alta ? "Completar producto" : "Editar producto"} descripcion={actual.nombre} simple />
     <PasosProducto paso={paso} elegir={setPaso} ocupado={imagenOcupada || datosOcupados} persistido imagen={actual.tieneImagen} borrador={borradorDatos} imagenPendiente={borradorImagen} />

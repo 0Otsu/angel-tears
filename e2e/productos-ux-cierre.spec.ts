@@ -56,7 +56,7 @@ test("gestion: cinco anchos, menu accesible, comando termina antes del refresh y
       const nuevo = page.getByRole("button", { name: "Nuevo producto", exact: true }); expect((await nuevo.boundingBox())!.height).toBeGreaterThanOrEqual(44)
       await page.screenshot({ path: info.outputPath(`listado-${width}.png`), fullPage: true })
     }
-    const fila = page.getByRole("list", { name: "Productos registrados" }).getByRole("listitem").filter({ has: page.getByRole("heading", { name: nombres[0], exact: true }) })
+    const fila = page.getByRole("table", { name: "Productos registrados" }).getByRole("row").filter({ has: page.getByRole("heading", { name: nombres[0], exact: true }) })
     const menu = fila.getByRole("button", { name: `Acciones de ${nombres[0]}`, exact: true })
     await menu.focus(); await page.keyboard.press("Enter"); await expect(page.getByRole("menuitem", { name: "Publicar", exact: true })).toBeVisible()
     await expect(page.getByRole("menuitem", { name: "Gestionar imágenes", exact: true })).toBeVisible()

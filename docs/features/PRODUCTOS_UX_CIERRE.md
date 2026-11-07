@@ -61,4 +61,39 @@ Cleanup real: un producto y los dos identificadores de assets propios registrado
 
 ## Dependencias y continuidad
 
+### Listado administrativo — pasada visual posterior
+
+Alcance: solo listado de Productos, sin reglas nuevas ni cambios a persistencia,
+Auth o implementacion de Inventario. Reutiliza la tabla UI y acciones existentes.
+Filas compactas en escritorio; el mismo arbol de controles se apila como tarjetas
+en movil, con encabezados de columna conservados para tecnologias asistivas.
+Editar visible, resto de acciones en menu Radix, filtros combinables y limpieza de
+filtros; vacio, error, carga y confirmaciones existentes conservados.
+
+La pagina autorizada consulta una sola tanda mediante el contrato existente
+`consultarDisponibilidad` de Inventario, sin SQL de stock nuevo ni saldos en el DTO
+de Producto. Publicado/Oculto y disponibilidad se comunican por separado:
+publicado sin stock indica `Sin stock · fuera del listado`; una lectura fallida
+mantiene Productos disponibles con `Stock sin confirmar`, sin inventar saldo cero.
+Es una fotografia de disponibilidad al consultar/refrescar, no un monitor en tiempo real.
+
+Verificacion focalizada: 59 pruebas de listado/editor/preview, publicacion y pagina;
+19 adicionales del adapter Cloudinary preexistente. Lint, typecheck y diff-check verdes.
+Los selectores E2E de lista/fila y Editar se adaptan a tabla/accion visible, conservando
+sus aserciones; no se ejecutan en esta pasada por el alcance solicitado.
+Cobertura: componentes del listado/editor/preview y publicacion,
+con pruebas de pagina para autorizacion antes de leer, consulta agrupada y fallo de
+Inventario. Sin suite completa ni E2E costosos. La herramienta de revision visual
+se detuvo por no poder verificar la URL del navegador; revision visual manual
+de escritorio/movil pendiente en aquella pasada, sin afirmar capturas nuevas aprobadas.
+Actualizacion 07/11: el responsable confirma responsive/listado aprobado manualmente;
+la aceptacion integral y evidencia de esta ronda estan en PRODUCTOS_5_VALIDACION.md.
+
+La auditoria de descartables de desarrollo y propuesta SQL por IDs permanecen en
+`work/PLAN_LIMPIEZA_PRODUCTOS_DEMO.md` y `work/propuesta-limpieza-productos-demo.sql`,
+ignorados por Git. La propuesta fue aprobada y ejecutada posteriormente para seis IDs,
+con respaldo, simulacion ROLLBACK, COMMIT y comprobacion de registros ajenos intactos.
+Resultado: siete productos reales; evidencia en work/limpieza-productos-demo-resultado.json.
+No se tocaron assets Cloudinary ni se agrega borrado definitivo a la interfaz.
+
 Reutiliza Auth/C0, publicacion y galeria ya integradas; no cambia arquitectura ni requiere ADR nuevo. Continuan sin marcar 5.1/5.2/5.3, integracion con dependencias reales/aceptacion global, trazabilidad academica y deployment/dominio/CWV de campo. Video sigue diferido. Esta pasada no equivale a aceptar 5.x ni certificacion WCAG completa.

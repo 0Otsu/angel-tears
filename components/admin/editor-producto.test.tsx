@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react"
 import { beforeEach, expect, it, vi } from "vitest"
 import { EditorProducto } from "./editor-producto"
 import { ProductosAdmin } from "./productos-admin"
@@ -76,15 +76,92 @@ it("guardar oculto confirma el comando y navega sin competir con un refresh", as
  expect(guardar).not.toHaveBeenCalled();
 })
 
-it("publicar desde resumen conserva feedback al pasar a acciones de producto publicado", async () => {
+it("publicar desde preview abre confirmacion unica, explica sin stock y retorna foco al cerrar", async () => {
  publicar.mockResolvedValue({estado:"ok",productoId:producto.id,slug:producto.slug,version:2});
  render(<EditorProducto producto={{...producto,tieneImagen:true,imagen:{urlSegura:"https://example.test/A.png",ancho:20,alto:20}}} categorias={categorias} />);
  fireEvent.click(screen.getByRole("button",{name:"3. Vista previa"}));
  await waitFor(() => expect((screen.getByRole("button", { name: "Publicar producto" }) as HTMLButtonElement).disabled).toBe(false));
  fireEvent.click(screen.getByRole("button",{name:"Publicar producto"}));
- expect(await screen.findByText("Producto publicado.")).toBeTruthy();
+ const dialogo = await screen.findByRole("dialog", {name:"¡Producto publicado!"});
+ expect(within(dialogo).getByText("Collar")).toBeTruthy();
+ await within(dialogo).findByText(/todavía no aparecerá en el listado del catálogo/);
+ expect(within(dialogo).getByRole("link",{name:"Ir a Inventario"}).getAttribute("href")).toBe("/admin/stock");
+ expect(within(dialogo).queryByRole("link",{name:/Ver producto/})).toBeNull();
+ expect(screen.queryByText("Producto publicado.")).toBeNull();
+ expect(navegar).not.toHaveBeenCalled();
+ await waitFor(()=>expect(document.activeElement).toBe(within(dialogo).getByRole("button",{name:"Volver a productos"})));
+ fireEvent.keyDown(dialogo,{key:"Escape",code:"Escape"});
+ await waitFor(()=>expect(screen.queryByRole("dialog")).toBeNull());
+ await waitFor(()=>expect(document.activeElement).toBe(screen.getByRole("button",{name:"Acciones de Collar"})));
  expect(screen.getByRole("button",{name:"Acciones de Collar"})).toBeTruthy();
  expect(screen.getByRole("button",{name:"Cancelar"})).toBeTruthy();
+ fireEvent.click(screen.getByRole("button",{name:"Editar datos"}));
+ fireEvent.click(screen.getByRole("button",{name:"3. Vista previa"}));
+ await screen.findByRole("region",{name:"Detalle del producto"});
+ expect(screen.queryByRole("dialog")).toBeNull();
+})
+
+it("no confirma antes del ok y Volver a productos navega solo por accion explicita", async () => {
+ let terminar!: (r:unknown)=>void;
+ publicar.mockImplementationOnce(()=>new Promise(r=>{terminar=r}));
+ render(<EditorProducto producto={{...producto,tieneImagen:true}} categorias={categorias} pasoInicial="vista-previa" />);
+ const boton = await screen.findByRole("button",{name:"Publicar producto"});
+ await waitFor(()=>expect((boton as HTMLButtonElement).disabled).toBe(false));
+ fireEvent.click(boton); expect(screen.queryByRole("dialog")).toBeNull();
+ expect(navegar).not.toHaveBeenCalled();
+ await act(async()=>terminar({estado:"ok",productoId:producto.id,slug:producto.slug,version:2}));
+ const dialogo=await screen.findByRole("dialog",{name:"¡Producto publicado!"});
+ expect(screen.getAllByRole("dialog")).toHaveLength(1);
+ expect(navegar).not.toHaveBeenCalled();
+ fireEvent.click(within(dialogo).getByRole("button",{name:"Volver a productos"}));
+ expect(navegar).toHaveBeenCalledWith("/admin/productos");
+ expect(publicar).toHaveBeenCalledTimes(1);
+})
+
+it("con stock ofrece pagina publica del slug confirmado en otra pestana", async () => {
+ previa.mockImplementation(async({version})=>({estado:"ok",version,producto:{...producto,moneda:"ARS",disponible:true,imagen:null,galeria:[]}}));
+ publicar.mockResolvedValue({estado:"ok",productoId:producto.id,slug:producto.slug,version:2});
+ render(<EditorProducto producto={{...producto,tieneImagen:true}} categorias={categorias} pasoInicial="vista-previa" />);
+ await waitFor(()=>expect((screen.getByRole("button",{name:"Publicar producto"}) as HTMLButtonElement).disabled).toBe(false));
+ fireEvent.click(screen.getByRole("button",{name:"Publicar producto"}));
+ const dialogo=await screen.findByRole("dialog",{name:"¡Producto publicado!"});
+ const enlace=await within(dialogo).findByRole("link",{name:"Ver producto (abre otra pestaña)"});
+ expect(enlace.getAttribute("href")).toBe("/catalogo/collar"); expect(enlace.getAttribute("target")).toBe("_blank");
+ expect(enlace.getAttribute("rel")).toContain("noopener");
+ expect(within(dialogo).queryByRole("link",{name:"Ir a Inventario"})).toBeNull();
+ fireEvent.click(within(dialogo).getByRole("button",{name:"Cerrar confirmación"}));
+ await waitFor(()=>expect(screen.queryByRole("dialog")).toBeNull());
+})
+
+it("consultar o editar un publicado no abre confirmacion", async () => {
+ render(<EditorProducto producto={{...producto,publicado:true,tieneImagen:true}} categorias={categorias} pasoInicial="vista-previa" />);
+ await screen.findByRole("region",{name:"Detalle del producto"});
+ expect(screen.queryByRole("dialog")).toBeNull(); expect(publicar).not.toHaveBeenCalled();
+ fireEvent.click(screen.getByRole("button",{name:"Editar datos"}));
+ expect(screen.getByLabelText("Nombre *")).toBeTruthy(); expect(screen.queryByRole("dialog")).toBeNull();
+})
+
+it("lectura posterior pendiente no inventa stock ni impide cerrar con foco accesible", async () => {
+ previa.mockImplementationOnce(async({version})=>({estado:"ok",version,producto:{...producto,moneda:"ARS",disponible:true,imagen:null,galeria:[]}})).mockImplementationOnce(()=>new Promise(()=>{}));
+ publicar.mockResolvedValue({estado:"ok",productoId:producto.id,slug:producto.slug,version:2});
+ render(<EditorProducto producto={{...producto,tieneImagen:true}} categorias={categorias} pasoInicial="vista-previa" />);
+ await waitFor(()=>expect((screen.getByRole("button",{name:"Publicar producto"}) as HTMLButtonElement).disabled).toBe(false));
+ fireEvent.click(screen.getByRole("button",{name:"Publicar producto"}));
+ const dialogo=await screen.findByRole("dialog",{name:"¡Producto publicado!"});
+ expect(within(dialogo).getByText("Podés revisar su disponibilidad en Inventario.")).toBeTruthy();
+ expect(within(dialogo).queryByRole("link",{name:/Ver producto/})).toBeNull();
+ fireEvent.keyDown(dialogo,{key:"Escape",code:"Escape"});
+ await waitFor(()=>expect(document.activeElement).toBe(screen.getByRole("group",{name:"Acciones del producto"})));
+})
+
+it.each(["error_tecnico","sesion_requerida","conflicto_version","imagen_requerida"])("fallo %s conserva editor, error y ausencia de dialogo",async(estado)=>{
+ publicar.mockResolvedValue({estado});
+ render(<EditorProducto producto={{...producto,tieneImagen:true}} categorias={categorias} pasoInicial="vista-previa" />);
+ await waitFor(()=>expect((screen.getByRole("button",{name:"Publicar producto"}) as HTMLButtonElement).disabled).toBe(false));
+ fireEvent.click(screen.getByRole("button",{name:"Publicar producto"}));
+ await screen.findByRole("alert"); expect(screen.queryByRole("dialog")).toBeNull(); expect(navegar).not.toHaveBeenCalled();
+ fireEvent.click(screen.getByRole("button",{name:"Editar datos"}));
+ expect((screen.getByLabelText("Nombre *") as HTMLInputElement).value).toBe("Collar");
 })
 
 it("recuperacion contextual: error normal permite retry y solo un conflicto pide recargar", async () => {

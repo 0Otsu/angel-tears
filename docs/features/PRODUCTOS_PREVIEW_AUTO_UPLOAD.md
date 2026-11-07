@@ -43,6 +43,14 @@ Capturas y registros locales ignorados en `work/productos-preview/`: auto-upload
 
 Cierre: 368 unit/component (51 archivos), 176 PostgreSQL (18 archivos) y 66 E2E completos correctos. Lint/typecheck, build de produccion del arnes E2E, DB check, generacion DB sin cambios (12 tablas), OpenSpec strict/doctor y diff-check correctos. Nueve E2E focalizados verificaron tambien la regresion de salida al listado. Un primer intento de build fallo internamente en la resolucion Turbopack de Google Fonts; repeticion del comando normal y build final completo correctos, sin alterar fuentes/configuracion ni el arnes para evitarlo.
 
+## Confirmacion de publicacion — 07/11/2026
+
+Ajuste UX autorizado sobre `2117c57`: despues de `ok` del comando existente, publicar desde Vista previa abre un unico Dialog Radix centrado con nombre, confirmacion y Volver a productos (sin redireccion automatica). Reemplaza el aviso transitorio de ese recorrido; listado y otras operaciones conservan su feedback. No se abre al consultar/editar un publicado ni ante error.
+
+La disponibilidad procede del DTO autorizado de preview y se vuelve a leer con la version confirmada. Sin stock se explica exclusion del listado y se enlaza `/admin/stock`; con stock se ofrece el slug confirmado en otra pestaña. Mientras no haya lectura vigente, se ofrece revisar Inventario sin afirmar stock. No cambia publicacion, persistencia ni reglas de elegibilidad/PDP.
+
+Foco inicial en Volver a productos; Escape/cierre devuelven foco a las acciones del producto, con fallback al grupo si el control espera lectura. Acciones apiladas en mobile, texto largo con wrap y altura acotada con scroll. 48 pruebas focalizadas de componentes/formularios/publicacion correctas, lint de archivos afectados y TypeScript correctos. Se adapta la asercion E2E anterior al nuevo dialogo sin ejecutar E2E/suite completa ni publicar productos reales. Revision visual manual mobile queda disponible para el responsable. Diff Cloudinary previo preservado por separado; no credenciales nuevas ni commits.
+
 ## Limites y pendientes
 
 Sin nuevas dependencias, schema/migrations o cambios de Auth/Inventario/backend Cloudinary. No hay iframe/publicacion temporal, galeria duplicada, nuevos servicios, video o infraestructura de pruebas del dominio. La preview representa el detalle persistido en el contexto admin, no Header/Footer/relacionados publicos. Otra pestaña no recibe actualizaciones push; una nueva lectura obtiene estado actual. 5.x, otros owners, deploy y security pass no se iniciaron; 4.4 conserva su cierre tecnico previo y limites de medicion de campo.
