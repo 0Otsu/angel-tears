@@ -1,10 +1,15 @@
-import { asc, eq, inArray } from "drizzle-orm"
+import { and, asc, eq, inArray } from "drizzle-orm"
 import type { NodePgDatabase } from "drizzle-orm/node-postgres"
 import { inventario, movimientoStock } from "@/lib/infraestructura/esquemas/inventario"
 import {
   ErrorProductoSinSaldo,
+  ErrorReversaInvalida,
   ErrorStockInsuficiente,
   type ContratoInventario,
+  type MovimientoDeOrigen,
+  type VariacionConOrigen,
+  type MovimientoRegistrado,
+  type OrigenMovimiento,
   type SaldoAfectado,
   type TransaccionLlamador,
 } from "@/lib/modulos/inventario/contrato"
@@ -23,6 +28,61 @@ function comoTransaccionBd(tx: TransaccionLlamador): TransaccionBd {
   return tx as TransaccionBd
 }
 
+// Unico punto que conoce las columnas de origen de movimiento_stock. Cada origen nuevo (compra,
+// venta) agrega su columna en su migracion y su caso aqui; una reversa repite las del original.
+function columnasDeOrigen(origen: OrigenMovimiento) {
+  return { ajusteId: origen.ajusteId }
+}
+
+function origenDeFila(fila: typeof movimientoStock.$inferSelect): OrigenMovimiento {
+  return { tipo: "AJUSTE", ajusteId: fila.ajusteId! }
+}
+
+function mismoOrigen(a: OrigenMovimiento, b: OrigenMovimiento): boolean {
+  return a.ajusteId === b.ajusteId
+}
+
+const SQLSTATE_UNICA = "23505"
+
+function esViolacionUnica(error: unknown): boolean {
+  const causa = (error as { cause?: { code?: string } } | null)?.cause
+  return (error as { code?: string } | null)?.code === SQLSTATE_UNICA || causa?.code === SQLSTATE_UNICA
+}
+
+// Se llama con los saldos del producto ya bloqueados: dos anulaciones del mismo movimiento
+// comparten producto, asi que la segunda espera el lock y ve la reversa de la primera.
+async function validarReversas(
+  tx: TransaccionBd,
+  variaciones: readonly VariacionConOrigen[],
+): Promise<Map<string, typeof movimientoStock.$inferSelect>> {
+  const pedidas = variaciones.filter((v) => v.reversaDe)
+  const originales = new Map<string, typeof movimientoStock.$inferSelect>()
+  if (pedidas.length === 0) return originales
+
+  const ids = pedidas.map((v) => v.reversaDe!)
+  const repetido = ids.find((id, i) => ids.indexOf(id) !== i)
+  if (repetido) throw new ErrorReversaInvalida(repetido, "YA_REVERTIDO")
+
+  const filas = await tx.select().from(movimientoStock).where(inArray(movimientoStock.id, ids))
+  for (const fila of filas) originales.set(fila.id, fila)
+  const yaRevertidos = new Set(
+    (await tx.select({ de: movimientoStock.reversaDe }).from(movimientoStock).where(inArray(movimientoStock.reversaDe, ids)))
+      .map((fila) => fila.de),
+  )
+
+  for (const variacion of pedidas) {
+    const id = variacion.reversaDe!
+    const original = originales.get(id)
+    if (!original) throw new ErrorReversaInvalida(id, "NO_ENCONTRADO")
+    if (original.tipo !== "ORIGINAL") throw new ErrorReversaInvalida(id, "NO_ES_ORIGINAL")
+    if (original.productoId !== variacion.productoId) throw new ErrorReversaInvalida(id, "PRODUCTO_DISTINTO")
+    if (!mismoOrigen(origenDeFila(original), variacion.origen)) throw new ErrorReversaInvalida(id, "ORIGEN_DISTINTO")
+    if (variacion.delta !== -original.delta) throw new ErrorReversaInvalida(id, "DELTA_NO_OPUESTO")
+    if (yaRevertidos.has(id)) throw new ErrorReversaInvalida(id, "YA_REVERTIDO")
+  }
+  return originales
+}
+
 export function crearContratoInventario(db: NodePgDatabase): ContratoInventario {
   return {
     async crearSaldoCero(transaccion, productoId) {
@@ -34,7 +94,7 @@ export function crearContratoInventario(db: NodePgDatabase): ContratoInventario 
     async aplicarMovimientos(transaccion, comando) {
       const tx = comoTransaccionBd(transaccion)
       const consolidadas = consolidarVariaciones(comando.variaciones)
-      if (consolidadas.length === 0) return { saldos: [], productosAfectados: [] }
+      if (consolidadas.length === 0) return { saldos: [], movimientos: [], productosAfectados: [] }
 
       // Lock de las filas en orden de ID: dos operaciones que comparten productos las toman en
       // el mismo orden y no se bloquean entre si en circulo. La verificacion va despues del lock.
@@ -50,6 +110,8 @@ export function crearContratoInventario(db: NodePgDatabase): ContratoInventario 
         .orderBy(asc(inventario.productoId))
         .for("update")
       const actuales = new Map(filas.map((fila) => [fila.productoId, fila]))
+
+      const originales = await validarReversas(tx, comando.variaciones)
 
       const saldos: SaldoAfectado[] = []
       for (const { productoId, delta } of consolidadas) {
@@ -87,12 +149,28 @@ export function crearContratoInventario(db: NodePgDatabase): ContratoInventario 
           delta: variacion.delta,
           saldoResultante,
           actorId: comando.actorId,
-          ajusteId: variacion.origen.ajusteId,
+          tipo: variacion.reversaDe ? ("REVERSA" as const) : ("ORIGINAL" as const),
+          reversaDe: variacion.reversaDe ?? null,
+          // La reversa hereda el origen del original (ya verificado igual al pedido).
+          ...columnasDeOrigen(variacion.reversaDe ? origenDeFila(originales.get(variacion.reversaDe)!) : variacion.origen),
         }
       })
-      await tx.insert(movimientoStock).values(movimientos)
+      let registrados: MovimientoRegistrado[]
+      try {
+        registrados = await tx
+          .insert(movimientoStock)
+          .values(movimientos)
+          .returning({ id: movimientoStock.id, productoId: movimientoStock.productoId, delta: movimientoStock.delta, tipo: movimientoStock.tipo })
+          .then((filas) => filas as MovimientoRegistrado[])
+      } catch (error) {
+        // Red de seguridad de la base: la unica de reversa_de gana aunque otra tx se haya colado.
+        if (esViolacionUnica(error) && comando.variaciones.some((v) => v.reversaDe)) {
+          throw new ErrorReversaInvalida(comando.variaciones.find((v) => v.reversaDe)!.reversaDe!, "YA_REVERTIDO")
+        }
+        throw error
+      }
 
-      return { saldos, productosAfectados: saldos.map((s) => s.productoId) }
+      return { saldos, movimientos: registrados, productosAfectados: saldos.map((s) => s.productoId) }
     },
 
     async consultarDisponibilidad(productoIds) {
@@ -104,6 +182,34 @@ export function crearContratoInventario(db: NodePgDatabase): ContratoInventario 
         hayStock: fila.cantidad > 0,
         saldo: fila.cantidad,
         minimo: fila.minimo,
+      }))
+    },
+
+    async consultarMovimientosDeOrigen(transaccion, origenes) {
+      const tx = comoTransaccionBd(transaccion)
+      if (origenes.length === 0) return []
+      const filas = await tx
+        .select()
+        .from(movimientoStock)
+        .where(
+          and(
+            eq(movimientoStock.tipo, "ORIGINAL"),
+            inArray(movimientoStock.ajusteId, origenes.map((o) => columnasDeOrigen(o).ajusteId)),
+          ),
+        )
+        .orderBy(asc(movimientoStock.creadoEn), asc(movimientoStock.id))
+      const revertidos = new Set(
+        filas.length === 0
+          ? []
+          : (await tx.select({ de: movimientoStock.reversaDe }).from(movimientoStock).where(inArray(movimientoStock.reversaDe, filas.map((f) => f.id))))
+              .map((r) => r.de),
+      )
+      return filas.map((fila): MovimientoDeOrigen => ({
+        id: fila.id,
+        origen: origenDeFila(fila),
+        productoId: fila.productoId,
+        delta: fila.delta,
+        revertido: revertidos.has(fila.id),
       }))
     },
   }

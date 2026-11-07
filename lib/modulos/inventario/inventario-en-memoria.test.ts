@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import {
   esErrorProductoSinSaldo,
+  esErrorReversaInvalida,
   esErrorStockInsuficiente,
   type VariacionConOrigen,
 } from "@/lib/modulos/inventario/contrato"
@@ -103,5 +104,43 @@ describe("contrato de inventario (doble en memoria)", () => {
     const resultado = await inventario.consultarDisponibilidad(["a", "a", "zzz"])
 
     expect(resultado).toEqual([{ productoId: "a", hayStock: true, saldo: 2, minimo: 2 }])
+  })
+
+  describe("reversas", () => {
+    it("revierte un movimiento una sola vez y conserva el origen", async () => {
+      const inventario = crearInventarioEnMemoria()
+      inventario.cargar("p1", 10)
+      const { movimientos } = await inventario.aplicarMovimientos(tx, { actorId: "a", variaciones: [variacion("p1", -4)] })
+
+      await inventario.aplicarMovimientos(tx, { actorId: "a", variaciones: [{ ...variacion("p1", 4), reversaDe: movimientos[0].id }] })
+
+      expect((await inventario.consultarDisponibilidad(["p1"]))[0].saldo).toBe(10)
+      expect(inventario.movimientos[1]).toMatchObject({ tipo: "REVERSA", reversaDe: movimientos[0].id, origenId: "ajuste-1" })
+      const error = await capturarError(inventario.aplicarMovimientos(tx, { actorId: "a", variaciones: [{ ...variacion("p1", 4), reversaDe: movimientos[0].id }] }))
+      expect(esErrorReversaInvalida(error) && error.motivo).toBe("YA_REVERTIDO")
+    })
+
+    it("rechaza una reversa con delta no opuesto o de un movimiento inexistente", async () => {
+      const inventario = crearInventarioEnMemoria()
+      inventario.cargar("p1", 10)
+      const { movimientos } = await inventario.aplicarMovimientos(tx, { actorId: "a", variaciones: [variacion("p1", -4)] })
+
+      const delta = await capturarError(inventario.aplicarMovimientos(tx, { actorId: "a", variaciones: [{ ...variacion("p1", 3), reversaDe: movimientos[0].id }] }))
+      const falta = await capturarError(inventario.aplicarMovimientos(tx, { actorId: "a", variaciones: [{ ...variacion("p1", 4), reversaDe: "no-existe" }] }))
+
+      expect(esErrorReversaInvalida(delta) && delta.motivo).toBe("DELTA_NO_OPUESTO")
+      expect(esErrorReversaInvalida(falta) && falta.motivo).toBe("NO_ENCONTRADO")
+    })
+
+    it("consultarMovimientosDeOrigen marca como revertido el original ya reversado", async () => {
+      const inventario = crearInventarioEnMemoria()
+      inventario.cargar("p1", 10)
+      const { movimientos } = await inventario.aplicarMovimientos(tx, { actorId: "a", variaciones: [variacion("p1", -4)] })
+      await inventario.aplicarMovimientos(tx, { actorId: "a", variaciones: [{ ...variacion("p1", 4), reversaDe: movimientos[0].id }] })
+
+      expect(await inventario.consultarMovimientosDeOrigen(tx, [ajuste])).toEqual([
+        { id: movimientos[0].id, origen: ajuste, productoId: "p1", delta: -4, revertido: true },
+      ])
+    })
   })
 })
