@@ -1,15 +1,14 @@
 "use client"
 
 import { Settings } from "lucide-react"
-import { proveedoresDemo, comprasDemo, ventasDemo, egresosDemo } from "@/lib/mock/admin"
+import { comprasDemo, ventasDemo, egresosDemo } from "@/lib/mock/admin"
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
-import { TablaDemo, type FilaDemo } from "./tabla-demo"
+import { TablaDemo } from "./tabla-demo"
 import { filasProductos, filasMovimientos } from "./filas-demo"
 import { EncabezadoAdmin, AvisoDemo, PanelAdmin, EtiquetaEstado } from "./piezas-admin"
 
 const definiciones = {
   productos: { titulo: "Productos", descripcion: "Listado de accesorios y su visibilidad pública. Solo muestra visual.", columnas: ["Producto", "Categoría", "Precio mock", "Visibilidad"], filas: filasProductos },
-  proveedores: { titulo: "Proveedores", descripcion: "Referencias ficticias para explorar la composición del listado.", columnas: ["Referencia", "Proveedor", "Nota de muestra"], filas: proveedoresDemo.map(p => ({ id: p.id, buscar: `${p.id} ${p.nombre} ${p.nota}`, celdas: [p.id, <span key="nombre" className="font-medium">{p.nombre}</span>, p.nota], detalle: [{ nombre: "Referencia", valor: p.id }, { nombre: "Nombre de muestra", valor: p.nombre }, { nombre: "Nota", valor: p.nota }] })) as FilaDemo[] },
   compras: { titulo: "Compras", descripcion: "Historial mock de octubre. No registra compras ni modifica stock.", columnas: ["Referencia", "Fecha", "Detalle", "Importe", "Estado"], filas: filasMovimientos(comprasDemo) },
   ventas: { titulo: "Ventas", descripcion: "Historial mock de octubre, con ejemplos vigentes y anulados.", columnas: ["Referencia", "Fecha", "Detalle", "Importe", "Estado"], filas: filasMovimientos(ventasDemo) },
   egresos: { titulo: "Egresos", descripcion: "Egresos manuales mock de octubre. Las compras no se duplican aquí.", columnas: ["Referencia", "Fecha", "Detalle", "Importe", "Estado"], filas: filasMovimientos(egresosDemo) },
