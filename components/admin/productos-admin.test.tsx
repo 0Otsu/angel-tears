@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { NuevoProducto, EditorProducto } from "./editor-producto"
 import { ProductosAdmin } from "./productos-admin"
@@ -86,6 +86,49 @@ it("edicion comunica decimal normalizado al editor sin dejar un borrador falso",
 })
 
 describe("productos administrativos", () => {
+  it("presenta una tabla semantica que se apila como tarjetas, con una sola accion Editar por producto", () => {
+    render(<ProductosAdmin consulta={consulta} />)
+    const tabla = screen.getByRole("table", { name: "Productos registrados" })
+    expect(within(tabla).getAllByRole("columnheader").map(h => h.textContent)).toEqual(["Producto", "Categoría", "Precio", "Estado", "Acciones"])
+    expect(within(tabla).getAllByRole("row")).toHaveLength(2)
+    expect(within(tabla).getAllByRole("button", { name: "Editar Collar real" })).toHaveLength(1)
+    fireEvent.click(screen.getByRole("button", { name: "Editar Collar real" }))
+    expect(push).toHaveBeenCalledWith(`/admin/productos/${consulta.productos[0].id}/editar`)
+    expect(within(tabla).getAllByRole("row")[1].className).toContain("md:table-row")
+  })
+
+  it.each([false, true, undefined])("distingue publicado de disponibilidad %s sin afirmar visibilidad falsa", disponible => {
+    render(<ProductosAdmin consulta={{ ...consulta, productos: [{ ...consulta.productos[0], publicado: true }] }} disponibilidad={disponible === undefined ? {} : { [consulta.productos[0].id]: disponible }} />)
+    expect(within(screen.getByRole("table")).getByText("Publicado")).toBeTruthy()
+    expect(screen.getByText(disponible === false ? "Sin stock · fuera del listado" : disponible === true ? "Con stock" : "Stock sin confirmar")).toBeTruthy()
+    expect(screen.queryByText("En catálogo")).toBeNull()
+  })
+
+  it("oculto con stock sigue fuera del catalogo; filtros combinados se pueden restablecer", () => {
+    render(<ProductosAdmin consulta={consulta} disponibilidad={{ [consulta.productos[0].id]: true }} />)
+    expect(screen.getByText("Fuera del catálogo")).toBeTruthy()
+    fireEvent.change(screen.getByLabelText("Buscar por nombre"), { target: { value: "collar" } })
+    fireEvent.change(screen.getByLabelText("Categoría"), { target: { value: "collares" } })
+    expect(screen.getByRole("heading", { name: "Collar real" })).toBeTruthy()
+    fireEvent.change(screen.getByLabelText("Estado"), { target: { value: "publicado" } })
+    expect(screen.queryByRole("table")).toBeNull()
+    fireEvent.click(screen.getByRole("button", { name: "Limpiar filtros" }))
+    expect(screen.getByRole("table")).toBeTruthy()
+    expect((screen.getByLabelText("Buscar por nombre") as HTMLInputElement).value).toBe("")
+  })
+
+  it("menu conserva imagenes, preview y publicaciones sin duplicar Editar", async () => {
+    render(<ProductosAdmin consulta={consulta} />)
+    fireEvent.keyDown(screen.getByRole("button", { name: "Acciones de Collar real" }), { key: "Enter", code: "Enter" })
+    expect(await screen.findByRole("menuitem", { name: "Gestionar imágenes" })).toBeTruthy()
+    expect(screen.getByRole("menuitem", { name: "Vista previa" })).toBeTruthy()
+    expect(screen.getByRole("menuitem", { name: "Publicar" })).toBeTruthy()
+    expect(screen.getByRole("menuitem", { name: "Destacar" })).toBeTruthy()
+    expect(screen.queryByRole("menuitem", { name: "Editar" })).toBeNull()
+    fireEvent.click(screen.getByRole("menuitem", { name: "Gestionar imágenes" }))
+    expect(push).toHaveBeenCalledWith(`/admin/productos/${consulta.productos[0].id}/editar?paso=imagen`)
+  })
+
   it("lista los registros recibidos, incluidos ocultos, y diferencia error de consulta de lista vacia", () => {
     const { rerender } = render(<ProductosAdmin consulta={consulta} />)
     expect(screen.getByText("Collar real")).toBeTruthy()

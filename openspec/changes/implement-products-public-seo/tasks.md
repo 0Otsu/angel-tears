@@ -95,9 +95,32 @@ Checkpoint parcial 4.4 del 31/10/2026: desktop/notebook/mobile y 320 px con nomb
 Ajuste acotado posterior del 02/11/2026: Imagenes inicia la cola automaticamente, serializa transferencias y bloquea Vista previa hasta resolver pendientes/errores. Preview administrativa autorizada reutiliza presentacion/proyeccion del PDP, conserva 404 publico de ocultos y ofrece Ver producto en otra pestaña solo para publicados. Smoke real de siete imagenes, publicacion/contenido coincidente y cleanup comprobados; evidencia en [preview y auto-upload](../../../docs/features/PRODUCTOS_PREVIEW_AUTO_UPLOAD.md). No reabre tareas aceptadas, no altera el cierre tecnico 4.4 ni marca 5.x.
 
 - [ ] 5.1 Ejecutar E2E alta → imagen → publicar → compra/ajuste → Home/catálogo/PDP → agotar/ocultar/reponer con dependencias reales.
-- [ ] 5.2 Ejecutar tests/lint/typecheck/build y OpenSpec estricto; actualizar mapa/docs y registrar dominio/contenido o RF/CU aún pendientes.
+- [x] 5.2 Ejecutar tests/lint/typecheck/build y OpenSpec estricto; actualizar mapa/docs y registrar dominio/contenido o RF/CU aún pendientes.
 - [ ] 5.3 Integrar por [flujo Git vigente](../../../docs/GIT_WORKFLOW.md), coordinando contratos/archivos con owners sin PR/aprobación cruzada obligatorios; revisión adicional recomendable. Ninguna task se marca por el solo hecho de planificar y no se archiva antes de aceptación técnica con evidencia.
 
 ## Workflow follow-up
+
+Cierre tecnico final del 07/11/2026: main local y remoto verificados por ls-remote en
+2117c57, sin incorporar trabajo ajeno. 98 PostgreSQL focalizados / 10 archivos en
+angel_tears_test validada por la guardia (Producto, galeria, publicacion, catalogo,
+preview y contrato Inventario compartido); 26 unitarios de diagnostico/guardia,
+lint, build de produccion con TypeScript, db:check, OpenSpec strict/doctor y diff-check
+correctos. Primer build detecta ICO con PNG RGB: se corrige solo a RGBA y se repite
+correctamente. Build usa tambien _test; sin operaciones reales en Cloudinary ni
+acceso operativo a desarrollo. Manuales de listado/responsive/modal/navegacion/favicon/
+catalogo aceptados por el responsable, diferenciados de pruebas del agente.
+5.2 cerrada con alcance focalizado autorizado y pendientes RF/CU/dominio registrados;
+5.1 permanece abierta por E2E integrado con dependencias y 5.3 por integracion Git no
+autorizada aun. [Evidencia y manifiesto de commit](../../../docs/features/PRODUCTOS_5_VALIDACION.md).
+
+Pasada focalizada anterior del 07/11/2026 sobre main local 2117c57: 194 pruebas unitarias/
+componentes de Productos/uploader/catalogo, lint, TypeScript, OpenSpec strict/doctor
+y diff-check correctos. Lecturas reales Home/catalogo/siete PDP 200; listado de siete
+productos reales. Upload Sofi y responsive del listado confirmados por el responsable.
+Iconos derivados del recurso de marca reconocidos por metadata App Router; dispositivos
+fisicos y visual del favicon pendientes. Sin escrituras sobre datos reales ni nuevas
+llamadas Cloudinary. [Matriz y pendientes 5.x](../../../docs/features/PRODUCTOS_5_VALIDACION.md).
+5.1 sigue abierta, 5.2 parcial (no build ni regresion PostgreSQL/E2E actual), 5.3 abierta
+(sin commit/merge/push). No marcar aceptacion global con pruebas de componentes.
 
 - Search Console/GBP y aceptación productiva dependen de entorno autorizado; no crear módulos o changes futuros activos en esta preparación.

@@ -67,6 +67,10 @@ Por ajuste expreso del responsable del 02/11/2026, el sistema SHALL ofrecer una 
 - **WHEN** se solicita la vista previa sin sesion o con una version desactualizada
 - **THEN** no se revelan datos sin autorizacion ni se adopta una version ajena sobre el borrador; se informa login/recarga segun corresponda.
 
+#### Scenario: Confirmacion al publicar desde Vista previa
+- **WHEN** el comando existente confirma la publicacion desde Vista previa
+- **THEN** se muestra un dialogo accesible de exito con nombre y accion Volver a productos sin navegacion automatica ni aviso duplicado. La disponibilidad confirmada determina acceso publico con stock o aclaracion/enlace a Inventario sin stock; consultar un publicado o fallar el comando no abre ese dialogo.
+
 #### Scenario: Seleccion excede el cupo
 - **WHEN** imagenes guardadas mas seleccionadas superan siete
 - **THEN** se rechaza toda la nueva seleccion con un mensaje; el backend tambien preserva el limite ante concurrencia.
