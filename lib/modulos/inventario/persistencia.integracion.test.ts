@@ -10,7 +10,7 @@ import {
   esErrorStockInsuficiente,
   type VariacionConOrigen,
 } from "@/lib/modulos/inventario/contrato"
-import { crearContratoInventario } from "@/lib/modulos/inventario/persistencia"
+import { crearContratoInventario, movimientoYaRevertidoDe } from "@/lib/modulos/inventario/persistencia"
 import { insertarProductoOcultoConSaldo, sembrarCategorias } from "@/lib/modulos/productos/persistencia"
 import { crearConexionPruebas } from "@/pruebas/arnes-bd"
 
@@ -483,6 +483,38 @@ describe("inventario sobre PostgreSQL", () => {
 
       const reversa = await revertir(PRODUCTO_A, -5, o.origen, o.id)
       expect(await motivoDe(revertir(PRODUCTO_A, 5, o.origen, reversa.movimientos[0].id))).toBe("NO_ES_ORIGINAL")
+    })
+
+    it("otra violacion de unicidad no se informa como reversa ya hecha", async () => {
+      await fijarSaldo(PRODUCTO_A, 10)
+      const o = await original(PRODUCTO_A, 5)
+
+      // La reversa es valida, pero la segunda variacion repite el origen de un ORIGINAL existente
+      // y viola otra unica (ajuste_id, tipo): el error de la base debe llegar sin disfrazarse.
+      const error = await db().transaction((tx) =>
+        contrato().aplicarMovimientos(tx, {
+          actorId: ACTOR,
+          variaciones: [
+            { ...variacion(PRODUCTO_A, -5, o.origen), reversaDe: o.id },
+            variacion(PRODUCTO_B, 1, o.origen),
+          ],
+        })).catch((e: unknown) => e)
+
+      expect(esErrorReversaInvalida(error)).toBe(false)
+      expect(error).toBeInstanceOf(Error)
+      expect(await saldoDe(PRODUCTO_A)).toBe(15)
+      expect(await db().select().from(movimientoStock).where(eq(movimientoStock.reversaDe, o.id))).toHaveLength(0)
+    })
+
+    it("solo reconoce como YA_REVERTIDO la unica de reversa_de, directa o dentro de cause", () => {
+      const reversa = { code: "23505", constraint: "movimiento_stock_reversa_de_unica", detail: "Key (reversa_de)=(abc-123) already exists." }
+      expect(movimientoYaRevertidoDe(reversa)).toBe("abc-123")
+      expect(movimientoYaRevertidoDe(new Error("x", { cause: reversa }))).toBe("abc-123")
+      expect(movimientoYaRevertidoDe({ cause: reversa })).toBe("abc-123")
+      expect(movimientoYaRevertidoDe({ code: "23505", constraint: "movimiento_stock_ajuste_tipo_unico" })).toBeNull()
+      expect(movimientoYaRevertidoDe({ code: "23514", constraint: "movimiento_stock_reversa_de_unica" })).toBeNull()
+      expect(movimientoYaRevertidoDe(new Error("otro"))).toBeNull()
+      expect(movimientoYaRevertidoDe(null)).toBeNull()
     })
 
     it("consultarMovimientosDeOrigen entrega el ID del original y si ya fue revertido", async () => {

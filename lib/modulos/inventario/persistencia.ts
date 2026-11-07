@@ -43,10 +43,20 @@ function mismoOrigen(a: OrigenMovimiento, b: OrigenMovimiento): boolean {
 }
 
 const SQLSTATE_UNICA = "23505"
+const RESTRICCION_REVERSA_UNICA = "movimiento_stock_reversa_de_unica"
 
-function esViolacionUnica(error: unknown): boolean {
-  const causa = (error as { cause?: { code?: string } } | null)?.cause
-  return (error as { code?: string } | null)?.code === SQLSTATE_UNICA || causa?.code === SQLSTATE_UNICA
+type ErrorPg = { code?: string; constraint?: string; detail?: string; cause?: ErrorPg }
+
+/**
+ * Si `error` es la violacion de la unica de `reversa_de` (el movimiento ya tiene su reversa),
+ * devuelve el ID repetido; con cualquier otro error, incluso otra unica, devuelve null y el
+ * llamador lo propaga sin disfrazarlo de reversa. Drizzle puede envolver el error de pg en `cause`.
+ */
+export function movimientoYaRevertidoDe(error: unknown): string | null {
+  const pg = [error as ErrorPg | null, (error as ErrorPg | null)?.cause].find((e) => e?.code === SQLSTATE_UNICA)
+  if (!pg || pg.constraint !== RESTRICCION_REVERSA_UNICA) return null
+  // detail: Key (reversa_de)=(<uuid>) already exists.
+  return /\(reversa_de\)=\(([^)]+)\)/.exec(pg.detail ?? "")?.[1] ?? ""
 }
 
 // Se llama con los saldos del producto ya bloqueados: dos anulaciones del mismo movimiento
@@ -163,9 +173,10 @@ export function crearContratoInventario(db: NodePgDatabase): ContratoInventario 
           .returning({ id: movimientoStock.id, productoId: movimientoStock.productoId, delta: movimientoStock.delta, tipo: movimientoStock.tipo })
           .then((filas) => filas as MovimientoRegistrado[])
       } catch (error) {
-        // Red de seguridad de la base: la unica de reversa_de gana aunque otra tx se haya colado.
-        if (esViolacionUnica(error) && comando.variaciones.some((v) => v.reversaDe)) {
-          throw new ErrorReversaInvalida(comando.variaciones.find((v) => v.reversaDe)!.reversaDe!, "YA_REVERTIDO")
+        // Red de seguridad de la base: solo la unica de reversa_de se informa como YA_REVERTIDO.
+        const repetido = movimientoYaRevertidoDe(error)
+        if (repetido !== null) {
+          throw new ErrorReversaInvalida(repetido || comando.variaciones.find((v) => v.reversaDe)!.reversaDe!, "YA_REVERTIDO")
         }
         throw error
       }
