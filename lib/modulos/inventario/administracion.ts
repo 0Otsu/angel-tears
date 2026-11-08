@@ -73,7 +73,7 @@ export function crearAdministracionInventario(dependencias: {
     return {
       filas: filas.map((fila) => ({
         ...fila,
-        stockBajo: esStockBajo(fila.saldo, fila.minimo),
+        stockBajo: esStockBajo(fila.saldo),
         sinStock: fila.saldo === 0,
       })),
     }
@@ -116,6 +116,7 @@ export function crearAdministracionInventario(dependencias: {
     return autorizado.estado === "sesion_requerida" ? autorizado : autorizado.valor
   }
 
+  /** @deprecated Escritura legada compatible; no influye en alertas generales ni se ofrece en UI. */
   async function cambiarMinimo(
     encabezados: Headers,
     entrada: { productoId: unknown; minimo: unknown },

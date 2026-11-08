@@ -73,25 +73,31 @@ describe("administracion de inventario sobre PostgreSQL", () => {
   })
 
   describe("consultar", () => {
-    it("clasifica stock bajo (<=), sin stock y sin minimo, ordenado por nombre", async () => {
-      await fijar(PRODUCTO_A, 5, 5) // igualdad: bajo
-      await fijar(PRODUCTO_B, 0, null) // agotado sin minimo: sin stock, no bajo
+    it("clasifica alerta general, preservando minimos historicos como datos", async () => {
+      await fijar(PRODUCTO_A, 5, 5) // minimo historico no determina alerta
+      await fijar(PRODUCTO_B, 0, null) // agotado sin minimo: alerta general y sin stock
       await fijar(PRODUCTO_C, 0, 0) // cero es un minimo real: bajo y sin stock
 
       const { filas } = await administracion().consultar(encabezados)
       const mios = filas.filter((f) => IDS.includes(f.productoId))
 
       expect(mios.map((f) => [f.nombre, f.saldo, f.minimo, f.stockBajo, f.sinStock])).toEqual([
-        ["Anillo", 5, 5, true, false],
-        ["Brazalete", 0, null, false, true],
+        ["Anillo", 5, 5, false, false],
+        ["Brazalete", 0, null, true, true],
         ["Collar", 0, 0, true, true],
       ])
     })
 
-    it("un saldo por encima del minimo no es stock bajo", async () => {
-      await fijar(PRODUCTO_A, 6, 5)
+    it("cuatro unidades no es stock bajo aunque el minimo historico sea diez", async () => {
+      await fijar(PRODUCTO_A, 4, 10)
       const { filas } = await administracion().consultar(encabezados)
       expect(filas.find((f) => f.productoId === PRODUCTO_A)).toMatchObject({ stockBajo: false, sinStock: false })
+    })
+
+    it.each([0,1,2,3,4])("consulta saldo %s con criterio general y minimo historico cero",async saldo=>{
+      await fijar(PRODUCTO_A,saldo,0)
+      const {filas}=await administracion().consultar(encabezados)
+      expect(filas.find(f=>f.productoId===PRODUCTO_A)).toMatchObject({saldo,minimo:0,stockBajo:saldo<=3,sinStock:saldo===0})
     })
 
     it("sin sesion rechaza la lectura", async () => {

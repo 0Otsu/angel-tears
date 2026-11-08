@@ -14,10 +14,10 @@ Decisiones A/C/L y actualización expresa del 19/10: listados solo publicado + s
 ## Stock
 
 - El stock nunca puede ser negativo.
-- El stock mínimo es opcional.
-- Un producto sin mínimo no participa en la consulta de stock bajo.
+- Umbral general aprobado por Sofi: cero Sin stock; una a tres unidades Pocas unidades; cuatro o más Disponible.
+- Los mínimos individuales históricos se conservan como datos compatibles, pero no determinan alertas ni se configuran en la experiencia administrativa.
 
-Stock bajo: `stock <= minimo`; mínimo cero es real y distinto de null. Unidades enteras. Ajustes explícitos de incremento/decremento con cantidad, motivo obligatorio, fecha automática e historia, nunca reemplazo silencioso. Saldo inicial identificado sin compra ficticia ni efecto económico. No duplicar el saldo en Producto. Si venta supera disponible: bloquear, informar saldo y conservar formulario sin autoajustar cantidad. Restricciones comerciales no aprobadas permanecen en decisiones pendientes.
+Actualización comercial expresa: `stockBajo` representa alerta general inclusiva (`stock <= 3`, incluido cero); sustituye la regla anterior `stock <= minimo`. Los tres estados operativos distinguen cero de pocas unidades. Unidades enteras. Ajustes explícitos de incremento/decremento con cantidad, motivo obligatorio, fecha automática e historia, nunca reemplazo silencioso. Saldo inicial identificado sin compra ficticia ni efecto económico. No duplicar el saldo en Producto. Si venta supera disponible: bloquear, informar saldo y conservar formulario sin autoajustar cantidad. Restricciones comerciales no aprobadas permanecen en decisiones pendientes.
 
 ## Proveedores
 

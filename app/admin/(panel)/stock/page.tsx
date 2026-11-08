@@ -6,8 +6,9 @@ import { exigirAdministradoraEnPagina } from "@/lib/modulos/autenticacion/guardi
 import { esErrorSesionRequerida } from "@/lib/modulos/autenticacion/contrato"
 import { obtenerAdministracionInventario } from "@/lib/modulos/inventario/administracion-aplicacion"
 import type { FilaStock } from "@/lib/modulos/inventario/administracion-contrato"
+import { filtroStock } from "@/lib/presentacion/inventario"
 
-export default async function PaginaStock() {
+export default async function PaginaStock({searchParams}: {searchParams: Promise<{estado?:string}>}) {
   await exigirAdministradoraEnPagina()
   let filas: FilaStock[] = []
   let errorCarga = false
@@ -18,7 +19,8 @@ export default async function PaginaStock() {
     console.error("[inventario] fallo de consulta", { tipo: error instanceof Error ? error.name : typeof error })
     errorCarga = true
   }
-  return <StockAdmin filas={filas} errorCarga={errorCarga} />
+  const inicial = filtroStock((await searchParams).estado)
+  return <StockAdmin key={inicial} filas={filas} errorCarga={errorCarga} filtroInicial={inicial} />
 }
 
 export const metadata: Metadata = { title: "Inventario" }

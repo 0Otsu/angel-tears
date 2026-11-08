@@ -9,6 +9,13 @@
 
 ## 2. Stock, mínimos y ajustes
 
+Actualizacion comercial autorizada en fix/inventario-ux: minimo GENERAL tres para
+todos los productos, sin configuracion individual en UI. Sustituye el criterio de
+alertas de 2.1; 2.2 queda como capacidad interna legada, no se borra ni se expone al
+operador. DTO/columnas existentes se conservan, stockBajo usa saldo <= 3 incluyendo
+cero y se comparte clasificacion con Dashboard. No se reabren movimientos/reversas
+ni se marcan tareas de Compras/aceptacion global. Evidencia: docs/features/INVENTARIO_UX.md.
+
 - [x] 2.1 Implementar consulta saldo/mínimo/stock bajo <=; probar null, cero, igualdad y saldo agotado, y documentar estados.
 - [x] 2.2 Implementar cambio de mínimo con validación/permisos; probar quitar mínimo, valores inválidos y conservación de saldo.
 - [x] 2.3 Implementar ajustes y saldo inicial identificados con motivo, actor/historia y deduplicación; probar decremento insuficiente y ausencia de compra/efecto económico.
