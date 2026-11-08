@@ -14,6 +14,7 @@ it("cinco destinos principales, rutas conservadas y acceso de usuario separado",
   expect(nav.queryByRole("link", { name: "Configuración" })).toBeNull()
   expect(screen.getByRole("button", { name: "Menú de usuario: Administradora" })).toBeTruthy()
   expect(screen.getByRole("heading", { name: "Contenido del modulo" })).toBeTruthy()
+  expect(screen.queryByText("Datos de demostración · sin persistencia")).toBeNull()
 })
 it.each([
   ["/admin/ventas", "Operaciones", "Ventas"], ["/admin/compras", "Operaciones", "Compras"],

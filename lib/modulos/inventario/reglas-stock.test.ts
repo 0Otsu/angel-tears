@@ -7,27 +7,10 @@ import {
   esStockBajo,
 } from "@/lib/modulos/inventario/reglas-stock"
 
-describe("esStockBajo", () => {
-  it("es bajo cuando el saldo es menor que el minimo", () => {
-    expect(esStockBajo(2, 5)).toBe(true)
-  })
-
-  it("es bajo cuando el saldo es igual al minimo", () => {
-    expect(esStockBajo(5, 5)).toBe(true)
-  })
-
-  it("no es bajo cuando el saldo supera el minimo", () => {
-    expect(esStockBajo(6, 5)).toBe(false)
-  })
-
-  it("sin minimo nunca participa en la alerta, ni con saldo cero", () => {
-    expect(esStockBajo(0, null)).toBe(false)
-    expect(esStockBajo(100, null)).toBe(false)
-  })
-
-  it("el minimo cero es real: saldo cero participa y saldo uno no", () => {
-    expect(esStockBajo(0, 0)).toBe(true)
-    expect(esStockBajo(1, 0)).toBe(false)
+describe("esStockBajo general", () => {
+  it.each([0,1,2,3,4])("saldo %s aplica umbral general e ignora todos los minimos historicos", saldo => {
+    for (const minimo of [null,0,1,3,5,10]) expect(esStockBajo(saldo,minimo)).toBe(saldo<=3)
+    expect(esStockBajo(saldo)).toBe(saldo<=3)
   })
 })
 

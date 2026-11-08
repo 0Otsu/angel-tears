@@ -57,7 +57,7 @@ test.afterAll(async () => {
 })
 
 for (const [vista, width, height] of [["desktop", 1280, 900], ["mobile", 390, 844]] as const) {
-  test(`ajustes, minimo, estados e historial reales en ${vista}`, async ({ page }) => {
+  test(`ajustes, alertas generales e historial reales en ${vista}`, async ({ page }) => {
     await page.setViewportSize({ width, height })
     await reiniciarLimiteDeIntentos()
     await page.goto("/admin/stock")
@@ -69,57 +69,57 @@ for (const [vista, width, height] of [["desktop", 1280, 900], ["mobile", 390, 84
 
     await page.goto("/admin/stock")
     await expect(page.getByText("Datos de demostración")).toHaveCount(0)
-    const tarjeta = page.getByRole("listitem").filter({ hasText: NOMBRE })
+    const tarjeta = page.getByRole("table", { name: "Inventario por producto" }).getByRole("row").filter({ hasText: NOMBRE })
     await expect(tarjeta).toContainText("Sin stock")
 
     // Un decremento con saldo 0 se rechaza y conserva el formulario.
-    await page.getByRole("button", { name: `Ajustar stock de ${NOMBRE}` }).click()
+    await page.getByRole("button", { name: `Modificar stock de ${NOMBRE}` }).click()
     const dialogo = page.getByRole("dialog")
-    await dialogo.getByLabel("Tipo").selectOption("DECREMENTO")
+    await dialogo.getByRole("radio", {name:"Retirar"}).check()
     await dialogo.getByLabel("Cantidad *").fill("1")
     await dialogo.getByLabel("Motivo *").fill("Prueba")
-    await dialogo.getByRole("button", { name: "Registrar ajuste" }).click()
-    await expect(dialogo.getByRole("alert")).toContainText("hay 0 y querés restar 1")
+    await expect(dialogo.getByRole("button", { name: "Registrar ajuste" })).toBeDisabled()
+    await expect(dialogo.getByRole("status")).toContainText("no alcanza")
     await expect(dialogo.getByLabel("Motivo *")).toHaveValue("Prueba")
 
     // Validacion por campo con foco en el primero con error.
-    await dialogo.getByLabel("Tipo").selectOption("INCREMENTO")
+    await dialogo.getByRole("radio", {name:"Agregar"}).check()
     await dialogo.getByLabel("Cantidad *").fill("0")
     await dialogo.getByRole("button", { name: "Registrar ajuste" }).click()
     await expect(dialogo.getByText("Ingresá una cantidad entera mayor a cero.")).toBeVisible()
     await expect(dialogo.getByLabel("Cantidad *")).toBeFocused()
 
-    // Saldo inicial real.
-    await dialogo.getByLabel("Tipo").selectOption("INICIAL")
+    // Incremento real por existencias previas (el backend conserva tambien INICIAL).
+    await dialogo.getByRole("radio", {name:"Agregar"}).check()
     await dialogo.getByLabel("Cantidad *").fill("4")
     await dialogo.getByLabel("Motivo *").fill("Existencias previas")
     await dialogo.getByRole("button", { name: "Registrar ajuste" }).click()
     await expect(page.getByRole("dialog")).toHaveCount(0)
-    await expect(tarjeta).toContainText("Stock: 4")
+    await expect(tarjeta.getByRole("cell").filter({ hasText: /^4\s*unidades/ })).toBeVisible()
     await expect(tarjeta).not.toContainText("Sin stock")
 
-    // Minimo 4: saldo == minimo es stock bajo.
-    await page.getByRole("button", { name: `Configurar mínimo de ${NOMBRE}` }).click()
-    await page.getByRole("dialog").getByLabel("Mínimo", { exact: true }).fill("-1")
-    await page.getByRole("dialog").getByRole("button", { name: "Guardar mínimo" }).click()
-    await expect(page.getByRole("dialog").getByText(/entero de cero o más/)).toBeVisible()
-    await page.getByRole("dialog").getByLabel("Mínimo", { exact: true }).fill("4")
-    await page.getByRole("dialog").getByRole("button", { name: "Guardar mínimo" }).click()
-    await expect(tarjeta).toContainText("Stock bajo")
-    await expect(tarjeta).toContainText("Mínimo: 4")
-
-    // Filtro por estado y quitar el minimo.
-    await page.getByLabel("Estado").selectOption("bajo")
+    // Cuatro disponible -> tres pocas, bajo el umbral general y sin configurar minimos.
+    await expect(tarjeta).toContainText("Disponible")
+    await expect(tarjeta).not.toContainText("Mínimo:")
+    await page.getByRole("button", {name:`Más acciones de ${NOMBRE}`}).click()
+    await expect(page.getByRole("menuitem", {name:"Configurar mínimo"})).toHaveCount(0)
+    await page.keyboard.press("Escape")
+    await page.getByRole("button", {name:`Modificar stock de ${NOMBRE}`}).click()
+    await dialogo.getByRole("radio", {name:"Retirar"}).check()
+    await dialogo.getByLabel("Cantidad *").fill("1")
+    await dialogo.getByLabel("Motivo *").fill("Control de prueba")
+    await dialogo.getByRole("button", {name:"Registrar ajuste"}).click()
+    await expect(page.getByRole("dialog")).toHaveCount(0)
+    await expect(tarjeta).toContainText("Pocas unidades")
+    await page.getByLabel("Estado").selectOption("pocas")
     await expect(tarjeta).toBeVisible()
+    await page.getByLabel("Estado").selectOption("disponible")
+    await expect(tarjeta).toHaveCount(0)
     await page.getByLabel("Estado").selectOption("")
-    await page.getByRole("button", { name: `Configurar mínimo de ${NOMBRE}` }).click()
-    await page.getByRole("dialog").getByLabel("Mínimo", { exact: true }).fill("")
-    await page.getByRole("dialog").getByRole("button", { name: "Guardar mínimo" }).click()
-    await expect(tarjeta).toContainText("Sin mínimo")
-    await expect(tarjeta).not.toContainText("Stock bajo")
 
     // Historial con el movimiento registrado.
-    await page.getByRole("button", { name: `Ver historial de ${NOMBRE}` }).click()
+    await page.getByRole("button", {name:`Más acciones de ${NOMBRE}`}).click()
+    await page.getByRole("menuitem", {name:"Historial"}).click()
     const historial = page.getByRole("dialog")
     await expect(historial.getByText("Existencias previas")).toBeVisible()
     await expect(historial.getByText(/Stock resultante: 4/)).toBeVisible()

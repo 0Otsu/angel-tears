@@ -9,9 +9,9 @@ export type FilaStock = {
   categoriaNombre: string
   publicado: boolean
   saldo: number
-  /** null = sin minimo; cero es un minimo real. */
+  /** Legado: se conserva el valor persistido por compatibilidad; no determina alertas. */
   minimo: number | null
-  /** saldo <= minimo; nunca es true sin minimo. */
+  /** Alerta general aprobada: saldo <= 3, incluido cero; independiente de minimo. */
   stockBajo: boolean
   sinStock: boolean
 }

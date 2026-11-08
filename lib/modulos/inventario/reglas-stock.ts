@@ -1,6 +1,7 @@
 // Reglas puras de stock (B1..B5, ADR-003): sin base de datos, Next ni Zod, para probarlas sin
-// infraestructura. Cantidades enteras; el saldo nunca queda negativo; el minimo null (sin
-// minimo) es distinto de cero.
+// infraestructura. Cantidades enteras; el saldo nunca queda negativo. Minimo individual
+// se conserva como dato legado; no determina las alertas generales aprobadas.
+import { clasificarStock } from "./alertas-stock"
 
 export type VariacionStock = {
   readonly productoId: string
@@ -16,14 +17,15 @@ export function esCantidadPositiva(valor: unknown): valor is number {
   return esEnteroNoNegativo(valor) && valor > 0
 }
 
-/** El minimo es opcional: null/ausente (sin alerta) o un entero >= 0. Cero es un minimo real. */
+/** Valida el dato legado: null o entero >= 0; no determina las alertas generales. */
 export function esMinimoValido(valor: unknown): valor is number | null {
   return valor === null || esEnteroNoNegativo(valor)
 }
 
-/** Stock bajo significa saldo <= minimo (B1); sin minimo no participa (B2). */
-export function esStockBajo(saldo: number, minimo: number | null): boolean {
-  return minimo !== null && saldo <= minimo
+/** Alerta general inclusiva: saldo 0..3. Segundo argumento legado ignorado por compatibilidad. */
+export function esStockBajo(saldo: number, minimoLegado?: number | null): boolean {
+  void minimoLegado
+  return clasificarStock(saldo) !== "disponible"
 }
 
 /**

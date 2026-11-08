@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useState, type ReactNode } from "react"
 import { consultarHistorialAccion } from "@/app/admin/(panel)/stock/acciones"
 import type { FilaStock, MovimientoHistorial, ResultadoHistorialAdmin } from "@/lib/modulos/inventario/administracion-contrato"
 import { Button } from "@/components/ui/button"
@@ -11,7 +11,7 @@ const formato = new Intl.DateTimeFormat("es-AR", { dateStyle: "short", timeStyle
 
 type Estado = { cargando: true } | { cargando: false; resultado: ResultadoHistorialAdmin }
 
-export function DialogoHistorialStock({ fila }: { fila: FilaStock }) {
+export function DialogoHistorialStock({ fila, disparador, alCerrar }: { fila: FilaStock; disparador?: ReactNode; alCerrar?:()=>void }) {
   const [estado, setEstado] = useState<Estado | null>(null)
 
   async function cargar() {
@@ -24,8 +24,8 @@ export function DialogoHistorialStock({ fila }: { fila: FilaStock }) {
   const resultado = estado && !estado.cargando ? estado.resultado : null
   const movimientos: MovimientoHistorial[] = resultado?.estado === "ok" ? resultado.movimientos : []
   return <Dialog onOpenChange={abierto => { if (abierto) void cargar() }}>
-    <DialogTrigger asChild><Button variant="outline" className="min-h-11" aria-label={`Ver historial de ${fila.nombre}`}>Historial</Button></DialogTrigger>
-    <DialogContent className="max-h-[85vh] overflow-y-auto">
+    <DialogTrigger asChild>{disparador ?? <Button variant="outline" className="min-h-11" aria-label={`Ver historial de ${fila.nombre}`}>Historial</Button>}</DialogTrigger>
+    <DialogContent className="max-h-[85vh] overflow-y-auto" onCloseAutoFocus={alCerrar ? e=>{e.preventDefault();alCerrar()} : undefined}>
       <DialogHeader><DialogTitle>Historial de stock</DialogTitle><DialogDescription>{fila.nombre} · últimos movimientos.</DialogDescription></DialogHeader>
       {estado?.cargando && <p role="status" className="flex items-center gap-2 text-sm"><Spinner />Cargando historial…</p>}
       {resultado && resultado.estado !== "ok" && <div role="alert" className="space-y-2 text-sm text-destructive"><p>{resultado.estado === "sesion_requerida" ? "Tu sesión venció. Volvé a iniciar sesión." : resultado.estado === "no_encontrado" ? "El producto ya no tiene inventario." : "No pudimos consultar el historial."}</p>{resultado.estado === "error_tecnico" && <Button variant="outline" onClick={() => void cargar()}>Reintentar</Button>}</div>}

@@ -39,6 +39,16 @@ Las reglas aquí aprobadas no convierten los mocks en funciones reales. La aplic
 
 ### B. Stock e inventario
 
+**Actualización comercial posterior aprobada por Sofi y el responsable:** el umbral
+general es tres para todos los productos: 0 Sin stock; 1–3 Pocas unidades; >=4
+Disponible. Reemplaza B1/B2 y sus ejemplos siguientes únicamente en lo relativo a
+alertas/configuración individual. Los mínimos persistidos/DTO quedan como legado
+compatible, sin determinar alertas ni aparecer como configuración en UI. stockBajo
+representa saldo <=3, incluido cero. No se cambian saldos, movimientos, reversas,
+idempotencia ni reglas de operaciones. Evidencia y deuda de compatibilidad en
+[Inventario UX](features/INVENTARIO_UX.md). La tabla siguiente conserva el antecedente
+histórico; no se deben aplicar sus mínimos individuales como política vigente.
+
 | Código | Decisión aprobada |
 | --- | --- |
 | B1 | Stock bajo significa **stock <= mínimo**. |
