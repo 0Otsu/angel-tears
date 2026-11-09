@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray } from "drizzle-orm"
+import { and, asc, eq, inArray, or } from "drizzle-orm"
 import type { NodePgDatabase } from "drizzle-orm/node-postgres"
 import { inventario, movimientoStock } from "@/lib/infraestructura/esquemas/inventario"
 import {
@@ -12,6 +12,7 @@ import {
   type OrigenMovimiento,
   type SaldoAfectado,
   type TransaccionLlamador,
+  identificadorDeOrigen,
 } from "@/lib/modulos/inventario/contrato"
 import { calcularSaldoResultante, consolidarVariaciones } from "@/lib/modulos/inventario/reglas-stock"
 
@@ -31,15 +32,19 @@ function comoTransaccionBd(tx: TransaccionLlamador): TransaccionBd {
 // Unico punto que conoce las columnas de origen de movimiento_stock. Cada origen nuevo (compra,
 // venta) agrega su columna en su migracion y su caso aqui; una reversa repite las del original.
 function columnasDeOrigen(origen: OrigenMovimiento) {
-  return { ajusteId: origen.ajusteId }
+  return origen.tipo === "AJUSTE"
+    ? { ajusteId: origen.ajusteId, ventaLineaId: null }
+    : { ajusteId: null, ventaLineaId: origen.ventaLineaId }
 }
 
 function origenDeFila(fila: typeof movimientoStock.$inferSelect): OrigenMovimiento {
-  return { tipo: "AJUSTE", ajusteId: fila.ajusteId! }
+  return fila.ventaLineaId
+    ? { tipo: "VENTA", ventaLineaId: fila.ventaLineaId }
+    : { tipo: "AJUSTE", ajusteId: fila.ajusteId! }
 }
 
 function mismoOrigen(a: OrigenMovimiento, b: OrigenMovimiento): boolean {
-  return a.ajusteId === b.ajusteId
+  return identificadorDeOrigen(a) === identificadorDeOrigen(b)
 }
 
 const SQLSTATE_UNICA = "23505"
@@ -199,15 +204,17 @@ export function crearContratoInventario(db: NodePgDatabase): ContratoInventario 
     async consultarMovimientosDeOrigen(transaccion, origenes) {
       const tx = comoTransaccionBd(transaccion)
       if (origenes.length === 0) return []
+      const ajusteIds = origenes.flatMap((o) => (o.tipo === "AJUSTE" ? [o.ajusteId] : []))
+      const ventaLineaIds = origenes.flatMap((o) => (o.tipo === "VENTA" ? [o.ventaLineaId] : []))
+      // Un origen de cada tabla: se combinan con OR para una sola lectura ordenada.
+      const porOrigen = or(
+        ajusteIds.length ? inArray(movimientoStock.ajusteId, ajusteIds) : undefined,
+        ventaLineaIds.length ? inArray(movimientoStock.ventaLineaId, ventaLineaIds) : undefined,
+      )
       const filas = await tx
         .select()
         .from(movimientoStock)
-        .where(
-          and(
-            eq(movimientoStock.tipo, "ORIGINAL"),
-            inArray(movimientoStock.ajusteId, origenes.map((o) => columnasDeOrigen(o).ajusteId)),
-          ),
-        )
+        .where(and(eq(movimientoStock.tipo, "ORIGINAL"), porOrigen))
         .orderBy(asc(movimientoStock.creadoEn), asc(movimientoStock.id))
       const revertidos = new Set(
         filas.length === 0

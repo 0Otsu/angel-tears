@@ -14,10 +14,17 @@ import type { VariacionStock } from "@/lib/modulos/inventario/reglas-stock"
 export type TransaccionLlamador = object
 
 /**
- * Operacion que origina un movimiento. Hoy solo existe el ajuste; la compra se agrega junto
- * con CompraLinea y la venta en la Ronda 2 (blueprint, seccion 12): no se adelantan tablas.
+ * Operacion que origina un movimiento: un ajuste o una linea de venta (change implement-sales).
+ * La compra se agrega junto con CompraLinea (blueprint, seccion 12): no se adelantan tablas.
  */
-export type OrigenMovimiento = { readonly tipo: "AJUSTE"; readonly ajusteId: string }
+export type OrigenMovimiento =
+  | { readonly tipo: "AJUSTE"; readonly ajusteId: string }
+  | { readonly tipo: "VENTA"; readonly ventaLineaId: string }
+
+/** Identificador estable y comparable de un origen, util para agrupar o comparar sin conocer su tabla. */
+export function identificadorDeOrigen(origen: OrigenMovimiento): string {
+  return origen.tipo === "AJUSTE" ? `AJUSTE:${origen.ajusteId}` : `VENTA:${origen.ventaLineaId}`
+}
 
 export type VariacionConOrigen = VariacionStock & {
   readonly origen: OrigenMovimiento

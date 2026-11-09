@@ -13,8 +13,10 @@ import {
   type DisponibilidadProducto,
   type MovimientoDeOrigen,
   type MovimientoRegistrado,
+  type OrigenMovimiento,
   type ResultadoAplicacion,
   type SaldoAfectado,
+  identificadorDeOrigen,
 } from "@/lib/modulos/inventario/contrato"
 import { calcularSaldoResultante, consolidarVariaciones } from "@/lib/modulos/inventario/reglas-stock"
 
@@ -26,7 +28,7 @@ export type MovimientoEnMemoria = {
   readonly delta: number
   readonly saldoResultante: number
   readonly actorId: string
-  readonly origenId: string
+  readonly origen: OrigenMovimiento
 }
 
 // Una reversa exige las mismas condiciones que la implementacion real (ver persistencia.ts).
@@ -36,7 +38,7 @@ function validarReversa(variacion: VariacionConOrigen, movimientos: readonly Mov
   if (!original) throw new ErrorReversaInvalida(id, "NO_ENCONTRADO")
   if (original.tipo !== "ORIGINAL") throw new ErrorReversaInvalida(id, "NO_ES_ORIGINAL")
   if (original.productoId !== variacion.productoId) throw new ErrorReversaInvalida(id, "PRODUCTO_DISTINTO")
-  if (original.origenId !== variacion.origen.ajusteId) throw new ErrorReversaInvalida(id, "ORIGEN_DISTINTO")
+  if (identificadorDeOrigen(original.origen) !== identificadorDeOrigen(variacion.origen)) throw new ErrorReversaInvalida(id, "ORIGEN_DISTINTO")
   if (variacion.delta !== -original.delta) throw new ErrorReversaInvalida(id, "DELTA_NO_OPUESTO")
   if (movimientos.some((m) => m.reversaDe === id)) throw new ErrorReversaInvalida(id, "YA_REVERTIDO")
 }
@@ -103,17 +105,19 @@ export function crearInventarioEnMemoria(): InventarioEnMemoria {
           delta: variacion.delta,
           saldoResultante,
           actorId: comando.actorId,
-          origenId: variacion.origen.ajusteId,
+          // La reversa conserva el origen del original (ya verificado igual al pedido).
+          origen: variacion.origen,
         })
       }
       return { saldos: afectados, movimientos: registrados, productosAfectados: afectados.map((a) => a.productoId) }
     },
     async consultarMovimientosDeOrigen(_tx, origenes): Promise<MovimientoDeOrigen[]> {
+      const pedidos = new Set(origenes.map(identificadorDeOrigen))
       return movimientos
-        .filter((m) => m.tipo === "ORIGINAL" && origenes.some((o) => o.ajusteId === m.origenId))
+        .filter((m) => m.tipo === "ORIGINAL" && pedidos.has(identificadorDeOrigen(m.origen)))
         .map((m) => ({
           id: m.id,
-          origen: { tipo: "AJUSTE", ajusteId: m.origenId },
+          origen: m.origen,
           productoId: m.productoId,
           delta: m.delta,
           revertido: movimientos.some((r) => r.reversaDe === m.id),

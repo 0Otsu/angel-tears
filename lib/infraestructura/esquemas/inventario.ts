@@ -1,7 +1,8 @@
 // Schema de Inventario (blueprint, seccion 5): saldo por Producto, ajustes manuales y movimientos
-// append-only. Owner: Claudio. El saldo vive aqui y no en Producto. Solo cubre el origen
-// "ajuste": la columna/FK de origen de CompraLinea llega junto con Compra/CompraLinea y la de
-// VentaLinea en la Ronda 2 (blueprint, seccion 12); no se adelantan tablas.
+// append-only. Owner: Claudio. El saldo vive aqui y no en Producto. Origenes de movimiento:
+// ajuste y linea de venta (extension de Emi, autorizada por Claudio; ver el change
+// implement-sales). La columna/FK de origen de CompraLinea llega junto con Compra/CompraLinea
+// (blueprint, seccion 12); no se adelantan tablas.
 import { sql } from "drizzle-orm"
 import {
   check,
@@ -16,6 +17,7 @@ import {
 } from "drizzle-orm/pg-core"
 import { user } from "@/lib/infraestructura/esquemas/auth"
 import { producto } from "@/lib/infraestructura/esquemas/producto"
+import { ventaLinea } from "@/lib/infraestructura/esquemas/venta"
 
 const fecha = (nombre: string) => timestamp(nombre, { withTimezone: true })
 
@@ -77,9 +79,11 @@ export const movimientoStock = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "restrict" }),
     tipo: text("tipo").notNull().default("ORIGINAL"),
-    // Origen del movimiento. Hoy solo ajuste; los demas origenes se suman con su tabla y se
-    // amplia el CHECK de "exactamente un origen" en esa misma migracion.
+    // Origen del movimiento: exactamente uno entre ajuste y linea de venta. Los demas origenes
+    // se suman con su tabla y se amplia el CHECK de "exactamente un origen" en esa migracion.
+    // Una reversa conserva el mismo origen que el movimiento original.
     ajusteId: uuid("ajuste_id").references(() => ajusteStock.id, { onDelete: "restrict" }),
+    ventaLineaId: uuid("venta_linea_id").references(() => ventaLinea.id, { onDelete: "restrict" }),
     // Una reversa apunta al movimiento que revierte, y cada movimiento se revierte una sola vez.
     reversaDe: uuid("reversa_de")
       .references((): AnyPgColumn => movimientoStock.id, { onDelete: "restrict" })
@@ -94,7 +98,10 @@ export const movimientoStock = pgTable(
     check("movimiento_stock_delta_no_cero", sql`${tabla.delta} <> 0`),
     check("movimiento_stock_saldo_no_negativo", sql`${tabla.saldoResultante} >= 0`),
     check("movimiento_stock_tipo_valido", sql`${tabla.tipo} IN ('ORIGINAL', 'REVERSA')`),
-    check("movimiento_stock_origen_unico", sql`num_nonnulls(${tabla.ajusteId}) = 1`),
+    uniqueIndex("movimiento_stock_venta_linea_tipo_unico")
+      .on(tabla.ventaLineaId, tabla.tipo)
+      .where(sql`${tabla.ventaLineaId} IS NOT NULL`),
+    check("movimiento_stock_origen_unico", sql`num_nonnulls(${tabla.ajusteId}, ${tabla.ventaLineaId}) = 1`),
     check(
       "movimiento_stock_reversa_coherente",
       sql`(${tabla.tipo} = 'REVERSA') = (${tabla.reversaDe} IS NOT NULL)`,
