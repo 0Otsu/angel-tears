@@ -26,9 +26,9 @@ Clasificación de análisis solicitada: **A** cobertura candidata por RF/RNF exi
 | RF-12 Registrar compra | Compras, Claudio R1 | implement-inventory-suppliers-purchases | Cabecera/líneas/importes/movimientos en una tx. |
 | RF-13 Consultar compras | Compras, Claudio R1 | implement-inventory-suppliers-purchases | Fecha real, costos/supplier snapshot y estado histórico. |
 | RF-14 Anular compra | Compras, Claudio R1 | implement-inventory-suppliers-purchases | Reversión única, completa o rechazada por negativo. |
-| RF-15 Registrar venta | Ventas R2, owner no asignado | Roadmap, sin change activo | Stock suficiente/oculto interno, múltiples líneas y precio histórico. |
-| RF-16 Consultar ventas | Ventas R2 | Roadmap | Historia y fechas reales; comprador opcional/Consumidor Final. |
-| RF-17 Anular venta | Ventas R2 | Roadmap | Estado/historia y reintegro único. |
+| RF-15 Registrar venta | Ventas R2, Emi | implement-sales | Stock suficiente/oculto interno, múltiples líneas y precio histórico. Implementado en `/admin/ventas`: una transacción con cabecera, líneas y movimientos de stock; idempotencia por clave y huella. |
+| RF-16 Consultar ventas | Ventas R2, Emi | implement-sales | Historia y fechas reales; comprador opcional/Consumidor Final. Listado por fecha de operación y estado, detalle con líneas y resumen de vigentes para Dashboard/Finanzas. |
+| RF-17 Anular venta | Ventas R2, Emi | implement-sales | Estado/historia y reintegro único, con reversas del contrato de Inventario; la venta anulada se conserva. |
 | RF-18 Registrar egreso | Finanzas/Egresos R2 | Roadmap | Concepto/importe/fecha, sin duplicar compra. |
 | RF-19 Consultar egresos | Finanzas/Egresos R2 | Roadmap | Vigentes/anulados y período correcto. |
 | RF-20 Anular egreso | Finanzas/Egresos R2 | Roadmap | Historia y exclusión, sin doble anulación. |

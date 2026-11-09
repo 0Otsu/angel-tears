@@ -121,7 +121,7 @@ Son **13 patrones de página**: tres públicos y diez administrativos incluyendo
 | `/admin/stock` | Admin | Existencias y mínimos | 🟣 UI/MOCK | Inventario/estados predefinidos | Ninguna | Buscar/filtrar/ver detalle local | Saldo real, mínimo opcional, consulta bajo mínimo. |
 | `/admin/proveedores` | Admin | Referencias de proveedores | 🟣 UI/MOCK | `proveedoresDemo` | Ninguna | Buscar/ver detalle local | Campos validados, consulta y gestión persistente. |
 | `/admin/compras` | Admin | Historial | 🟣 UI/MOCK | `comprasDemo` | Ninguna | Buscar/filtrar/detalle de lectura | Registrar, consultar/anular y actualizar stock atómicamente. |
-| `/admin/ventas` | Admin | Historial | 🟣 UI/MOCK | `ventasDemo` | Ninguna | Buscar/filtrar/detalle de lectura | Registrar, consultar/anular y controlar stock. |
+| `/admin/ventas` | Admin | Historial | ✅ REAL (change `implement-sales`, rama `ebenitez-ventas`) | PostgreSQL: `venta`, `venta_linea` | Ninguna; noindex | Registrar venta multilínea, listado con filtros, detalle y anulación con confirmación | Pendiente: integración a `main` y revisión de Claudio. Ver [bitácora](features/VENTAS.md). |
 | `/admin/egresos` | Admin | Historial manual | 🟣 UI/MOCK | `egresosDemo` | Ninguna | Buscar/filtrar/detalle de lectura | Registrar/consultar/anular sin doble conteo. |
 | `/admin/reportes` | Admin | Resultado y visualizaciones | 🟣 UI/MOCK | `periodosDemo`, `segmentosDemo` | Ninguna | Selector/tabs y cálculo de muestra | Agregados de operaciones vigentes, período aprobado, tests. |
 | `/admin/configuracion` | Admin | Reserva visual | 🟣 UI/MOCK | Texto fijo E04 | Ninguna | Mostrar vacío explicativo | ⚪ Definir si hay algo necesario en MVP. |

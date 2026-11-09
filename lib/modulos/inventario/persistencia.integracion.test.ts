@@ -398,7 +398,7 @@ describe("inventario sobre PostgreSQL", () => {
       expect(resultado.saldos).toEqual([{ productoId: PRODUCTO_A, saldoAnterior: 15, saldoResultante: 10 }])
       expect(resultado.movimientos).toEqual([{ id: expect.any(String), productoId: PRODUCTO_A, delta: -5, tipo: "REVERSA" }])
       const [reversa] = await db().select().from(movimientoStock).where(eq(movimientoStock.id, resultado.movimientos[0].id))
-      expect(reversa).toMatchObject({ tipo: "REVERSA", reversaDe: o.id, ajusteId: o.origen.ajusteId, saldoResultante: 10 })
+      expect(reversa).toMatchObject({ tipo: "REVERSA", reversaDe: o.id, ajusteId: o.origen.tipo === "AJUSTE" ? o.origen.ajusteId : null, saldoResultante: 10 })
       expect(await saldoDe(PRODUCTO_A)).toBe(10)
     })
 

@@ -106,6 +106,43 @@ describe("contrato de inventario (doble en memoria)", () => {
     expect(resultado).toEqual([{ productoId: "a", hayStock: true, saldo: 2, minimo: 2 }])
   })
 
+  it("admite la linea de venta como origen, encuentra sus originales y la revierte una sola vez", async () => {
+    const inventario = crearInventarioEnMemoria()
+    inventario.cargar("a", 5)
+    const lineaVenta = { tipo: "VENTA", ventaLineaId: "linea-1" } as const
+    await inventario.aplicarMovimientos(tx, {
+      actorId: "admin-1",
+      variaciones: [{ productoId: "a", delta: -2, origen: lineaVenta }],
+    })
+
+    const [original] = await inventario.consultarMovimientosDeOrigen(tx, [lineaVenta, ajuste])
+    expect(original).toMatchObject({ origen: lineaVenta, productoId: "a", delta: -2, revertido: false })
+
+    await inventario.aplicarMovimientos(tx, {
+      actorId: "admin-1",
+      variaciones: [{ productoId: "a", delta: 2, origen: lineaVenta, reversaDe: original.id }],
+    })
+    const [revertido] = await inventario.consultarMovimientosDeOrigen(tx, [lineaVenta])
+    expect(revertido.revertido).toBe(true)
+    expect((await inventario.consultarDisponibilidad(["a"]))[0].saldo).toBe(5)
+
+    const repetida = await capturarError(
+      inventario.aplicarMovimientos(tx, {
+        actorId: "admin-1",
+        variaciones: [{ productoId: "a", delta: 2, origen: lineaVenta, reversaDe: original.id }],
+      }),
+    )
+    expect(repetida).toMatchObject({ motivo: "YA_REVERTIDO" })
+
+    const otroOrigen = await capturarError(
+      inventario.aplicarMovimientos(tx, {
+        actorId: "admin-1",
+        variaciones: [{ productoId: "a", delta: 2, origen: { tipo: "VENTA", ventaLineaId: "linea-2" }, reversaDe: original.id }],
+      }),
+    )
+    expect(otroOrigen).toMatchObject({ motivo: "ORIGEN_DISTINTO" })
+  })
+
   describe("reversas", () => {
     it("revierte un movimiento una sola vez y conserva el origen", async () => {
       const inventario = crearInventarioEnMemoria()
@@ -115,7 +152,7 @@ describe("contrato de inventario (doble en memoria)", () => {
       await inventario.aplicarMovimientos(tx, { actorId: "a", variaciones: [{ ...variacion("p1", 4), reversaDe: movimientos[0].id }] })
 
       expect((await inventario.consultarDisponibilidad(["p1"]))[0].saldo).toBe(10)
-      expect(inventario.movimientos[1]).toMatchObject({ tipo: "REVERSA", reversaDe: movimientos[0].id, origenId: "ajuste-1" })
+      expect(inventario.movimientos[1]).toMatchObject({ tipo: "REVERSA", reversaDe: movimientos[0].id, origen: ajuste })
       const error = await capturarError(inventario.aplicarMovimientos(tx, { actorId: "a", variaciones: [{ ...variacion("p1", 4), reversaDe: movimientos[0].id }] }))
       expect(esErrorReversaInvalida(error) && error.motivo).toBe("YA_REVERTIDO")
     })
