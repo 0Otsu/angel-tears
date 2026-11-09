@@ -14,7 +14,7 @@ context: |
   El template no define requisitos. No ampliar MVP ni implementar funciones nuevas
   sin propuesta y evaluacion de fuentes. No carrito/pedidos/pagos/reservas, roles,
   multiadmin, clientes, sucursales, CMS general, ERP/contabilidad o IA.
-  Esta preparacion deja solo tres changes activos, sin ejecutar sus tareas.
+  Hay cuatro changes activos: los tres de Ronda 1 y implement-sales (Ventas, Emi).
 rules:
   proposal:
     - Indicar owner, ronda, alcance, fuera de alcance, dependencias y trazabilidad.

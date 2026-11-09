@@ -34,6 +34,8 @@ Actualización técnica del 09/11/2026: Claudio integró en `main` el contrato d
 
 ## Open Questions
 
+Resueltas de forma provisoria el 09/11/2026 para poder implementar, a confirmar con el equipo y los docentes: el precio de la línea es el vigente del Producto y no se edita, la anulación no pide motivo, no se registran medios de pago y no hay límites de negocio de líneas, cantidades, importes ni fechas. Detalle en la [bitácora](../../../docs/features/VENTAS.md). Texto original de las preguntas:
+
 Precio de la línea: ¿siempre el actual del Producto o la Administradora puede indicar otro (el diagrama de actividad del CU-15 habla de «precios aplicados»)? ¿La anulación pide un motivo? Se asume que no se registran medios de pago, a confirmar. Límites de líneas, cantidades, importes y fechas (futuras o antiguas) no están definidos y no se inventan. Quién escribe las reversas y el CHECK de origen, y el número de migración, se resuelven con Claudio. SRS/RUP pendientes de formalización.
 
 ## Workflow

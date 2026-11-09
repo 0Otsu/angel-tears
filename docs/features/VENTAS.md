@@ -50,6 +50,41 @@ Verificado sobre `7f5eea8` más este cambio:
   - 9 del origen VENTA (`lib/modulos/ventas/inventario-venta.integracion.test.ts`): descuento con la línea como origen, CHECK de origen único e índice de original único, lectura de originales y marca de revertidos, anulación de varias líneas con reversas ligadas, segunda anulación rechazada, tres anulaciones simultáneas con una sola aplicada, origen distinto rechazado, stock insuficiente sin efectos parciales y rollback.
 - Lint (sin advertencias), typecheck, `db:check` y `openspec validate --all --strict` en verde.
 
-## Próximos pasos
+## 09/11/2026: Ventas completo (registro, consulta, anulación y pantalla)
 
-Contrato de Ventas y puertos con dobles (1.2), reglas puras (1.3), registrar con transacción e idempotencia (3.x), consultar y anular (4.x) y la UI (5.x).
+### Qué se hizo
+
+- **Reglas puras** (`reglas-venta.ts`, 1.3): valida fecha real, comprador opcional (vacío es Consumidor Final), líneas y cantidades; arma las líneas con nombre y precio del Producto y el total en centavos con la aritmética de `compras/dinero.ts` (reutilizada sin modificar). Las líneas repetidas del mismo producto no se fusionan.
+- **Contrato** (`contrato.ts`, 1.2): tipos públicos y el puerto `LeerProductosVendibles`. Ventas depende de Inventario por `ContratoInventario` y de Producto por su lectura interna (`consultarProductosInternos`, ocultos incluidos).
+- **Registro** (`registro.ts`, 3.1–3.3): en una sola transacción inserta cabecera y líneas y llama a `aplicarMovimientos` con cada línea como origen. Si falta stock se revierte todo y se informa el disponible (B6). La misma clave con el mismo contenido recupera lo ya confirmado, sin leer precios; con otro contenido es conflicto. La huella no incluye precios.
+- **Anulación** (`anulacion.ts`, 4.2–4.3): bloquea la cabecera, pide a Inventario los originales de las líneas (`consultarMovimientosDeOrigen`) y aplica las variaciones opuestas con `reversaDe`; el estado pasa a ANULADA con fecha y actor. Una segunda anulación devuelve `ya_anulada` sin reintegrar.
+- **Consulta** (`lectura.ts`, 4.1): listado por rango inclusivo de fecha de operación (nunca por fecha de carga) y estado, con límite y aviso de que hay más; detalle con líneas; y `resumirVentas`, que suma solo las vigentes y cuenta las anuladas aparte (insumo para Dashboard y Finanzas).
+- **Administración con sesión** (`administracion.ts`, 5.1–5.2): cada comando exige la Administradora antes de cualquier efecto (`conAdministradora`); las lecturas lanzan `ErrorSesionRequerida`. Server Actions en `app/admin/(panel)/ventas/acciones.ts`, que refrescan stock, Home, catálogo y PDP solo después del commit y solo si la venta es nueva.
+- **Pantalla** `/admin/ventas`: listado con filtros GET (sirven sin JavaScript), diálogo de registro multilínea con total estimado, diálogo de detalle con anulación en dos pasos y estados vacío, filtrado vacío y error. Se quitó el pie de prototipo de esa ruta (`estructura-admin.tsx`).
+
+### Decisiones tomadas por defecto (a confirmar)
+
+Las preguntas abiertas del diseño se resolvieron con el criterio mínimo, sin inventar requisitos:
+
+- El precio de cada línea es el vigente del Producto y la interfaz no lo edita.
+- La anulación no pide motivo.
+- No se registran medios de pago.
+- Sin límites de líneas, cantidades, importes ni fechas (futuras o antiguas): solo se exige una fecha real y cantidades enteras positivas. El listado sí tiene un límite técnico de 50 filas por defecto (máximo 200).
+- Una venta en un formulario con error de stock conserva todo; si el servidor rechaza la venta sin guardarla, el siguiente envío usa una clave nueva; ante un fallo técnico se reintenta con la misma clave para no duplicar.
+
+### Pruebas
+
+Sobre `7f5eea8` más este cambio:
+
+- Unitarias y de componentes: 536 (nuevas: 14 de reglas, 5 de presentación, 9 de Server Actions y 15 de la pantalla con RTL, que cubren conservación del formulario ante stock insuficiente, reintento con la misma clave, foco y `aria-describedby` en errores por línea y confirmación de anulación).
+- Integración: 280 contra PostgreSQL real. Las de Ventas son 59: schema (10), origen VENTA en Inventario (9), registro (16, con tres envíos simultáneos de la misma solicitud, dos ventas de la última unidad y ventas cruzadas sin deadlock), anulación y consulta (14, con tres anulaciones simultáneas y anulación junto con una venta del mismo producto) y administración con sesión (10).
+- E2E real con Auth y la base de pruebas (`e2e/ventas-real.spec.ts`), en escritorio y móvil: stock insuficiente conserva el formulario, venta de un producto oculto, descuento de stock, detalle, anulación con reintegro, filtro por estado, sin scroll horizontal y axe sin violaciones (listado y los dos diálogos).
+- Lint (sin advertencias), typecheck, `db:check`, `openspec validate --all --strict` y `pnpm build` (lo hace Playwright al levantar el servidor) en verde.
+- Cierres inesperados de procesos de Windows (`0xC0000409`) en integración: se reintentó y pasó completo.
+- Fallos ajenos en la corrida E2E completa: `proveedores-real.spec.ts` (2) y `formularios-ux.spec.ts` (1) fallan por selectores que coinciden con dos elementos (`El nombre es obligatorio.` y `Categoría`) en pantallas de Proveedores y Productos. No se tocaron esos archivos y no se verificó si ya fallaban en `main`.
+
+### Pendiente
+
+- Revisión de Claudio: orden de migraciones frente a Compras (`0004`) y el uso de su contrato de reversas.
+- Contrato de lectura para Dashboard y Finanzas: `resumirVentas` está implementado en el módulo, pero Resumen y Finanzas todavía no lo consumen (es trabajo de quien los integre).
+- Integrar a `main` y avisar al equipo (6.3). Sin push hasta que Emi lo indique.
