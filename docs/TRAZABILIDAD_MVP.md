@@ -23,9 +23,9 @@ Clasificación de análisis solicitada: **A** cobertura candidata por RF/RNF exi
 | RF-09 Registrar proveedor | Proveedores, Claudio R1 | implement-inventory-suppliers-purchases | Nombre requerido, contactos opcionales. UI real en `/admin/proveedores` con Server Action autorizada. |
 | RF-10 Modificar proveedor | Proveedores, Claudio R1 | implement-inventory-suppliers-purchases | Historia preservada e inactivación según gap. Edición con control de versión; sin baja (no aprobada). |
 | RF-11 Consultar proveedores | Proveedores, Claudio R1 | implement-inventory-suppliers-purchases | Lectura real con activo/inactivo y vacío/error diferenciados. Implementado en `/admin/proveedores`. |
-| RF-12 Registrar compra | Compras, Claudio R1 | implement-inventory-suppliers-purchases | Cabecera/líneas/importes/movimientos en una tx. |
-| RF-13 Consultar compras | Compras, Claudio R1 | implement-inventory-suppliers-purchases | Fecha real, costos/supplier snapshot y estado histórico. |
-| RF-14 Anular compra | Compras, Claudio R1 | implement-inventory-suppliers-purchases | Reversión única, completa o rechazada por negativo. |
+| RF-12 Registrar compra | Compras, Claudio R1 | implement-inventory-suppliers-purchases | Cabecera/líneas/importes/movimientos en una tx. Implementado en `/admin/compras` con idempotencia por clave y huella. |
+| RF-13 Consultar compras | Compras, Claudio R1 | implement-inventory-suppliers-purchases | Fecha real, costos/supplier snapshot y estado histórico. Listado y detalle reales por fecha de operación y estado. |
+| RF-14 Anular compra | Compras, Claudio R1 | implement-inventory-suppliers-purchases | Reversión única, completa o rechazada por negativo. Implementado con reversas del contrato de Inventario y prueba de concurrencia. |
 | RF-15 Registrar venta | Ventas R2, Emi | implement-sales | Stock suficiente/oculto interno, múltiples líneas y precio histórico. Implementado en `/admin/ventas`: una transacción con cabecera, líneas y movimientos de stock; idempotencia por clave y huella. |
 | RF-16 Consultar ventas | Ventas R2, Emi | implement-sales | Historia y fechas reales; comprador opcional/Consumidor Final. Listado por fecha de operación y estado, detalle con líneas y resumen de vigentes para Dashboard/Finanzas. |
 | RF-17 Anular venta | Ventas R2, Emi | implement-sales | Estado/historia y reintegro único, con reversas del contrato de Inventario; la venta anulada se conserva. |

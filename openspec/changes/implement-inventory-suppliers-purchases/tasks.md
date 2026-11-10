@@ -30,11 +30,11 @@ ni se marcan tareas de Compras/aceptacion global. Evidencia: docs/features/INVEN
 
 ## 4. Compras
 
-- [ ] 4.1 Implementar cabecera/líneas/snapshots/fecha real y carga; probar múltiples líneas/importes exactos/proveedor opcional y documentar DTO.
-- [ ] 4.2 Confirmar compra en tx común con stock/movimientos/idempotencia; probar incremento único, fallo intermedio y reintento después de respuesta perdida.
-- [ ] 4.3 Implementar anulación completa bajo locks y estado; probar doble anulación y reversión bloqueada sin negativo ni efecto parcial.
-- [ ] 4.4 Probar anulación concurrente con decremento de stock y orden de locks; verificar invariantes reales de PostgreSQL y registrar evidencia.
-- [ ] 4.5 Integrar formulario/consulta/anulación sin edición de confirmadas; probar conservación de contexto, error de reversión y accesibilidad; documentar el flujo.
+- [x] 4.1 Implementar cabecera/líneas/snapshots/fecha real y carga; probar múltiples líneas/importes exactos/proveedor opcional y documentar DTO.
+- [x] 4.2 Confirmar compra en tx común con stock/movimientos/idempotencia; probar incremento único, fallo intermedio y reintento después de respuesta perdida.
+- [x] 4.3 Implementar anulación completa bajo locks y estado; probar doble anulación y reversión bloqueada sin negativo ni efecto parcial.
+- [x] 4.4 Probar anulación concurrente con decremento de stock y orden de locks; verificar invariantes reales de PostgreSQL y registrar evidencia.
+- [x] 4.5 Integrar formulario/consulta/anulación sin edición de confirmadas; probar conservación de contexto, error de reversión y accesibilidad; documentar el flujo.
 
 ## 5. Integración
 

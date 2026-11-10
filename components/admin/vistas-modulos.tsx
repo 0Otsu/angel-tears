@@ -1,7 +1,7 @@
 "use client"
 
 import { Settings } from "lucide-react"
-import { comprasDemo, ventasDemo, egresosDemo } from "@/lib/mock/admin"
+import { ventasDemo, egresosDemo } from "@/lib/mock/admin"
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
 import { TablaDemo } from "./tabla-demo"
 import { filasProductos, filasMovimientos } from "./filas-demo"
@@ -9,7 +9,6 @@ import { EncabezadoAdmin, AvisoDemo, PanelAdmin, EtiquetaEstado } from "./piezas
 
 const definiciones = {
   productos: { titulo: "Productos", descripcion: "Listado de accesorios y su visibilidad pública. Solo muestra visual.", columnas: ["Producto", "Categoría", "Precio mock", "Visibilidad"], filas: filasProductos },
-  compras: { titulo: "Compras", descripcion: "Historial mock de octubre. No registra compras ni modifica stock.", columnas: ["Referencia", "Fecha", "Detalle", "Importe", "Estado"], filas: filasMovimientos(comprasDemo) },
   ventas: { titulo: "Ventas", descripcion: "Historial mock de octubre, con ejemplos vigentes y anulados.", columnas: ["Referencia", "Fecha", "Detalle", "Importe", "Estado"], filas: filasMovimientos(ventasDemo) },
   egresos: { titulo: "Egresos", descripcion: "Egresos manuales mock de octubre. Las compras no se duplican aquí.", columnas: ["Referencia", "Fecha", "Detalle", "Importe", "Estado"], filas: filasMovimientos(egresosDemo) },
 }
