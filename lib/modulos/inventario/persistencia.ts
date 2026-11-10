@@ -32,15 +32,18 @@ function comoTransaccionBd(tx: TransaccionLlamador): TransaccionBd {
 // Unico punto que conoce las columnas de origen de movimiento_stock. Cada origen nuevo (compra,
 // venta) agrega su columna en su migracion y su caso aqui; una reversa repite las del original.
 function columnasDeOrigen(origen: OrigenMovimiento) {
-  return origen.tipo === "AJUSTE"
-    ? { ajusteId: origen.ajusteId, ventaLineaId: null }
-    : { ajusteId: null, ventaLineaId: origen.ventaLineaId }
+  const ninguna = { ajusteId: null, ventaLineaId: null, compraLineaId: null }
+  switch (origen.tipo) {
+    case "AJUSTE": return { ...ninguna, ajusteId: origen.ajusteId }
+    case "VENTA": return { ...ninguna, ventaLineaId: origen.ventaLineaId }
+    case "COMPRA": return { ...ninguna, compraLineaId: origen.compraLineaId }
+  }
 }
 
 function origenDeFila(fila: typeof movimientoStock.$inferSelect): OrigenMovimiento {
-  return fila.ventaLineaId
-    ? { tipo: "VENTA", ventaLineaId: fila.ventaLineaId }
-    : { tipo: "AJUSTE", ajusteId: fila.ajusteId! }
+  if (fila.compraLineaId) return { tipo: "COMPRA", compraLineaId: fila.compraLineaId }
+  if (fila.ventaLineaId) return { tipo: "VENTA", ventaLineaId: fila.ventaLineaId }
+  return { tipo: "AJUSTE", ajusteId: fila.ajusteId! }
 }
 
 function mismoOrigen(a: OrigenMovimiento, b: OrigenMovimiento): boolean {
@@ -206,10 +209,12 @@ export function crearContratoInventario(db: NodePgDatabase): ContratoInventario 
       if (origenes.length === 0) return []
       const ajusteIds = origenes.flatMap((o) => (o.tipo === "AJUSTE" ? [o.ajusteId] : []))
       const ventaLineaIds = origenes.flatMap((o) => (o.tipo === "VENTA" ? [o.ventaLineaId] : []))
+      const compraLineaIds = origenes.flatMap((o) => (o.tipo === "COMPRA" ? [o.compraLineaId] : []))
       // Un origen de cada tabla: se combinan con OR para una sola lectura ordenada.
       const porOrigen = or(
         ajusteIds.length ? inArray(movimientoStock.ajusteId, ajusteIds) : undefined,
         ventaLineaIds.length ? inArray(movimientoStock.ventaLineaId, ventaLineaIds) : undefined,
+        compraLineaIds.length ? inArray(movimientoStock.compraLineaId, compraLineaIds) : undefined,
       )
       const filas = await tx
         .select()
