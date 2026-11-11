@@ -148,6 +148,10 @@ histórico; no se deben aplicar sus mínimos individuales como política vigente
 | G3 | Anular conserva historial y excluye el egreso del resultado vigente. |
 | G4 | No editar egresos confirmados. Anular y registrar otro correctamente. |
 
+Confirmacion humana del 10/11/2026 para Egresos: el importe manual debe ser
+estrictamente mayor que cero. Se rechazan cero/negativos y mas de dos decimales
+antes de SQL, sin redondeo. No se extiende esta decision a Compras/Ventas.
+
 **Razón:** evitar doble conteo y conservar la historia de correcciones.
 
 **Consecuencias:** las consultas separan compras de egresos manuales y excluyen anulados. No se incorpora clasificación contable por inferencia.

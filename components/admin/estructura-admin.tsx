@@ -83,7 +83,7 @@ export function EstructuraAdmin({ children, nombre, email }: { children: ReactNo
         </div>
       </header>
       <main id="contenido-admin" tabIndex={-1} className="mx-auto max-w-[1440px] space-y-6 p-4 pb-10 outline-none lg:p-8">{area && <nav aria-label={`Navegación de ${area}`} className="flex flex-wrap gap-2 border-b border-border pb-4">{secundaria.map(item => <Link key={item.ruta} href={item.ruta} aria-current={ruta === item.ruta ? "page" : undefined} className={cn("inline-flex min-h-11 items-center rounded-xl px-4 text-sm focus-visible:outline-2 focus-visible:outline-primary", ruta === item.ruta ? "border border-primary/30 bg-primary/10 font-medium text-primary underline underline-offset-4" : "text-muted-foreground hover:bg-card")}>{item.nombre}</Link>)}</nav>}{children}</main>
-      {!productosPersistidos && !["/admin", "/admin/stock", "/admin/proveedores", "/admin/compras", "/admin/ventas"].includes(ruta) && <footer className="flex flex-wrap justify-between gap-2 border-t border-border/70 px-4 py-4 text-[10px] text-muted-foreground lg:px-8"><span>Angel Tears · Prototipo de administración</span><span>Datos de demostración · sin persistencia</span></footer>}
+      {!productosPersistidos && !["/admin", "/admin/stock", "/admin/proveedores", "/admin/compras", "/admin/ventas", "/admin/egresos"].includes(ruta) && <footer className="flex flex-wrap justify-between gap-2 border-t border-border/70 px-4 py-4 text-[10px] text-muted-foreground lg:px-8"><span>Angel Tears · Prototipo de administración</span><span>Datos de demostración · sin persistencia</span></footer>}
     </div>
   </div>
 }
