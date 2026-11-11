@@ -84,12 +84,6 @@ export const ventasDemo: MovimientoDemo[] = [
   { id: "V-101", fecha: "05/10/2026", detalle: "Consumidor Final · accesorios", importe: 56000, estado: "Vigente" },
   { id: "V-100", fecha: "02/10/2026", detalle: "Venta de muestra anulada", importe: 12000, estado: "Anulada" },
 ]
-export const comprasDemo: MovimientoDemo[] = [
-  { id: "C-044", fecha: "25/10/2026", detalle: "Proveedor A · accesorios", importe: 30000, estado: "Vigente" },
-  { id: "C-043", fecha: "18/10/2026", detalle: "Proveedor B · accesorios", importe: 36000, estado: "Vigente" },
-  { id: "C-042", fecha: "11/10/2026", detalle: "Proveedor A · accesorios", importe: 45000, estado: "Vigente" },
-  { id: "C-041", fecha: "04/10/2026", detalle: "Proveedor C · accesorios", importe: 31000, estado: "Vigente" },
-]
 export const egresosDemo: MovimientoDemo[] = [
   { id: "E-024", fecha: "27/10/2026", detalle: "Egreso manual de muestra D", importe: 9000, estado: "Vigente" },
   { id: "E-023", fecha: "20/10/2026", detalle: "Egreso manual de muestra C", importe: 9000, estado: "Vigente" },

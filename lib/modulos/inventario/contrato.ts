@@ -20,10 +20,15 @@ export type TransaccionLlamador = object
 export type OrigenMovimiento =
   | { readonly tipo: "AJUSTE"; readonly ajusteId: string }
   | { readonly tipo: "VENTA"; readonly ventaLineaId: string }
+  | { readonly tipo: "COMPRA"; readonly compraLineaId: string }
 
 /** Identificador estable y comparable de un origen, util para agrupar o comparar sin conocer su tabla. */
 export function identificadorDeOrigen(origen: OrigenMovimiento): string {
-  return origen.tipo === "AJUSTE" ? `AJUSTE:${origen.ajusteId}` : `VENTA:${origen.ventaLineaId}`
+  switch (origen.tipo) {
+    case "AJUSTE": return `AJUSTE:${origen.ajusteId}`
+    case "VENTA": return `VENTA:${origen.ventaLineaId}`
+    case "COMPRA": return `COMPRA:${origen.compraLineaId}`
+  }
 }
 
 export type VariacionConOrigen = VariacionStock & {

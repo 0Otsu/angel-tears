@@ -17,6 +17,7 @@ import {
 } from "drizzle-orm/pg-core"
 import { user } from "@/lib/infraestructura/esquemas/auth"
 import { producto } from "@/lib/infraestructura/esquemas/producto"
+import { compraLinea } from "@/lib/infraestructura/esquemas/compra"
 import { ventaLinea } from "@/lib/infraestructura/esquemas/venta"
 
 const fecha = (nombre: string) => timestamp(nombre, { withTimezone: true })
@@ -79,11 +80,12 @@ export const movimientoStock = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "restrict" }),
     tipo: text("tipo").notNull().default("ORIGINAL"),
-    // Origen del movimiento: exactamente uno entre ajuste y linea de venta. Los demas origenes
+    // Origen del movimiento: exactamente uno entre ajuste, linea de venta y linea de compra. Los demas origenes
     // se suman con su tabla y se amplia el CHECK de "exactamente un origen" en esa migracion.
     // Una reversa conserva el mismo origen que el movimiento original.
     ajusteId: uuid("ajuste_id").references(() => ajusteStock.id, { onDelete: "restrict" }),
     ventaLineaId: uuid("venta_linea_id").references(() => ventaLinea.id, { onDelete: "restrict" }),
+    compraLineaId: uuid("compra_linea_id").references(() => compraLinea.id, { onDelete: "restrict" }),
     // Una reversa apunta al movimiento que revierte, y cada movimiento se revierte una sola vez.
     reversaDe: uuid("reversa_de")
       .references((): AnyPgColumn => movimientoStock.id, { onDelete: "restrict" })
@@ -101,7 +103,13 @@ export const movimientoStock = pgTable(
     uniqueIndex("movimiento_stock_venta_linea_tipo_unico")
       .on(tabla.ventaLineaId, tabla.tipo)
       .where(sql`${tabla.ventaLineaId} IS NOT NULL`),
-    check("movimiento_stock_origen_unico", sql`num_nonnulls(${tabla.ajusteId}, ${tabla.ventaLineaId}) = 1`),
+    uniqueIndex("movimiento_stock_compra_linea_tipo_unico")
+      .on(tabla.compraLineaId, tabla.tipo)
+      .where(sql`${tabla.compraLineaId} IS NOT NULL`),
+    check(
+      "movimiento_stock_origen_unico",
+      sql`num_nonnulls(${tabla.ajusteId}, ${tabla.ventaLineaId}, ${tabla.compraLineaId}) = 1`,
+    ),
     check(
       "movimiento_stock_reversa_coherente",
       sql`(${tabla.tipo} = 'REVERSA') = (${tabla.reversaDe} IS NOT NULL)`,

@@ -36,6 +36,13 @@
       "when": 1793661334509,
       "tag": "0004_ventas-base",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794353631782,
+      "tag": "0005_compras-base",
+      "breakpoints": true
     }
   ]
 }

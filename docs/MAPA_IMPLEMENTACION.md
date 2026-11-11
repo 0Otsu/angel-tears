@@ -973,7 +973,7 @@ El backlog no autoriza comenzar ninguno de estos épicos. Actualización del 19/
 | Productos | 🟣 UI/MOCK | Augusto R1, Producto único/categorías/imagen/slug/visibilidad/destacado; no borrar historia. |
 | Stock | 🟣 UI/MOCK | Claudio R1, saldo/mínimo `<=`/ajustes/historia/contrato transaccional; no saldo duplicado en Producto. |
 | Proveedores | ✅ UI REAL | Claudio R1: alta, edición, inactivación/reactivación y listado reales en `/admin/proveedores`; baja sin historia pendiente (no habilitada). |
-| Compras | 🟣 UI/MOCK | Claudio R1, múltiples líneas/costos históricos/tx/reversión única sin negativos. |
+| Compras | ✅ UI REAL | Claudio R1: registro multilínea con costos históricos y proveedor opcional, confirmación transaccional con idempotencia, anulación única sin negativos y listado/detalle reales en `/admin/compras`. |
 | Ventas | 🟣 UI/MOCK | R2 sin owner, diseño completo en blueprint; sin change activo. |
 | Finanzas — Egresos | 🟣 UI/MOCK en ruta actual `/admin/egresos` | R2; agrupar navegación bajo Finanzas, conservar historia y no duplicar compras. |
 | Finanzas — Resultado económico | 🟣 UI/MOCK en `/admin/reportes` y Resumen | R2; fórmula/fechas reales y lectura consistente, sin Reportes paralelo ni tabla de resultado. |
