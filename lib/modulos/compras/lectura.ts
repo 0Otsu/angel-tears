@@ -1,3 +1,4 @@
+import { validarPaginacion, paginar } from "@/lib/paginacion"
 import { and, asc, desc, eq, gte, lte, sql, type SQL } from "drizzle-orm"
 import type { NodePgDatabase } from "drizzle-orm/node-postgres"
 import { compra, compraLinea } from "@/lib/infraestructura/esquemas/compra"
@@ -19,8 +20,6 @@ import { esFechaOperacionValida } from "@/lib/modulos/compras/reglas-compra"
 export type Ejecutor = Pick<NodePgDatabase, "select">
 
 const ESTADOS: readonly EstadoCompra[] = ["CONFIRMADA", "ANULADA"]
-const LIMITE_POR_DEFECTO = 50
-const LIMITE_MAXIMO = 200
 
 export async function cargarCompra(ejecutor: Ejecutor, cabecera: typeof compra.$inferSelect): Promise<CompraDetalle> {
   const lineas = await ejecutor
@@ -77,26 +76,22 @@ function condicionesDeFecha({ desde, hasta }: Fechas): SQL[] {
   ]
 }
 
-function aLimite(valor: unknown): number | null {
-  if (vacio(valor)) return LIMITE_POR_DEFECTO
-  const numero = typeof valor === "string" && /^\d{1,4}$/.test(valor.trim()) ? Number(valor.trim()) : valor
-  return typeof numero === "number" && Number.isInteger(numero) && numero >= 1 && numero <= LIMITE_MAXIMO ? numero : null
-}
-
 /** Mas recientes primero por fecha de operacion (no por fecha de carga). Incluye las anuladas. */
 export async function listarCompras(db: Ejecutor, filtro: FiltroCompras = {}): Promise<ResultadoListadoCompras> {
-  const errores: Partial<Record<"estado" | "desde" | "hasta" | "limite", string>> = {}
+  const errores: Partial<Record<"estado" | "desde" | "hasta" | "limite" | "pagina", string>> = {}
   const rango = evaluarRango(filtro)
   if (!rango.ok) Object.assign(errores, rango.errores)
   if (!vacio(filtro.estado) && !ESTADOS.includes(filtro.estado as EstadoCompra)) errores.estado = "Elegí un estado válido."
-  const limite = aLimite(filtro.limite)
-  if (limite === null) errores.limite = `Ingresá un límite entre 1 y ${LIMITE_MAXIMO}.`
-  if (!rango.ok || limite === null || errores.estado) return { estado: "datos_invalidos", errores }
-
+  const entrada = validarPaginacion(filtro)
+  if (!entrada.success) for (const e of entrada.error.issues) errores[e.path[0] as "pagina" | "limite"] = e.message
+  if (!rango.ok || !entrada.success || Object.keys(errores).length) return { estado: "datos_invalidos", errores }
+  const { limite, pagina } = entrada.data
   const condiciones = [
     ...condicionesDeFecha(rango.fechas),
     ...(vacio(filtro.estado) ? [] : [eq(compra.estado, filtro.estado as EstadoCompra)]),
   ]
+  const [conteo] = await db.select({ total: sql<number>`count(*)::int` }).from(compra).where(and(...condiciones))
+  const paginacion = paginar(conteo.total, pagina, limite)
   const filas = await db
     .select({
       id: compra.id,
@@ -111,13 +106,14 @@ export async function listarCompras(db: Ejecutor, filtro: FiltroCompras = {}): P
     })
     .from(compra)
     .where(and(...condiciones))
-    .orderBy(desc(compra.fechaOperacion), desc(compra.creadoEn), desc(compra.id))
-    // Una fila de mas indica si hay otra pagina sin contar toda la tabla.
-    .limit(limite + 1)
+    .orderBy(desc(compra.fechaOperacion), desc(compra.id))
+    // Solo se transfieren las filas de la pagina; el total se calcula en PostgreSQL.
+    .limit(limite).offset((paginacion.pagina - 1) * limite)
 
   return {
     estado: "ok",
-    hayMas: filas.length > limite,
+    hayMas: paginacion.pagina < paginacion.paginas,
+    paginacion,
     compras: filas.slice(0, limite).map((f) => ({
       ...f,
       estado: f.estado as EstadoCompra,

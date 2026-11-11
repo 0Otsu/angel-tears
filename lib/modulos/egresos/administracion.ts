@@ -1,5 +1,6 @@
 import "server-only"
-import { and, desc, eq } from "drizzle-orm"
+import { and, desc, eq, sql } from "drizzle-orm"
+import { paginar } from "@/lib/paginacion"
 import type { NodePgDatabase } from "drizzle-orm/node-postgres"
 import { z } from "zod"
 import { egreso } from "@/lib/infraestructura/esquemas/egreso"
@@ -61,9 +62,14 @@ export function crearAdministracionEgresos({ db, exigir }: { db: NodePgDatabase;
     const p = filtroEgresos.safeParse(filtro)
     if (!p.success) return { estado: "datos_invalidos", errores: erroresPorCampo(p.error) }
     const f = p.data
-    const filas = await db.select().from(egreso).where(and(...condicionesFecha(f), ...(f.estado ? [eq(egreso.estado, f.estado)] : [])))
-      .orderBy(desc(egreso.fechaOperacion), desc(egreso.creadoEn), desc(egreso.id)).limit(f.limite + 1)
-    return { estado: "ok", egresos: filas.slice(0, f.limite).map(detalle), hayMas: filas.length > f.limite }
+    return db.transaction(async tx => {
+      const condiciones = and(...condicionesFecha(f), ...(f.estado ? [eq(egreso.estado, f.estado)] : []))
+      const [conteo] = await tx.select({ total: sql<number>`count(*)::int` }).from(egreso).where(condiciones)
+      const paginacion = paginar(conteo.total, f.pagina, f.limite)
+      const filas = await tx.select().from(egreso).where(condiciones)
+        .orderBy(desc(egreso.fechaOperacion), desc(egreso.id)).limit(f.limite).offset((paginacion.pagina - 1) * f.limite)
+      return { estado: "ok", egresos: filas.map(detalle), hayMas: paginacion.pagina < paginacion.paginas, paginacion }
+    }, { isolationLevel: "repeatable read", accessMode: "read only" })
   }
   async function resumir(headers: Headers, filtro: Pick<FiltroEgresos, "desde" | "hasta"> = {}): Promise<ResultadoResumen> {
     await exigir(headers)

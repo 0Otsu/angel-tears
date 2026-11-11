@@ -1,3 +1,4 @@
+import type { Paginacion } from "@/lib/paginacion"
 // Tipos publicos de Compras (change implement-inventory-suppliers-purchases, 4.x). Puros: los
 // comparten el servidor y los componentes cliente sin arrastrar base de datos. Compras depende de
 // otros modulos solo por sus contratos: `ContratoInventario` (aplicarMovimientos,
@@ -56,11 +57,12 @@ export type FiltroCompras = {
   readonly desde?: unknown
   readonly hasta?: unknown
   readonly limite?: unknown
+  readonly pagina?: unknown
 }
 
 export type ResultadoListadoCompras =
-  | { estado: "ok"; compras: readonly ResumenCompra[]; hayMas: boolean }
-  | { estado: "datos_invalidos"; errores: Partial<Record<"estado" | "desde" | "hasta" | "limite", string>> }
+  | { estado: "ok"; compras: readonly ResumenCompra[]; hayMas: boolean; paginacion?: Paginacion }
+  | { estado: "datos_invalidos"; errores: Partial<Record<"estado" | "desde" | "hasta" | "limite" | "pagina", string>> }
 
 export type ResultadoDetalleCompra =
   | { estado: "ok"; compra: CompraDetalle }

@@ -236,7 +236,7 @@ describe("anulacion y consulta de ventas sobre PostgreSQL", () => {
     })
 
     it("un estado vacio muestra el listado sin ventas como estado vacio, no como error", async () => {
-      expect(await listarVentas(db())).toEqual({ estado: "ok", ventas: [], hayMas: false })
+      expect(await listarVentas(db())).toEqual({ estado: "ok", ventas: [], hayMas: false, paginacion: { pagina: 1, porPagina: 25, total: 0, paginas: 1 } })
     })
 
     it("pagina con limite e indica si hay mas", async () => {

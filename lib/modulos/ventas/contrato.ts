@@ -1,3 +1,4 @@
+import type { Paginacion } from "@/lib/paginacion"
 // Tipos publicos de Ventas (change implement-sales, 1.2). Puros: los comparten el servidor y los
 // componentes cliente sin arrastrar base de datos. Ventas depende de otros modulos solo por sus
 // contratos: `ContratoInventario` (aplicarMovimientos, consultarMovimientosDeOrigen) y la lectura
@@ -54,11 +55,12 @@ export type FiltroVentas = {
   readonly desde?: unknown
   readonly hasta?: unknown
   readonly limite?: unknown
+  readonly pagina?: unknown
 }
 
 export type ResultadoListadoVentas =
-  | { estado: "ok"; ventas: readonly ResumenVenta[]; hayMas: boolean }
-  | { estado: "datos_invalidos"; errores: Partial<Record<"estado" | "desde" | "hasta" | "limite", string>> }
+  | { estado: "ok"; ventas: readonly ResumenVenta[]; hayMas: boolean; paginacion?: Paginacion }
+  | { estado: "datos_invalidos"; errores: Partial<Record<"estado" | "desde" | "hasta" | "limite" | "pagina", string>> }
 
 export type ResultadoDetalleVenta =
   | { estado: "ok"; venta: VentaDetalle }

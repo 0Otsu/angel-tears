@@ -1,4 +1,5 @@
 import { z } from "zod"
+import { limiteListado, paginaListado } from "@/lib/paginacion"
 import { centavosADecimal, decimalACentavos } from "@/lib/modulos/compras/dinero"
 
 // PostgreSQL no admite anio cero, aunque forme parte del formato ISO extendido.
@@ -21,7 +22,8 @@ export const filtroEgresos = z.object({
   desde: z.union([fecha, z.literal(""), z.null()]).optional().transform(v => v || null),
   hasta: z.union([fecha, z.literal(""), z.null()]).optional().transform(v => v || null),
   estado: z.enum(["CONFIRMADO", "ANULADO", ""], "Elegí un estado válido.").optional(),
-  limite: z.preprocess(v => typeof v === "string" && /^\d{1,3}$/.test(v) ? Number(v) : v, z.number().int().min(1).max(200).default(50)),
+  limite: limiteListado,
+  pagina: paginaListado,
 }).refine(f => !f.desde || !f.hasta || f.desde <= f.hasta, { path: ["hasta"], message: "La fecha final no puede ser anterior a la inicial." })
 
 export function erroresPorCampo(error: z.ZodError) {

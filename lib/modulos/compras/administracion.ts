@@ -117,7 +117,7 @@ export function crearAdministracionCompras(dependencias: DependenciasAdministrac
   // Lecturas para paginas y Dashboard: sin sesion lanzan ErrorSesionRequerida, como Inventario.
   async function listar(encabezados: Headers, filtro: FiltroCompras = {}): Promise<ResultadoListadoCompras> {
     await exigir(encabezados)
-    return listarCompras(db, filtro)
+    return db.transaction(tx => listarCompras(tx, filtro), { isolationLevel: "repeatable read", accessMode: "read only" })
   }
 
   async function resumir(encabezados: Headers, filtro: Pick<FiltroCompras, "desde" | "hasta"> = {}): Promise<ResultadoResumenCompras> {
