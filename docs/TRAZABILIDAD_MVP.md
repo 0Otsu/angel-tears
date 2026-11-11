@@ -1,5 +1,12 @@
 # Trazabilidad y sincronización SRS/RUP del MVP
 
+**Actualizacion 10/11/2026 (Egresos):** el responsable confirma vigentes las fuentes
+canonicas externas [SRS](https://docs.google.com/document/d/1SugCvtS4De8LImkAEiis5pGWY8Eg99TgWIXzBWMS72w/edit)
+y [RUP](https://docs.google.com/document/d/1IrhOgqJVge5cLLQkOo09Rq-L1NjrH7yjcF2UP18UvCQ/edit).
+RF-18/19/20 fueron contrastados para esta contribucion; evidencia en
+[Egresos](features/EGRESOS.md). Las menciones historicas a fuentes no versionadas
+no significan ausencia de SRS vigente ni certifican cobertura global del proyecto.
+
 **19/10/2026.** Estado: referencia de planificación suministrada por el responsable; SRS/RUP canónicos aún no están versionados. No certifica cobertura ni crea identificadores RF/RNF/CU nuevos. Los RF-01..21 siguientes fueron provistos expresamente en la tarea de arquitectura, no inferidos de la UI. Antes de aceptación académica se deben contrastar texto, versión y criterios con la fuente corregida.
 
 ## 1. Fuentes y clasificación
@@ -29,9 +36,9 @@ Clasificación de análisis solicitada: **A** cobertura candidata por RF/RNF exi
 | RF-15 Registrar venta | Ventas R2, Emi | implement-sales | Stock suficiente/oculto interno, múltiples líneas y precio histórico. Implementado en `/admin/ventas`: una transacción con cabecera, líneas y movimientos de stock; idempotencia por clave y huella. |
 | RF-16 Consultar ventas | Ventas R2, Emi | implement-sales | Historia y fechas reales; comprador opcional/Consumidor Final. Listado por fecha de operación y estado, detalle con líneas y resumen de vigentes para Dashboard/Finanzas. |
 | RF-17 Anular venta | Ventas R2, Emi | implement-sales | Estado/historia y reintegro único, con reversas del contrato de Inventario; la venta anulada se conserva. |
-| RF-18 Registrar egreso | Finanzas/Egresos R2 | Roadmap | Concepto/importe/fecha, sin duplicar compra. |
-| RF-19 Consultar egresos | Finanzas/Egresos R2 | Roadmap | Vigentes/anulados y período correcto. |
-| RF-20 Anular egreso | Finanzas/Egresos R2 | Roadmap | Historia y exclusión, sin doble anulación. |
+| RF-18 Registrar egreso | Egresos R2 / Augusto | implement-manual-expenses | Registro manual exacto e idempotente; evidencia en features/EGRESOS.md, pendiente integracion. |
+| RF-19 Consultar egresos | Egresos R2 / Augusto | implement-manual-expenses | Fuente manual por periodo/estado y resumen; composicion con Compras en Finanzas queda para la siguiente contribucion. |
+| RF-20 Anular egreso | Egresos R2 / Augusto | implement-manual-expenses | Anulacion unica e historia, excluido de totales vigentes; pendiente integracion. |
 | RF-21 Consultar resultado económico aproximado | Finanzas R2 | Roadmap | Fórmula con vigentes, ARS, precisión y fechaOperacion. |
 
 RNF temáticos aportados: acceso restringido, protección de información, separación público/privado, consistencia, conservación ante error, historial, mensajes comprensibles, disponibilidad pública, acceso web, PC/mobile y contenido indexable. Relacionarlos con controles/pruebas de [SEGURIDAD](SEGURIDAD.md), [TESTING](TESTING.md) y blueprint; no asignar números ni métricas no recibidas.
