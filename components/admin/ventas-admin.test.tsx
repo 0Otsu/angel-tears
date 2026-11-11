@@ -68,11 +68,11 @@ describe("listado de ventas", () => {
     expect(screen.queryByRole("button", { name: "Registrar venta" })).toBeNull()
   })
 
-  it("el filtro es un formulario GET con los valores actuales y muestra sus errores accesibles", () => {
+  it("el filtro automatico conserva valores y muestra errores accesibles sin boton Filtrar", () => {
     render(<VentasAdmin productos={productos} hayMas={false} ventas={[]} filtros={{ estado: "ANULADA", desde: "2026-11-01", hasta: "ayer" }} erroresFiltro={{ hasta: "Ingresá una fecha válida." }} />)
 
-    const formulario = screen.getByRole("search", { name: "Filtrar ventas" })
-    expect(formulario.getAttribute("method")).toBe("get")
+    expect(screen.getByRole("search", { name: "Filtrar operaciones" })).toBeTruthy()
+    expect(screen.queryByRole("button", { name: "Filtrar" })).toBeNull()
     expect((screen.getByLabelText("Estado") as HTMLSelectElement).value).toBe("ANULADA")
     expect((screen.getByLabelText("Desde") as HTMLInputElement).value).toBe("2026-11-01")
     expect(screen.getByLabelText("Hasta").getAttribute("aria-invalid")).toBe("true")

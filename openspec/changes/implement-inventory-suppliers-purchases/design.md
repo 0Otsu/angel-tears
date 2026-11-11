@@ -33,4 +33,9 @@ Actualización técnica autorizada el 22/10/2026: Proveedor se incorpora junto c
 
 ## Open Questions
 
+Refinamiento autorizado del 11/11/2026: solo el listado de Compras agrega filtros
+automáticos y paginación SQL, reutilizando autorización/consulta existentes.
+Registro, anulación e Inventario permanecen intactos. Evidencia y límites en
+[Operaciones](../../../docs/features/OPERACIONES_LISTADOS.md).
+
 Baja de proveedor sin historial, límites de importes/fechas y restricciones de aplicación de saldo inicial no aprobadas. Resolver antes del comportamiento afectado; no bloquean proveedor activo ni ajuste explícito ya definido. SRS/RUP pendientes de formalización.

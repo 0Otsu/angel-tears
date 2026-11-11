@@ -2,6 +2,7 @@ import {fireEvent,render,screen,within} from "@testing-library/react"
 import {expect,it,vi} from "vitest"
 import {ResumenAdmin} from "./resumen-admin"
 import {StockAdmin} from "./stock-admin"
+import {ProductosAdmin} from "./productos-admin"
 import {filtroStock} from "@/lib/presentacion/inventario"
 import type {FilaStock} from "@/lib/modulos/inventario/administracion-contrato"
 vi.mock("next/navigation",()=>({useRouter:()=>({refresh:vi.fn()})}))
@@ -29,10 +30,10 @@ it.each([["Sin stock",["Producto 0"]],["Pocas unidades",["Producto 3"]],["Total 
  const {unmount}=render(<ResumenAdmin filas={filas}/>);
  const enlace=screen.getByRole("link",{name:new RegExp(`^${nombre}`)})
  const url=new URL(enlace.getAttribute("href")!,"http://localhost")
- expect(url.pathname).toBe("/admin/stock")
- const filtro=filtroStock(url.searchParams.get("estado"));unmount()
- render(<StockAdmin filas={filas} filtroInicial={filtro}/>);
- const tabla=screen.getByRole("table",{name:"Inventario por producto"})
+ expect(url.pathname).toBe("/admin/productos")
+ const filtro=filtroStock(url.searchParams.get("stock"));unmount()
+ render(<ProductosAdmin consulta={{categorias:[],productos:filas.map(f=>({id:f.productoId,nombre:f.nombre,slug:f.productoId,precio:"10.00",categoriaCodigo:"anillos",categoriaNombre:"Anillos",publicado:true,destacado:false,version:1,tieneImagen:false,imagen:null,descripcion:null,material:null,medida:null,color:null,cuidados:null}))}} existencias={Object.fromEntries(filas.map(f=>[f.productoId,f.saldo]))} filtroStockInicial={filtro}/>);
+ const tabla=screen.getByRole("table",{name:"Productos registrados"})
  expect(within(tabla).getAllByRole("heading").map(h=>h.textContent)).toEqual(esperados)
 })
 it("tarjetas filtran y priorizan sin stock/pocas, sin datos mock",()=>{

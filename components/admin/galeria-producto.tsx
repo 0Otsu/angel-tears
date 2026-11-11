@@ -1,4 +1,5 @@
 "use client"
+import { CargandoAdmin } from "./cargando-admin"
 import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { ImagenProducto as Image } from "@/components/ui/imagen-producto"
@@ -56,7 +57,7 @@ export function GaleriaProducto({ productoId, nombre, version, alGuardar, alCamb
   return <PanelAdmin className="space-y-4 p-5" aria-label={`Imagen de ${nombre}`}>
     {aviso && <AvisoProductoGuardado key={aviso.numero} texto={aviso.texto} />}
     <h2 className="text-base font-medium">Imágenes del producto</h2>
-    {cargando && <p role="status">Consultando imágenes…</p>}
+    {cargando && <CargandoAdmin tipo="imagenes" nombre="imágenes"/>}
     {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
     {bloqueado && <Button className="min-h-11" variant="outline" onClick={() => window.location.reload()}>Recargar datos</Button>}
     {datos && <>

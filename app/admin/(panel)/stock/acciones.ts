@@ -14,7 +14,8 @@ import type {
 
 // El saldo publico (hayStock) depende de este inventario: se refrescan Home, catalogo y PDP.
 function refrescarSuperficies() {
-  for (const ruta of ["/admin/stock", "/", "/catalogo"]) revalidatePath(ruta)
+  for (const ruta of ["/admin/stock", "/admin/productos", "/admin", "/", "/catalogo"]) revalidatePath(ruta)
+  revalidatePath("/admin/productos/[id]/editar", "page")
   revalidatePath("/catalogo/[slug]", "page")
 }
 

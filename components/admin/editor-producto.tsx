@@ -10,6 +10,8 @@ import { GaleriaProducto } from "./galeria-producto"
 import { AccionesProducto } from "./acciones-producto"
 import { CancelarProducto } from "./cancelar-producto"
 import { VistaPreviaProducto } from "./vista-previa-producto"
+import type { FilaStock } from "@/lib/modulos/inventario/administracion-contrato"
+import { ExistenciasProducto } from "./existencias-producto"
 
 type Paso = "datos" | "imagen" | "vista-previa"
 function PasosProducto({ paso, elegir, ocupado = false, persistido = false, imagen = false, borrador = false, imagenPendiente = false }: { paso: Paso; elegir?: (paso: Paso) => void; ocupado?: boolean; persistido?: boolean; imagen?: boolean; borrador?: boolean; imagenPendiente?: boolean }) {
@@ -26,7 +28,7 @@ export function NuevoProducto({ categorias }: { categorias: ConsultaAdministrati
     <FormularioProducto categorias={categorias} cancelar={() => router.push("/admin/productos")} alCambiarBorrador={setCambios} alCambiarOcupado={setOcupado} accionCancelar={<CancelarProducto hayCambios={cambios} ocupado={ocupado} />} alGuardar={id => router.push(`/admin/productos/${id}/editar?paso=imagen&alta=1`)} />
   </>
 }
-export function EditorProducto({ producto, categorias, pasoInicial = "datos", alta = false }: { producto: ProductoAdministrativo; categorias: ConsultaAdministrativa["categorias"]; pasoInicial?: Paso; alta?: boolean }) {
+export function EditorProducto({ producto, categorias, existencias, pasoInicial = "datos", alta = false }: { producto: ProductoAdministrativo; categorias: ConsultaAdministrativa["categorias"]; existencias?: FilaStock | null; pasoInicial?: Paso; alta?: boolean }) {
   // Solo confirmaciones propias actualizan el snapshot. Una edicion ajena exige recarga.
   const [actual, setActual] = useState(producto)
   const [paso, setPaso] = useState<Paso>(pasoInicial)
@@ -42,6 +44,7 @@ export function EditorProducto({ producto, categorias, pasoInicial = "datos", al
     <EncabezadoAdmin titulo={alta ? "Completar producto" : "Editar producto"} descripcion={actual.nombre} simple />
     <PasosProducto paso={paso} elegir={setPaso} ocupado={imagenOcupada || datosOcupados} persistido imagen={actual.tieneImagen} borrador={borradorDatos} imagenPendiente={borradorImagen} />
     <div hidden={paso !== "datos"}>
+      {existencias !== undefined && <div className="mb-5"><ExistenciasProducto fila={existencias} /></div>}
       <FormularioProducto producto={producto} versionPropia={actual.version} alCambiarOcupado={setDatosOcupados} alCambiarBorrador={setBorradorDatos} accionCancelar={cancelar()} categorias={categorias} cancelar={() => setPaso("vista-previa")} alGuardar={(_id, datos) => setActual(prev => ({ ...prev, ...datos, categoriaCodigo: categorias.find(c => c.codigo === datos.categoriaCodigo)?.codigo ?? prev.categoriaCodigo, categoriaNombre: categorias.find(c => c.codigo === datos.categoriaCodigo)?.nombre ?? prev.categoriaNombre, version: prev.version + 1 }))} />
     </div>
     <div hidden={paso !== "imagen"}>

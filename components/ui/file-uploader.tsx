@@ -1,4 +1,5 @@
 "use client"
+import { Spinner } from "./spinner"
 
 import { useEffect, useEffectEvent, useId, useReducer, useRef, type DragEvent } from "react"
 import { Upload, Check, ImageIcon } from "lucide-react"
@@ -159,7 +160,7 @@ export function FileUploader<T>({ initialFile, autoUpload = false, enCola = fals
   const mensajes: Record<FaseSubida, string> = { retrying: estado.porcentaje === null ? "Reintentando archivo…" : `Reenviando archivo: ${estado.porcentaje} %`, idle: "Todavía no seleccionaste un archivo.", "drag-over": "Soltá para cargar", selected: "Archivo seleccionado. Listo para subir.", validating: "Validando el archivo seleccionado…", uploading: estado.porcentaje === null ? "Subiendo archivo…" : `Enviando archivo: ${estado.porcentaje} %`, processing: textoProcesando, success: textoExito, error: "No se pudo completar la carga." }
   const estadoCola = estado.fase === "idle" ? initialFile ? "Pendiente" : "" : estado.fase === "selected" ? "Pendiente" : estado.fase === "validating" ? "Validando…" : estado.fase === "uploading" || estado.fase === "retrying" ? estado.porcentaje === null ? "Subiendo…" : `Subiendo ${estado.porcentaje} %` : estado.fase === "processing" ? "Procesando…" : estado.fase === "error" ? "Error" : estado.fase === "success" ? "Cargada" : mensajes[estado.fase]
   return <div data-estado={estado.fase} className="min-w-0 space-y-4">
-    <p role="status" aria-live="polite" className={compact && !ocupado && !enCola ? "sr-only" : "text-sm"}>{enCola ? estadoCola : estado.fase === "error" ? "" : mensajes[estado.fase]}</p>
+    <p role="status" aria-live="polite" className={compact && !ocupado && !enCola ? "sr-only" : "text-sm"}>{ocupado && <span className="mr-2 inline-flex align-middle"><Spinner/></span>}{enCola ? estadoCola : estado.fase === "error" ? "" : mensajes[estado.fase]}</p>
     {vigente && <div className="grid min-w-0 grid-cols-[4rem_minmax(0,1fr)] items-center gap-3 rounded-xl border border-primary/25 bg-primary/5 p-4 sm:flex sm:flex-wrap sm:gap-4">
       {/* Las previews son URLs locales o persistidas aportadas por el caller. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}

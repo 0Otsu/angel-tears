@@ -55,6 +55,16 @@ Esto no implementa el caso de uso administrativo/endpoint/UI de 2.1. La coordina
 
 ## Open Questions
 
+Refinamiento autorizado del 11/11/2026: integrar la presentación de existencias en
+Productos y edición, reutilizando lecturas/ajustes/historial de Inventario. Mantener
+saldo técnico 1:1, C0, contratos, transacciones e idempotencia. Eliminar la entrada
+principal Inventario, conservar /admin/stock mediante redirección autorizada y
+redirigir alertas a Productos. RF-04/05/06/08 y CU-01/02/03 canónicos consultados;
+propuesta y evidencia en docs/features/PRODUCTOS_EXISTENCIAS.md. No reabre tasks
+aceptadas ni cierra 5.1; no modifica SRS/RUP externos. Validado con pruebas
+focalizadas, PostgreSQL con rollback y recorrido real en preview. Aceptación visual
+humana e integración pendientes.
+
 Dominio final, credenciales/cuotas de Cloudinary y contenido comercial real. Política de precio cero/signos/límites se resuelve con responsable antes de cerrar su validación. No están pendientes modelo único, categorías iniciales, proveedor de imágenes, visibilidad o tratamiento de agotados/ocultos.
 
 ## P0 local — 20/10/2026

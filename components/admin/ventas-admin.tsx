@@ -1,4 +1,8 @@
 "use client"
+import { FiltrosOperacionesAdmin } from "./filtros-operaciones"
+import { PaginacionOperaciones } from "./paginacion-operaciones"
+import type { Paginacion } from "@/lib/paginacion"
+import type { FiltrosOperaciones, ErroresOperaciones } from "@/lib/presentacion/operaciones"
 import { useState } from "react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
@@ -7,23 +11,21 @@ import type { ResumenVenta } from "@/lib/modulos/ventas/contrato"
 import { nombreDeComprador } from "@/lib/modulos/ventas/reglas-venta"
 import { formatearPrecioPublico } from "@/lib/modulos/catalogo/presentacion"
 import { etiquetaEstadoVenta, formatearFechaOperacion } from "@/lib/presentacion/ventas"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { AvisoProductoGuardado } from "./aviso-producto-guardado"
 import { DialogoDetalleVenta } from "./dialogo-detalle-venta"
 import { DialogoRegistroVenta } from "./dialogo-registro-venta"
 import { EncabezadoAdmin, EtiquetaEstado, PanelAdmin } from "./piezas-admin"
 
-export type FiltrosVentas = { estado: string; desde: string; hasta: string }
+export type FiltrosVentas = FiltrosOperaciones
 
-export function VentasAdmin({ ventas, hayMas, productos, filtros, erroresFiltro = {}, errorCarga = false }: {
+export function VentasAdmin({ ventas, hayMas, paginacion, productos, filtros, erroresFiltro = {}, errorCarga = false }: {
   ventas: ResumenVenta[]
+  paginacion?: Paginacion
   hayMas: boolean
   productos: ProductoParaVender[]
   filtros: FiltrosVentas
-  erroresFiltro?: Partial<Record<"estado" | "desde" | "hasta" | "limite", string>>
+  erroresFiltro?: ErroresOperaciones
   errorCarga?: boolean
 }) {
   const [aviso, notificar] = useState<{ texto: string; numero: number } | null>(null)
@@ -35,18 +37,7 @@ export function VentasAdmin({ ventas, hayMas, productos, filtros, erroresFiltro 
     <EncabezadoAdmin titulo="Ventas" simple>{!errorCarga && <DialogoRegistroVenta productos={productos} alGuardar={avisar} />}</EncabezadoAdmin>
     {aviso && <AvisoProductoGuardado key={aviso.numero} texto={aviso.texto} />}
     {errorCarga ? <PanelAdmin className="space-y-3 p-5"><p role="alert">No pudimos consultar las ventas.</p><Link href="/admin/ventas" className="underline">Reintentar consulta</Link></PanelAdmin> : <>
-      <form method="get" action="/admin/ventas" role="search" aria-label="Filtrar ventas" className="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] md:items-start">
-        <div className="min-w-0 space-y-2"><Label htmlFor="ventas-estado">Estado</Label>
-          <select id="ventas-estado" name="estado" defaultValue={filtros.estado} aria-invalid={Boolean(erroresFiltro.estado)} aria-describedby={erroresFiltro.estado ? "error-ventas-estado" : undefined} className="h-11 w-full rounded-md border bg-background px-3 text-sm focus-visible:outline-2 focus-visible:outline-primary"><option value="">Todas</option><option value="CONFIRMADA">Confirmadas</option><option value="ANULADA">Anuladas</option></select>
-          {erroresFiltro.estado && <p id="error-ventas-estado" className="text-sm text-destructive">{erroresFiltro.estado}</p>}</div>
-        <div className="min-w-0 space-y-2"><Label htmlFor="ventas-desde">Desde</Label>
-          <Input id="ventas-desde" name="desde" type="date" defaultValue={filtros.desde} aria-invalid={Boolean(erroresFiltro.desde)} aria-describedby={erroresFiltro.desde ? "error-ventas-desde" : undefined} className="min-h-11" />
-          {erroresFiltro.desde && <p id="error-ventas-desde" className="text-sm text-destructive">{erroresFiltro.desde}</p>}</div>
-        <div className="min-w-0 space-y-2"><Label htmlFor="ventas-hasta">Hasta</Label>
-          <Input id="ventas-hasta" name="hasta" type="date" defaultValue={filtros.hasta} aria-invalid={Boolean(erroresFiltro.hasta)} aria-describedby={erroresFiltro.hasta ? "error-ventas-hasta" : undefined} className="min-h-11" />
-          {erroresFiltro.hasta && <p id="error-ventas-hasta" className="text-sm text-destructive">{erroresFiltro.hasta}</p>}</div>
-        <div className="flex flex-wrap items-center gap-3 md:pt-7"><Button type="submit" className="min-h-11">Filtrar</Button>{filtrado && <Link href="/admin/ventas" className="inline-flex min-h-11 items-center px-2 text-sm underline">Limpiar filtros</Link>}</div>
-      </form>
+      <FiltrosOperacionesAdmin ruta="/admin/ventas" filtros={filtros} errores={erroresFiltro} femenino />
 
       {hayErrores ? <PanelAdmin className="p-5"><p role="alert" className="text-sm text-destructive">Revisá los filtros para ver las ventas.</p></PanelAdmin>
         : ventas.length === 0 ? <PanelAdmin className="flex min-h-56 flex-col items-center justify-center gap-3 p-6 text-center">
@@ -55,7 +46,7 @@ export function VentasAdmin({ ventas, hayMas, productos, filtros, erroresFiltro 
             {filtrado && <Link href="/admin/ventas" className="inline-flex min-h-11 items-center text-sm underline">Limpiar filtros</Link>}
           </PanelAdmin>
         : <>
-          <p role="status" className="text-xs text-muted-foreground">{ventas.length} {ventas.length === 1 ? "venta" : "ventas"}{hayMas && " · hay más: acotá las fechas para verlas"}</p>
+          <p role="status" className="text-xs text-muted-foreground">{ventas.length} {ventas.length === 1 ? "venta" : "ventas"}{hayMas && !paginacion && " · hay más: acotá las fechas para verlas"}</p>
           <PanelAdmin className="border-0 bg-transparent max-md:shadow-none! md:border md:bg-background">
             <Table role="table" aria-label="Ventas" className="block table-fixed md:table">
               <TableHeader role="rowgroup" className="sr-only md:not-sr-only md:table-header-group"><TableRow role="row" className="bg-card/40 hover:bg-card/40">
@@ -78,5 +69,6 @@ export function VentasAdmin({ ventas, hayMas, productos, filtros, erroresFiltro 
           </PanelAdmin>
         </>}
     </>}
+    {!errorCarga && !Object.keys(erroresFiltro).length && paginacion && <PaginacionOperaciones ruta="/admin/ventas" filtros={filtros} datos={paginacion} />}
   </>
 }

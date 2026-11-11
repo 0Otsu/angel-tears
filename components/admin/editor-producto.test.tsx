@@ -85,7 +85,7 @@ it("publicar desde preview abre confirmacion unica, explica sin stock y retorna 
  const dialogo = await screen.findByRole("dialog", {name:"¡Producto publicado!"});
  expect(within(dialogo).getByText("Collar")).toBeTruthy();
  await within(dialogo).findByText(/todavía no aparecerá en el listado del catálogo/);
- expect(within(dialogo).getByRole("link",{name:"Ir a Inventario"}).getAttribute("href")).toBe("/admin/stock");
+ expect(within(dialogo).getByRole("link",{name:"Ver existencias"}).getAttribute("href")).toBe(`/admin/productos/${producto.id}/editar#existencias`);
  expect(within(dialogo).queryByRole("link",{name:/Ver producto/})).toBeNull();
  expect(screen.queryByText("Producto publicado.")).toBeNull();
  expect(navegar).not.toHaveBeenCalled();
@@ -128,7 +128,7 @@ it("con stock ofrece pagina publica del slug confirmado en otra pestana", async 
  const enlace=await within(dialogo).findByRole("link",{name:"Ver producto (abre otra pestaña)"});
  expect(enlace.getAttribute("href")).toBe("/catalogo/collar"); expect(enlace.getAttribute("target")).toBe("_blank");
  expect(enlace.getAttribute("rel")).toContain("noopener");
- expect(within(dialogo).queryByRole("link",{name:"Ir a Inventario"})).toBeNull();
+ expect(within(dialogo).queryByRole("link",{name:"Ver existencias"})).toBeNull();
  fireEvent.click(within(dialogo).getByRole("button",{name:"Cerrar confirmación"}));
  await waitFor(()=>expect(screen.queryByRole("dialog")).toBeNull());
 })
@@ -148,7 +148,7 @@ it("lectura posterior pendiente no inventa stock ni impide cerrar con foco acces
  await waitFor(()=>expect((screen.getByRole("button",{name:"Publicar producto"}) as HTMLButtonElement).disabled).toBe(false));
  fireEvent.click(screen.getByRole("button",{name:"Publicar producto"}));
  const dialogo=await screen.findByRole("dialog",{name:"¡Producto publicado!"});
- expect(within(dialogo).getByText("Podés revisar su disponibilidad en Inventario.")).toBeTruthy();
+ expect(within(dialogo).getByText("Podés revisar sus existencias desde Editar producto.")).toBeTruthy();
  expect(within(dialogo).queryByRole("link",{name:/Ver producto/})).toBeNull();
  fireEvent.keyDown(dialogo,{key:"Escape",code:"Escape"});
  await waitFor(()=>expect(document.activeElement).toBe(screen.getByRole("group",{name:"Acciones del producto"})));

@@ -50,6 +50,18 @@ el proceso del equipo, no migraciones automaticas en arranque/build.
 
 ## Open Questions
 
+Refinamiento autorizado del 11/11/2026: Gastos incorpora filtros automáticos y
+paginación SQL en su consulta existente; registro, anulación, dinero y resúmenes
+sin cambios. Evidencia en [Operaciones](../../../docs/features/OPERACIONES_LISTADOS.md).
+
+Adaptación de presentación autorizada del 11/11/2026: nombre público «Gastos» en
+Operaciones, ruta principal /admin/gastos; /admin/egresos redirige después de exigir
+sesión y preserva filtros admitidos. Se reutilizan EgresosAdmin, diálogos, Actions
+y servicios existentes; nombres técnicos, tabla, contratos e importes sin cambios.
+Compras mantiene su fuente independiente y su efecto de stock; Gastos no incorpora
+mercadería. Dashboard/Finanzas solo cambian etiquetas y enlaces. No se modifican
+Google Docs/SRS/RUP. Validación y evidencia de esta adaptación en EGRESOS.md.
+
 Aceptacion visual humana y E2E transversal del sistema se informan por separado.
 Finanzas debe componer resumen de Compras/Ventas/Egresos con corte consistente
 cuando se implemente; no sumar Compras otra vez como Egreso.

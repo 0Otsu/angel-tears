@@ -28,7 +28,7 @@ function mensajeGeneral(r: ResultadoAjusteAdmin | null) {
   }
 }
 
-export function DialogoAjusteStock({ fila, alGuardar }: { fila: FilaStock; alGuardar: (texto: string) => void }) {
+export function DialogoAjusteStock({ fila, alGuardar }: { fila: FilaStock; alGuardar: (texto: string, saldoResultante: number) => void }) {
   const [abierto, abrir] = useState(false)
   const [tipo, setTipo] = useState("INCREMENTO")
   const [cantidad, setCantidad] = useState("")
@@ -72,7 +72,7 @@ export function DialogoAjusteStock({ fila, alGuardar }: { fila: FilaStock; alGua
       setResultado(respuesta)
       if (respuesta.estado === "ok") {
         abrir(false)
-        alGuardar(`Stock de ${fila.nombre}: ${respuesta.saldoResultante} unidades.`)
+        alGuardar(`Stock de ${fila.nombre}: ${respuesta.saldoResultante} unidades.`, respuesta.saldoResultante)
         router.refresh()
       }
     } finally { enCurso.current = false; ocupar(false) }

@@ -8,7 +8,7 @@ import { validarUrlBdPruebas } from "../pruebas/guardia-url-bd"
 import { borrarCuentaDePrueba, CONTRASENA_DE_PRUEBA, crearCuentaDePrueba, EMAIL_DE_PRUEBA, reiniciarLimiteDeIntentos } from "./apoyo/cuenta-de-prueba"
 
 // Inventario administrativo (tareas 2.2 y 2.5) con servidor Next real, Auth real y la base de
-// pruebas: ajustes, stock insuficiente, minimo, estados e historial.
+// pruebas: ajustes desde Producto, stock insuficiente, estados e historial.
 
 const con = () => crearConexionBd(validarUrlBdPruebas(process.env.DATABASE_URL_TEST, process.env.DATABASE_URL))
 const ID = "e2e00000-0000-4000-8000-000000000001"
@@ -69,8 +69,11 @@ for (const [vista, width, height] of [["desktop", 1280, 900], ["mobile", 390, 84
 
     await page.goto("/admin/stock")
     await expect(page.getByText("Datos de demostración")).toHaveCount(0)
-    const tarjeta = page.getByRole("table", { name: "Inventario por producto" }).getByRole("row").filter({ hasText: NOMBRE })
+    await expect(page).toHaveURL(/\/admin\/productos$/)
+    const tarjeta = page.getByRole("table", { name: "Productos registrados" }).getByRole("row").filter({ hasText: NOMBRE })
     await expect(tarjeta).toContainText("Sin stock")
+    await page.getByRole("button", { name: `Editar ${NOMBRE}` }).click()
+    const existencias = page.getByRole("region", { name: "Existencias" })
 
     // Un decremento con saldo 0 se rechaza y conserva el formulario.
     await page.getByRole("button", { name: `Modificar stock de ${NOMBRE}` }).click()
@@ -95,31 +98,28 @@ for (const [vista, width, height] of [["desktop", 1280, 900], ["mobile", 390, 84
     await dialogo.getByLabel("Motivo *").fill("Existencias previas")
     await dialogo.getByRole("button", { name: "Registrar ajuste" }).click()
     await expect(page.getByRole("dialog")).toHaveCount(0)
-    await expect(tarjeta.getByRole("cell").filter({ hasText: /^4\s*unidades/ })).toBeVisible()
-    await expect(tarjeta).not.toContainText("Sin stock")
+    await expect(existencias.locator("strong").first()).toHaveText("4")
+    await expect(existencias).not.toContainText("Sin stock")
 
     // Cuatro disponible -> tres pocas, bajo el umbral general y sin configurar minimos.
-    await expect(tarjeta).toContainText("Disponible")
-    await expect(tarjeta).not.toContainText("Mínimo:")
-    await page.getByRole("button", {name:`Más acciones de ${NOMBRE}`}).click()
-    await expect(page.getByRole("menuitem", {name:"Configurar mínimo"})).toHaveCount(0)
-    await page.keyboard.press("Escape")
+    await expect(existencias).toContainText("Disponible")
+    await expect(existencias).not.toContainText("Mínimo:")
     await page.getByRole("button", {name:`Modificar stock de ${NOMBRE}`}).click()
     await dialogo.getByRole("radio", {name:"Retirar"}).check()
     await dialogo.getByLabel("Cantidad *").fill("1")
     await dialogo.getByLabel("Motivo *").fill("Control de prueba")
     await dialogo.getByRole("button", {name:"Registrar ajuste"}).click()
     await expect(page.getByRole("dialog")).toHaveCount(0)
-    await expect(tarjeta).toContainText("Pocas unidades")
-    await page.getByLabel("Estado").selectOption("pocas")
+    await expect(existencias).toContainText("Pocas unidades")
+    await page.goto("/admin/productos?stock=pocas")
     await expect(tarjeta).toBeVisible()
-    await page.getByLabel("Estado").selectOption("disponible")
+    await page.getByLabel("Estado de stock").selectOption("disponible")
     await expect(tarjeta).toHaveCount(0)
-    await page.getByLabel("Estado").selectOption("")
+    await page.getByLabel("Estado de stock").selectOption("")
+    await page.getByRole("button", { name: `Editar ${NOMBRE}` }).click()
 
     // Historial con el movimiento registrado.
-    await page.getByRole("button", {name:`Más acciones de ${NOMBRE}`}).click()
-    await page.getByRole("menuitem", {name:"Historial"}).click()
+    await page.getByRole("button", {name:`Ver historial de ${NOMBRE}`}).click()
     const historial = page.getByRole("dialog")
     await expect(historial.getByText("Existencias previas")).toBeVisible()
     await expect(historial.getByText(/Stock resultante: 4/)).toBeVisible()

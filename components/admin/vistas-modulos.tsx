@@ -10,7 +10,7 @@ import { EncabezadoAdmin, AvisoDemo, PanelAdmin, EtiquetaEstado } from "./piezas
 const definiciones = {
   productos: { titulo: "Productos", descripcion: "Listado de accesorios y su visibilidad pública. Solo muestra visual.", columnas: ["Producto", "Categoría", "Precio mock", "Visibilidad"], filas: filasProductos },
   ventas: { titulo: "Ventas", descripcion: "Historial mock de octubre, con ejemplos vigentes y anulados.", columnas: ["Referencia", "Fecha", "Detalle", "Importe", "Estado"], filas: filasMovimientos(ventasDemo) },
-  egresos: { titulo: "Egresos", descripcion: "Egresos manuales mock de octubre. Las compras no se duplican aquí.", columnas: ["Referencia", "Fecha", "Detalle", "Importe", "Estado"], filas: filasMovimientos(egresosDemo) },
+  egresos: { titulo: "Gastos", descripcion: "Gastos mock de octubre. Las compras no se duplican aquí.", columnas: ["Referencia", "Fecha", "Detalle", "Importe", "Estado"], filas: filasMovimientos(egresosDemo) },
 }
 
 export function VistaModulo({ modulo }: { modulo: keyof typeof definiciones }) {

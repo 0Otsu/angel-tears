@@ -8,7 +8,7 @@ import { importeDemo, periodosDemo, segmentosDemo, type PeriodoDemo } from "@/li
 const configuracion = {
   ventas: { label: "Ventas", color: "var(--primary)" },
   compras: { label: "Compras", color: "var(--muted-foreground)" },
-  egresos: { label: "Egresos manuales", color: "var(--accent)" },
+  egresos: { label: "Gastos", color: "var(--accent)" },
 } satisfies ChartConfig
 
 const suscribirMontaje = () => () => {}
@@ -30,7 +30,7 @@ export function GraficoPeriodo({ periodo, serie = "ventas", barras = false }: { 
     <YAxis key="vertical" axisLine={false} tickLine={false} width={43} tickFormatter={v => `${Number(v) / 1000} mil`} fontSize={10} />,
     <ChartTooltip key="detalle" content={<ChartTooltipContent labelFormatter={valor => `Días ${valor}`} formatter={(valor, nombre) => <div className="flex min-w-36 justify-between gap-5"><span className="text-muted-foreground">{configuracion[nombre as keyof typeof configuracion]?.label ?? nombre}</span><span className="font-medium tabular-nums">{importeDemo(Number(valor))}</span></div>} />} />,
   ]
-  return <div role="img" aria-label={`Gráfico mock de ${barras ? "ventas, compras y egresos" : serie} en ${periodosDemo[periodo].nombre}`}>
+  return <div role="img" aria-label={`Gráfico mock de ${barras ? "ventas, compras y gastos" : configuracion[serie].label.toLowerCase()} en ${periodosDemo[periodo].nombre}`}>
     <ChartContainer config={configuracion} className="aspect-auto h-60 w-full min-w-0">
       {barras ? <BarChart accessibilityLayer data={datos} margin={{ top: 12, right: 8, left: 0, bottom: 6 }}>
         {ejes}

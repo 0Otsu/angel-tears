@@ -6,7 +6,7 @@ import { consultarVistaPreviaAccion } from "@/app/admin/(panel)/productos/vista-
 import type { ResultadoVistaPrevia } from "@/lib/modulos/productos/vista-previa-contrato"
 import { VistaDetalleProducto } from "@/components/publico/vista-detalle-producto"
 import { Button } from "@/components/ui/button"
-import { Spinner } from "@/components/ui/spinner"
+import { CargandoAdmin } from "./cargando-admin"
 import { PanelAdmin } from "./piezas-admin"
 
 export function VistaPreviaProducto({ productoId, version, publicado, slug, editarDatos, gestionarImagenes, acciones }: {
@@ -31,7 +31,7 @@ export function VistaPreviaProducto({ productoId, version, publicado, slug, edit
       </div>
     </div>
     <PanelAdmin className="p-4 sm:p-6">
-      {esperando ? <p role="status" className="flex items-center gap-2 text-sm"><Spinner />Preparando vista previa…</p> : listo ? <div className="mx-auto max-w-7xl"><VistaDetalleProducto product={resultado.producto} nivelTitulo="h2" enlacesEnOtraPestana sizesImagen="(min-width: 1634px) 600px, (min-width: 1314px) calc((100vw - 434px) / 2), (min-width: 1024px) calc(100vw - 354px), (min-width: 640px) calc(100vw - 82px), calc(100vw - 66px)" /></div> : <div className="space-y-3">
+      {esperando ? <CargandoAdmin tipo="preview" nombre="vista previa"/> : listo ? <div className="mx-auto max-w-7xl"><VistaDetalleProducto product={resultado.producto} nivelTitulo="h2" enlacesEnOtraPestana sizesImagen="(min-width: 1634px) 600px, (min-width: 1314px) calc((100vw - 434px) / 2), (min-width: 1024px) calc(100vw - 354px), (min-width: 640px) calc(100vw - 82px), calc(100vw - 66px)" /></div> : <div className="space-y-3">
         <p role="alert">{conflicto ? "El producto cambió desde que lo abriste." : resultado?.estado === "sesion_requerida" ? "Tu sesión venció. Volvé a iniciar sesión." : "No pudimos preparar la vista previa."}</p>
         {conflicto ? <Button variant="outline" onClick={() => window.location.reload()}>Recargar datos</Button> : resultado?.estado === "sesion_requerida" ? <Link href="/admin/login" className="underline">Iniciar sesión</Link> : <Button variant="outline" onClick={() => { recibir(null); reintentar(n => n + 1) }}>Reintentar consulta</Button>}
       </div>}

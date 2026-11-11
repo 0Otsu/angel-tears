@@ -11,7 +11,7 @@ it("delega entradas y encabezados, refresca solo despues de commit", async () =>
   const entrada = { concepto: "Luz" }
   await registrarEgresoAccion(entrada)
   expect(registrar).toHaveBeenCalledWith(encabezados, entrada)
-  expect(revalidar).toHaveBeenCalledExactlyOnceWith("/admin/egresos")
+  expect(revalidar.mock.calls).toEqual([["/admin/gastos"],["/admin/egresos"],["/admin"],["/admin/finanzas"]])
   revalidar.mockClear()
   registrar.mockResolvedValue({ estado: "sesion_requerida" })
   await registrarEgresoAccion(entrada)
@@ -21,7 +21,7 @@ it("anulacion repetida refresca estado actual sin reejecutar una operacion propi
   anular.mockResolvedValue({ estado: "ya_anulado", egreso: { id: "id" } })
   await anularEgresoAccion("id")
   expect(anular).toHaveBeenCalledWith(encabezados, "id")
-  expect(revalidar).toHaveBeenCalledExactlyOnceWith("/admin/egresos")
+  expect(revalidar.mock.calls).toEqual([["/admin/gastos"],["/admin/egresos"],["/admin"],["/admin/finanzas"]])
 })
 it("errores tecnicos no exponen payload, SQL o mensajes crudos", async () => {
   const log = vi.spyOn(console, "error").mockImplementation(() => {})

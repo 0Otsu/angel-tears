@@ -1,3 +1,4 @@
+import { resolverFiltrosOperaciones } from "@/lib/presentacion/operaciones"
 import type { Metadata } from "next"
 import { headers } from "next/headers"
 import { redirect } from "next/navigation"
@@ -8,13 +9,10 @@ import type { ProductoParaComprar, ProveedorParaComprar } from "@/lib/modulos/co
 import { obtenerAdministracionCompras } from "@/lib/modulos/compras/administracion-aplicacion"
 import type { ResultadoListadoCompras } from "@/lib/modulos/compras/contrato"
 
-// Un parametro repetido o ausente se trata como vacio; los valores invalidos los rechaza la consulta.
-const texto = (valor: string | string[] | undefined) => (typeof valor === "string" ? valor : "")
-
 export default async function PaginaCompras({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   await exigirAdministradoraEnPagina()
   const parametros = await searchParams
-  const filtros = { estado: texto(parametros.estado), desde: texto(parametros.desde), hasta: texto(parametros.hasta) }
+  const { filtros, errores } = resolverFiltrosOperaciones(parametros)
   let listado: ResultadoListadoCompras = { estado: "ok", compras: [], hayMas: false }
   let productos: ProductoParaComprar[] = []
   let proveedores: ProveedorParaComprar[] = []
@@ -23,7 +21,7 @@ export default async function PaginaCompras({ searchParams }: { searchParams: Pr
     const encabezados = await headers()
     const administracion = obtenerAdministracionCompras()
     ;[listado, productos, proveedores] = await Promise.all([
-      administracion.listar(encabezados, filtros),
+      Object.keys(errores).length ? Promise.resolve({ estado: "datos_invalidos" as const, errores }) : administracion.listar(encabezados, { ...filtros, limite: 25 }),
       administracion.productosParaComprar(encabezados),
       administracion.proveedoresParaComprar(encabezados),
     ])
@@ -37,7 +35,7 @@ export default async function PaginaCompras({ searchParams }: { searchParams: Pr
     hayMas={listado.estado === "ok" && listado.hayMas}
     productos={productos}
     proveedores={proveedores}
-    filtros={filtros}
+    paginacion={listado.estado === "ok" ? listado.paginacion : undefined} filtros={filtros}
     erroresFiltro={listado.estado === "datos_invalidos" ? listado.errores : {}}
     errorCarga={errorCarga}
   />

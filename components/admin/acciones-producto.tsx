@@ -90,11 +90,11 @@ export function AccionesProducto({ producto, alGuardar, alNotificar, finalizar =
         <DialogDescription asChild><div className="space-y-3">
           <p className="font-medium text-foreground [overflow-wrap:anywhere]">{confirmacion?.nombre}</p>
           <p>La publicación se completó correctamente.</p>
-          <p aria-live="polite">{disponible === false ? "Está publicado, pero todavía no aparecerá en el listado del catálogo porque no tiene stock." : disponible === true ? "Está publicado y tiene stock disponible." : "Podés revisar su disponibilidad en Inventario."}</p>
+          <p aria-live="polite">{disponible === false ? "Está publicado, pero todavía no aparecerá en el listado del catálogo porque no tiene stock." : disponible === true ? "Está publicado y tiene stock disponible." : "Podés revisar sus existencias desde Editar producto."}</p>
         </div></DialogDescription>
         <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:justify-center">
           <PendingButton ref={volver} className="min-h-11" pending={navegando} pendingLabel="Volviendo…" onClick={() => navegar(() => router.push("/admin/productos"))}>Volver a productos</PendingButton>
-          {disponible === true ? <Button asChild variant="outline" className="min-h-11"><a href={`/catalogo/${confirmacion?.slug}`} target="_blank" rel="noopener noreferrer" aria-label="Ver producto (abre otra pestaña)">Ver producto<ExternalLink aria-hidden="true" /></a></Button> : <Button asChild variant="outline" className="min-h-11"><Link href="/admin/stock">Ir a Inventario</Link></Button>}
+          {disponible === true ? <Button asChild variant="outline" className="min-h-11"><a href={`/catalogo/${confirmacion?.slug}`} target="_blank" rel="noopener noreferrer" aria-label="Ver producto (abre otra pestaña)">Ver producto<ExternalLink aria-hidden="true" /></a></Button> : <Button asChild variant="outline" className="min-h-11"><Link href={`/admin/productos/${producto.id}/editar#existencias`}>Ver existencias</Link></Button>}
         </div>
         <DialogClose asChild><Button type="button" variant="ghost" size="icon" className="absolute right-2 top-2 size-11" aria-label="Cerrar confirmación"><X aria-hidden="true" /></Button></DialogClose>
       </DialogContent>

@@ -40,4 +40,9 @@ Precio de la línea: ¿siempre el actual del Producto o la Administradora puede 
 
 ## Workflow
 
+Refinamiento autorizado del 11/11/2026: el listado administrativo conserva sus
+servicios y agrega filtros automáticos por período/estado y paginación SQL de 25
+filas, con orden fecha de operación/ID. Sin cambios transaccionales ni monetarios.
+Diseño, límites y evidencia en [Operaciones](../../../docs/features/OPERACIONES_LISTADOS.md).
+
 Rama propia `ebenitez-ventas` desde `main` actualizado; coordinar con Claudio todo lo compartido antes de editarlo. Antes de integrar: tests, lint, typecheck, build, validación OpenSpec estricta y revisión del diff; recién entonces merge y aviso al equipo. Bitácora `.md` de avance. Archivar solo tras aceptación técnica con evidencia, nunca en esta planificación.

@@ -1,3 +1,4 @@
+import { resolverFiltrosOperaciones } from "@/lib/presentacion/operaciones"
 import type { Metadata } from "next"
 import { headers } from "next/headers"
 import { redirect } from "next/navigation"
@@ -8,20 +9,17 @@ import type { ProductoParaVender } from "@/lib/modulos/ventas/administracion-con
 import { obtenerAdministracionVentas } from "@/lib/modulos/ventas/administracion-aplicacion"
 import type { ResultadoListadoVentas } from "@/lib/modulos/ventas/contrato"
 
-// Un parametro repetido o ausente se trata como vacio; los valores invalidos los rechaza la consulta.
-const texto = (valor: string | string[] | undefined) => (typeof valor === "string" ? valor : "")
-
 export default async function PaginaVentas({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   await exigirAdministradoraEnPagina()
   const parametros = await searchParams
-  const filtros = { estado: texto(parametros.estado), desde: texto(parametros.desde), hasta: texto(parametros.hasta) }
+  const { filtros, errores } = resolverFiltrosOperaciones(parametros)
   let listado: ResultadoListadoVentas = { estado: "ok", ventas: [], hayMas: false }
   let productos: ProductoParaVender[] = []
   let errorCarga = false
   try {
     const encabezados = await headers()
     const administracion = obtenerAdministracionVentas()
-    ;[listado, productos] = await Promise.all([administracion.listar(encabezados, filtros), administracion.productosParaVender(encabezados)])
+    ;[listado, productos] = await Promise.all([Object.keys(errores).length ? Promise.resolve({ estado: "datos_invalidos" as const, errores }) : administracion.listar(encabezados, { ...filtros, limite: 25 }), administracion.productosParaVender(encabezados)])
   } catch (error) {
     if (esErrorSesionRequerida(error)) redirect("/admin/login")
     console.error("[ventas] fallo de consulta", { tipo: error instanceof Error ? error.name : typeof error })
@@ -31,7 +29,7 @@ export default async function PaginaVentas({ searchParams }: { searchParams: Pro
     ventas={listado.estado === "ok" ? [...listado.ventas] : []}
     hayMas={listado.estado === "ok" && listado.hayMas}
     productos={productos}
-    filtros={filtros}
+    paginacion={listado.estado === "ok" ? listado.paginacion : undefined} filtros={filtros}
     erroresFiltro={listado.estado === "datos_invalidos" ? listado.errores : {}}
     errorCarga={errorCarga}
   />

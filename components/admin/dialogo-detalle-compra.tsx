@@ -1,4 +1,5 @@
 "use client"
+import { CargandoAdmin } from "./cargando-admin"
 import { useRef, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -82,7 +83,7 @@ export function DialogoDetalleCompra({ resumen, alAnular }: { resumen: ResumenCo
     <DialogTrigger asChild><Button variant="outline" className="min-h-11" aria-label={`Ver detalle de la ${etiqueta}`}>Ver detalle</Button></DialogTrigger>
     <DialogContent className="max-h-[calc(100svh-2rem)] min-w-0 overflow-y-auto motion-reduce:animate-none sm:max-w-2xl">
       <DialogHeader><DialogTitle>Detalle de la compra</DialogTitle><DialogDescription>{formatearFechaCompra(resumen.fechaOperacion)} · {resumen.nombreProveedor ?? SIN_PROVEEDOR}</DialogDescription></DialogHeader>
-      {carga.tipo === "cargando" && <p role="status" className="text-sm text-muted-foreground">Cargando la compra…</p>}
+      {carga.tipo === "cargando" && <CargandoAdmin tipo="detalle" nombre="compra"/>}
       {carga.tipo === "error" && <div role="alert" className="space-y-2 text-sm text-destructive"><p>{carga.mensaje}</p>{carga.sesion && <Link href="/admin/login" className="underline">Iniciar sesión</Link>}</div>}
       {compra && <div className="space-y-4">
         <div className="flex flex-wrap items-center gap-3 text-sm">

@@ -136,9 +136,91 @@ la autorizacion anterior no se presenta como prueba anticipada de que ya se inte
 ## Pendientes
 
 - Aplicacion deliberada de 0006 en desarrollo, fuera de esta ejecucion.
-- Composicion de Finanzas para completar consulta conjunta RF-19/resultado RF-21.
+- Composicion RF-19/RF-21 implementada y probada en `feature/finanzas-dashboard`;
+  ver [FINANZAS.md](FINANZAS.md). Su aceptacion e integracion siguen separadas de Egresos.
 - Aceptacion E2E transversal del proyecto y cierre operativo/seguridad/deploy posteriores.
 
 El cierre Git autorizado no incluye migracion en desarrollo ni modificacion de
 registros reales de Sofi. Revisar conexion, historial de migraciones y respaldo
-antes de aplicar 0006 en una tarea posterior. Finanzas y Dashboard siguen fuera.
+antes de aplicar 0006 en una tarea posterior. Finanzas y Dashboard se entregan por
+separado en la contribucion documentada en FINANZAS.md.
+
+## Adaptación de presentación: Gastos en Operaciones — 11/11/2026
+
+Autorizada por Augusto después de la revisión de Sofi. Es el mismo módulo Egresos
+manuales, con otra terminología comercial y ubicación; no un módulo nuevo.
+Se conservan tipos/servicios/Actions/tabla `egreso`, sus claves, validación exacta
+de importe positivo, fecha de operación/carga, autorización, transacciones,
+idempotencia, anulación única e historia. No hay migración ni nueva categoría.
+
+### Rutas y presentación
+
+- `/admin/gastos`: página principal real, reutiliza EgresosAdmin y los dos diálogos.
+- `/admin/egresos`: redirección interna tras exigir sesión; conserva desde/hasta/
+  estado/limite cuando son strings. No copia destinos externos ni arrays.
+- Operaciones: Ventas, Compras, Gastos y Proveedores. Finanzas permanece como
+  pantalla independiente; se retira solamente su antigua pestaña Egresos.
+- Listado, filtros, detalle, confirmaciones, errores, skeletons y formularios usan
+  «Gastos». Los IDs DOM y nombres técnicos se conservan. Dashboard, gráfico,
+  desglose y movimientos financieros solo cambian textos y enlace al módulo.
+- Las Actions existentes siguen en `egresos/acciones.ts`; tras confirmar refrescan
+  Gastos, alias antiguo, Dashboard y Finanzas. No se crea una API paralela.
+- Materiales para flores eternas, packaging, transporte o servicios se pueden
+  describir en Concepto: no generan entrada de productos al stock. La mercadería
+  terminada sigue registrándose en Compras y cuenta una sola vez como salida.
+  Sin fabricación, materias primas, recetas ni inventario adicional.
+
+### Evidencia focalizada de esta adaptación
+
+87 pruebas en ocho archivos correctas: validación Egresos, sus componentes y
+Actions, página Gastos/alias, shell, presentación financiera, cargas y guardias.
+Incluyen ruta segura/filtros, autorización antes de consultar, reintentos con la
+misma clave, bloqueo de doble envío, errores y anulación. Lint, TypeScript y build
+de producción correctos. No se repiten suites completas ni E2E masivos.
+
+PostgreSQL exclusivamente `angel_tears_preview_20261111`:
+
+- Compra real mediante el servicio existente y C0, con reintento de la misma
+  clave: aumenta dos unidades una sola vez y no crea registros en `egreso`.
+  Prueba terminada en ROLLBACK; huellas originales comprobadas.
+- Registro real desde `/admin/gastos` de un único gasto descartable por 1234.56
+  ARS, fecha de operación 10/11/2026, observación e historia. Se rechaza cero antes
+  de confirmar. PostgreSQL verifica importe exacto, ausencia de duplicados y stock,
+  compras y ventas sin cambios. Resumen vigente y resultado cambian exactamente
+  1234.56, manteniendo intacta la fórmula existente.
+- Anulación desde UI y segunda anulación mediante el servicio: `ya_anulado`, sin
+  otro efecto. Importes vigentes y resultado vuelven exactamente a su valor previo.
+- Limpieza transaccional limitada al ID/actor/concepto/importe/estado del fixture
+  anulado; huellas de productos, movimientos, compras, ventas y gastos originales
+  idénticas al control inicial. Evidencia en `work/gastos-preview-resultado.json`.
+
+Chromium autenticado con cuenta preview normal: Operaciones → Gastos, entrada
+directa, alias con filtros, registro/foco de error, listado, período/estado,
+detalle, historia, anulación y enlaces desde Finanzas. Acceso anónimo bloqueado
+en ambas rutas. Menú móvil y teclado/Escape con retorno de foco; sin overflow ni
+pageerrors. Capturas revisadas, con el fixture ya limpiado después de capturarlas:
+`work/gastos-desktop.png`, `work/gastos-mobile.png`, `work/gastos-detalle-mobile.png`.
+Los guiones E2E versionados se adaptaron a los nuevos nombres/rutas; no se
+ejecutaron contra `_test`, conforme a la restricción de usar solo preview.
+
+### Archivos y pendientes
+
+Páginas: `gastos/{page,loading}.tsx`, `gastos/page.test.ts`, `egresos/page.tsx`,
+`egresos/loading.tsx`, `egresos/acciones.ts` y su prueba.
+UI: egresos-admin y su prueba, dialogo-registro-egreso, dialogo-detalle-egreso,
+estructura-admin y su prueba; indicadores/evolucion/desglose/salidas-finanzas,
+graficos-admin, vistas-modulos y finanzas-admin.test. Presentación: finanzas.ts.
+E2E: egresos-real y finanzas-real. Documentación: este archivo y diseño del change
+implement-manual-expenses. El manifiesto preciso está en
+`work/archivos-adaptacion-gastos.txt`.
+
+Rama `feature/finanzas-dashboard`, base `4545c07`; `origin/main` consultado sin
+modificar referencias locales, continúa en ese commit. Se preservan todos los
+cambios previos de Productos/Stock y Finanzas/Dashboard. No se modifican servicios
+de Claudio/Emi ni se implementa otro sistema de movimientos o registro de gastos.
+Desarrollo, copia demo de Sofi, credenciales, Cloudinary y fuentes académicas no
+se modifican. Localhost:3000 queda con preview aislada para revisión.
+
+Pendientes: aceptación visual humana e integración Git autorizada; compactación de
+Existencias y posible reorganización futura de Finanzas siguen siendo tareas
+separadas. No hay commit/push/merge ni modificaciones de Google Docs, SRS o RUP.

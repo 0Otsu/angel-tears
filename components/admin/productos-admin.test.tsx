@@ -86,10 +86,32 @@ it("edicion comunica decimal normalizado al editor sin dejar un borrador falso",
 })
 
 describe("productos administrativos", () => {
+  it("consulta y filtra existencias 0/1/2/3/4 sin mezclar publicado u oculto", () => {
+    const productos = [0,1,2,3,4,20].map(saldo => ({ ...consulta.productos[0], id: `id-${saldo}`, nombre: `Producto ${saldo}`, publicado: saldo !== 2 }))
+    render(<ProductosAdmin consulta={{ ...consulta, productos }} existencias={Object.fromEntries([0,1,2,3,4,20].map(s => [`id-${s}`,s]))} />)
+    fireEvent.change(screen.getByLabelText("Estado de stock"),{target:{value:"pocas"}})
+    const tabla = () => screen.getByRole("table",{name:"Productos registrados"})
+    expect(within(tabla()).getAllByRole("heading").map(h=>h.textContent)).toEqual(["Producto 1","Producto 2","Producto 3"])
+    fireEvent.change(screen.getByLabelText("Estado"),{target:{value:"oculto"}})
+    expect(within(tabla()).getAllByRole("heading").map(h=>h.textContent)).toEqual(["Producto 2"])
+    fireEvent.change(screen.getByLabelText("Estado"),{target:{value:""}})
+    fireEvent.change(screen.getByLabelText("Estado de stock"),{target:{value:"sin_stock"}})
+    expect(within(tabla()).getAllByRole("heading").map(h=>h.textContent)).toEqual(["Producto 0"])
+    fireEvent.change(screen.getByLabelText("Estado de stock"),{target:{value:"disponible"}})
+    expect(within(tabla()).getAllByRole("heading").map(h=>h.textContent)).toEqual(["Producto 4","Producto 20"])
+  })
+
+  it("stock desconocido se comunica y no pasa por Sin stock",()=>{
+    render(<ProductosAdmin consulta={consulta} filtroStockInicial="sin_stock" />)
+    expect(screen.getByText(/No pudimos confirmar todas las existencias/)).toBeTruthy()
+    expect(screen.queryByRole("table")).toBeNull()
+    fireEvent.click(screen.getByRole("button",{name:"Limpiar filtros"}))
+    expect(screen.getByRole("table").textContent).toContain("Sin confirmar")
+  })
   it("presenta una tabla semantica que se apila como tarjetas, con una sola accion Editar por producto", () => {
     render(<ProductosAdmin consulta={consulta} />)
     const tabla = screen.getByRole("table", { name: "Productos registrados" })
-    expect(within(tabla).getAllByRole("columnheader").map(h => h.textContent)).toEqual(["Producto", "Categoría", "Precio", "Estado", "Acciones"])
+    expect(within(tabla).getAllByRole("columnheader").map(h => h.textContent)).toEqual(["Producto", "Categoría", "Precio", "Existencias", "Estado", "Acciones"])
     expect(within(tabla).getAllByRole("row")).toHaveLength(2)
     expect(within(tabla).getAllByRole("button", { name: "Editar Collar real" })).toHaveLength(1)
     fireEvent.click(screen.getByRole("button", { name: "Editar Collar real" }))

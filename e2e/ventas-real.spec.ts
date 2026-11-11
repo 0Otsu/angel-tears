@@ -139,11 +139,10 @@ for (const [vista, width, height] of [["desktop", 1280, 900], ["mobile", 390, 84
 
     // Filtro por estado (servidor): la anulada sigue visible en su historial.
     await page.getByLabel("Estado").selectOption("CONFIRMADA")
-    await page.getByRole("button", { name: "Filtrar" }).click()
     await expect(page).toHaveURL(/estado=CONFIRMADA/)
     await expect(page.getByText("No hay ventas con estos filtros")).toBeVisible()
     await page.getByLabel("Estado").selectOption("ANULADA")
-    await page.getByRole("button", { name: "Filtrar" }).click()
+    await expect(page).toHaveURL(/estado=ANULADA/)
     await expect(page.getByRole("table", { name: "Ventas" })).toContainText("Ana Pérez")
     expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
   })

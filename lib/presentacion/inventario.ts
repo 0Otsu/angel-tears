@@ -22,7 +22,7 @@ export function ordenarAtencionStock(filas: readonly FilaStock[]) {
 export function resumenStock(filas: readonly FilaStock[]) {
   return { total: filas.length, sinStock: filas.filter(f=>estadoVisualStock(f.saldo)==="sin_stock").length, pocas: filas.filter(f=>estadoVisualStock(f.saldo)==="pocas").length }
 }
-export const enlaceFiltroStock = (filtro: FiltroStock) => filtro ? `/admin/stock?estado=${filtro}` : "/admin/stock"
+export const enlaceFiltroStock = (filtro: FiltroStock) => filtro ? `/admin/productos?stock=${filtro}` : "/admin/productos"
 
 export function estimarAjusteStock(saldo: number, tipo: string, texto: string) {
   if (!/^\d{1,9}$/.test(texto.trim())) return null

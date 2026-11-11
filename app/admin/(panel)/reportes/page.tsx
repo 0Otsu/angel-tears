@@ -4,7 +4,7 @@ import { exigirAdministradoraEnPagina } from "@/lib/modulos/autenticacion/guardi
 
 export default async function PaginaReportes() {
   await exigirAdministradoraEnPagina()
-  redirect("/admin/finanzas")
+  redirect("/admin")
 }
 
 export const metadata: Metadata = { title: "Reportes" }
