@@ -30,7 +30,7 @@ function NavegacionAdmin() {
   const ruta = usePathname()
   return <nav aria-label="Módulos administrativos" className="grid grid-cols-3 gap-1 lg:flex lg:justify-center lg:gap-2">{navegacion.map(({ ruta: destino, nombre, icono: Icono }) => {
     const activo = pertenece(ruta, destino)
-    return <Link key={destino} href={destino} aria-current={activo ? ruta === destino ? "page" : "location" : undefined} className={cn("inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-2 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 motion-reduce:transition-none sm:px-4 sm:text-sm", activo ? "bg-primary font-medium text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-card hover:text-foreground")}><Icono className="hidden size-4 shrink-0 sm:block" aria-hidden="true" /><span>{nombre}</span></Link>
+    return <Link key={destino} href={destino} aria-current={activo ? ruta === destino ? "page" : "location" : undefined} className={cn("inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-2 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 motion-reduce:transition-none sm:px-4 sm:text-sm", activo ? "border border-brand-border bg-brand font-medium text-brand-foreground shadow-sm" : "text-muted-foreground hover:bg-card hover:text-foreground")}><Icono className="hidden size-4 shrink-0 sm:block" aria-hidden="true" /><span>{nombre}</span></Link>
   })}</nav>
 }
 function MarcaAdmin() {

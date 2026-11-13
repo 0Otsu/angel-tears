@@ -10,7 +10,7 @@ import { metadataPublica } from "@/lib/modulos/catalogo/metadata-publica"
 import { datosLocal, serializarDatosEstructurados } from "@/lib/modulos/catalogo/datos-estructurados"
 
 export const dynamic = "force-dynamic"
-export function generateMetadata() { return metadataPublica("Bijouterie en Concordia", "Bijouterie y accesorios de Angel Tears en Concordia, Entre Ríos. Conocé nuestros productos y la información del local.", "/") }
+export function generateMetadata() { return { ...metadataPublica("Bijouterie en Concordia, Entre Ríos", "Conocé los aros, collares, pulseras, anillos y otros accesorios de Angel Tears. Visitá nuestro local en Concordia, Entre Ríos, o consultanos por WhatsApp.", "/"), title: { absolute: "Bijouterie en Concordia, Entre Ríos | Angel Tears" } } }
 
 export default function HomePage() {
   return (

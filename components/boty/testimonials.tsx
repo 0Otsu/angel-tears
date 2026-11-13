@@ -74,7 +74,7 @@ export function Testimonials() {
             DE USTEDES
           </span>
           <h2 id="social-heading" className={`font-serif text-4xl leading-tight text-foreground text-balance md:text-7xl ${headerVisible ? 'animate-blur-in opacity-0' : 'opacity-0'}`} style={headerVisible ? { animationDelay: '0.4s', animationFillMode: 'forwards' } : {}}>
-            Detalles que encuentran su persona.
+            Un poquito de Angel Tears
           </h2>
         </div>
 

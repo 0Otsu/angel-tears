@@ -15,12 +15,12 @@ export function Hero() {
       <div className="relative z-10 w-full lg:pt-20">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto w-full text-center lg:mx-0 lg:max-w-xl lg:text-left">
-            <span className="mb-6 block text-sm uppercase tracking-normal text-black">Bijouterie · Concordia, Entre Ríos</span>
+            <span className="mb-6 block text-sm uppercase tracking-normal text-black">ANGEL TEARS · BIJOUTERIE EN CONCORDIA</span>
             <h1 id="hero-heading" className="mb-6 text-balance font-serif text-5xl font-semibold leading-[1.1] text-black md:text-6xl lg:text-7xl">
-              <span className="block">Pequeños detalles.</span>
-              <span className="block text-[clamp(3.5rem,18.5vw,4.5rem)] sm:text-7xl xl:text-9xl">Tu estilo, siempre.</span>
+              <span className="block">Accesorios para</span>
+              <span className="block text-[clamp(2.75rem,12.3vw,3.25rem)] leading-[1.1] sm:text-7xl xl:text-8xl">cada versión de vos.</span>
             </h1>
-            <p className="mx-auto mb-10 max-w-md text-lg leading-relaxed text-black lg:mx-0">Accesorios únicos para acompañar tu forma de ser.</p>
+            <p className="mx-auto mb-10 max-w-md text-lg leading-relaxed text-black lg:mx-0">Descubrí aros, collares, pulseras y anillos para todos los días. Encontrá tus favoritos en nuestro catálogo.</p>
             <div className="flex justify-center lg:justify-start">
               <Link href="/catalogo" className="group inline-flex items-center justify-center gap-3 rounded-full bg-primary px-8 py-4 text-sm tracking-wide text-primary-foreground boty-transition boty-shadow hover:bg-primary/90">
                 Ver catálogo<ArrowRight className="size-4 boty-transition group-hover:translate-x-1" aria-hidden="true" />

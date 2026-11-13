@@ -5,7 +5,7 @@ import { MapPin, Clock, Wallet, Truck } from "lucide-react"
 
 const features = [
   { icon: MapPin, title: "Ubicación", description: <>Entre Ríos 924<br />Planta baja, detrás de las escaleras</> },
-  { icon: Clock, title: "Horarios", description: "16:00 a 20:30" },
+  { icon: Clock, title: "Horarios", description: <>Lunes a viernes<br />16:00 a 20:30</> },
   { icon: Wallet, title: "Medios de pago", description: <>Efectivo<br />Transferencia</> },
   { icon: Truck, title: "Envíos", description: <>Envíos en Concordia<br />A cargo del cliente</> },
 ]
@@ -41,10 +41,10 @@ export function FeatureSection() {
               VENÍ A CONOCERNOS
             </span>
             <h2 id="local-heading" className="font-serif text-4xl leading-tight text-foreground mb-6 text-balance md:text-5xl xl:text-6xl">
-              Un espacio para encontrar ese detalle especial.
+              Vení a conocer Angel Tears
             </h2>
             <p className="text-lg text-muted-foreground leading-relaxed mb-8 max-w-md">
-              Encontranos en Entre Ríos 924, planta baja, detrás de las escaleras, en Concordia.
+              Estamos en Concordia, Entre Ríos. Conocé nuestro espacio y encontrá cómo visitarnos.
 
             </p>
 

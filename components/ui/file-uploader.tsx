@@ -165,7 +165,7 @@ export function FileUploader<T>({ initialFile, autoUpload = false, enCola = fals
       {/* Las previews son URLs locales o persistidas aportadas por el caller. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={vigente.url} alt={altVigente} className="h-16 w-16 rounded-lg object-contain sm:h-24 sm:w-24" />
-      <div className="min-w-0 flex-1 space-y-1"><p className="flex items-center gap-2 text-sm font-medium"><Check className="size-4 text-primary" aria-hidden="true" />{textoConfirmado}</p>
+      <div className="min-w-0 flex-1 space-y-1"><p className="flex items-center gap-2 text-sm font-medium"><Check className="size-4 text-success" aria-hidden="true" />{textoConfirmado}</p>
         {vigente.nombre && <p className="break-all text-sm">{vigente.nombre}</p>}
         <p className="text-xs text-muted-foreground">{vigente.tipo || "Tipo no disponible"}{vigente.tamano !== undefined ? ` · ${tamanoLegible(vigente.tamano)}` : ""}</p>
       </div>

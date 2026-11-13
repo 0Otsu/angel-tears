@@ -19,7 +19,7 @@ export function ProductGrid({ seleccion }: { seleccion: ProductoPublico[] }) {
         <div className="mb-16 text-center">
           <span className="mb-4 block text-sm uppercase tracking-[0.3em] text-primary">Selección Angel Tears</span>
           <h2 id="coleccion-heading" className="mb-4 text-balance font-serif text-4xl leading-tight text-foreground md:text-7xl">Accesorios para todos los días</h2>
-          <p className="mx-auto max-w-md text-lg text-muted-foreground">Piezas elegidas para acompañarte en cada ocasión.</p>
+          <p className="mx-auto max-w-md text-lg text-muted-foreground">Explorá nuestros aros, collares, pulseras y otros accesorios. Encontrá los modelos disponibles en el catálogo.</p>
         </div>
         <div className="mb-12 flex justify-center">
           <div role="group" aria-label="Filtrar selección por categoría" className="inline-flex max-w-full gap-1 overflow-x-auto rounded-full bg-background p-1">

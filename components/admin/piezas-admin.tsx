@@ -20,7 +20,7 @@ export function EncabezadoAdmin({ titulo, descripcion, simple = false, children 
 }
 
 export function EtiquetaEstado({ children, tono = "neutro" }: { children: ReactNode; tono?: "oliva" | "alerta" | "neutro" }) {
-  return <span className={cn("inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-medium", tono === "oliva" ? "bg-primary/10 text-primary" : tono === "alerta" ? "bg-destructive/10 text-destructive" : "bg-card text-muted-foreground")}><span className="size-1.5 rounded-full bg-current" aria-hidden="true" />{children}</span>
+  return <span className={cn("inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-medium", tono === "oliva" ? "bg-success-subtle text-success" : tono === "alerta" ? "bg-destructive/10 text-destructive" : "bg-card text-muted-foreground")}><span className="size-1.5 rounded-full bg-current" aria-hidden="true" />{children}</span>
 }
 
 export function AvisoDemo() {
