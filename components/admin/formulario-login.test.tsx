@@ -38,6 +38,11 @@ beforeEach(() => {
 
 // Frontera de identidad en la interfaz: lo que ve y completa la Administradora al ingresar.
 describe("formulario de acceso administrativo", () => {
+  it("no usa query strings si se envia antes de hidratar JavaScript", () => {
+    render(<FormularioLogin />)
+    expect(screen.getByRole("form", { name: "Acceso administrativo" }).getAttribute("method")).toBe("post")
+  })
+
   it("ofrece campos de correo y contrasena con etiqueta y obligatorios", () => {
     render(<FormularioLogin />)
     const { email, contrasena } = campos()

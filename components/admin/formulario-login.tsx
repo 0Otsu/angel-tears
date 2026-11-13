@@ -87,6 +87,7 @@ export function FormularioLogin() {
 
   return (
     <form
+      method="post"
       onSubmit={alEnviar}
       noValidate
       className="space-y-5"
