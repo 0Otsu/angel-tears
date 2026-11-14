@@ -40,7 +40,6 @@ function MarcaAdmin() {
 // El layout autorizado entrega la identidad real; el shell no sustituye los guards.
 export function EstructuraAdmin({ children, nombre, email }: { children: ReactNode; nombre: string; email: string }) {
   const ruta = usePathname(), enOperaciones = pertenece(ruta, "/admin/ventas")
-  const productosPersistidos = ruta === "/admin/productos" || ruta.startsWith("/admin/productos/")
   return <div className="min-h-svh bg-background text-foreground">
     <a href="#contenido-admin" className="sr-only z-[60] rounded-lg bg-primary px-4 py-3 text-primary-foreground focus:not-sr-only focus:fixed focus:left-4 focus:top-4">Saltar al contenido</a>
     <header className="sticky top-0 z-20 border-b border-border/70 bg-background/95 backdrop-blur-md">
@@ -59,6 +58,5 @@ export function EstructuraAdmin({ children, nombre, email }: { children: ReactNo
       {enOperaciones && <nav aria-label="Navegación de Operaciones" className="grid grid-cols-2 gap-1 border-b border-border pb-3 min-[375px]:grid-cols-4 sm:flex sm:gap-2">{operaciones.map(item => <Link key={item.ruta} href={item.ruta} aria-current={ruta === item.ruta ? "page" : undefined} className={cn("inline-flex min-h-11 items-center justify-center rounded-xl px-2 text-xs focus-visible:outline-2 focus-visible:outline-primary sm:px-4 sm:text-sm", ruta === item.ruta ? "border border-primary/30 bg-primary/10 font-medium text-primary underline underline-offset-4" : "text-muted-foreground hover:bg-card")}>{item.nombre}</Link>)}</nav>}
       {children}
     </main>
-    {!productosPersistidos && !["/admin", "/admin/stock", "/admin/proveedores", "/admin/compras", "/admin/ventas", "/admin/egresos", "/admin/gastos", "/admin/finanzas"].includes(ruta) && <footer className="mx-auto flex max-w-[1440px] flex-wrap justify-between gap-2 border-t border-border/70 px-4 py-4 text-[10px] text-muted-foreground sm:px-6 lg:px-8"><span>Angel Tears · Prototipo de administración</span><span>Datos de demostración · sin persistencia</span></footer>}
   </div>
 }

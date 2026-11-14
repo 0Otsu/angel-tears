@@ -30,7 +30,7 @@ describe("listado", () => {
       expect(within(tabla).getByText(String(saldo)).className).toContain(`text-${color}-900`)
       expect(badge.querySelector('svg[aria-hidden="true"]')).toBeTruthy()
     } else {
-      expect(badge.className).toContain("text-primary")
+      expect(badge.className).toContain("text-success")
       expect(filaVisual.className).not.toMatch(/bg-(rose|amber)/)
     }
   })

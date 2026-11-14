@@ -42,4 +42,9 @@ it("editor de Producto conserva su area sin navegacion secundaria ajena", () => 
   expect(screen.queryByRole("navigation", { name: /Navegación de/ })).toBeNull()
 })
 
+it("Cuenta no conserva advertencias falsas de prototipo o falta de persistencia", () => {
+  ruta.actual = "/admin/cuenta"; montar()
+  expect(screen.queryByText(/Prototipo|sin persistencia/i)).toBeNull()
+})
+
 it.each(["/admin","/admin/finanzas","/admin/egresos","/admin/productos/123/editar"])("shell %s conserva navegación sin breadcrumb redundante",url=>{ruta.actual=url;montar();expect(screen.queryByRole("navigation",{name:"Ubicación"})).toBeNull();expect(screen.queryByText("Administración",{exact:true})).toBeNull();expect(screen.getByRole("link",{name:"Ver tienda"}).getAttribute("href")).toBe("/")})

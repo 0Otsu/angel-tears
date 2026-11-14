@@ -8,6 +8,7 @@ import { producto } from "@/lib/infraestructura/esquemas/producto"
 import { esquemaReferenciaEdicion } from "./validacion-administrativa"
 import { ErrorImagen, esquemaReferenciaImagen, type AlmacenImagen, type ImagenGuardada } from "./imagen-contrato"
 import { validarArchivoImagen } from "./imagen-validacion"
+import { carpetaImagenes } from "./carpeta-imagenes"
 
 type DependenciasImagen = { db: NodePgDatabase; exigir: ExigirAdministradora; almacen: AlmacenImagen }
 
@@ -38,7 +39,7 @@ function crearGuardadoImagenProducto({ db, exigir, almacen }: DependenciasImagen
     if (reemplazo && !actual.imagen) throw new ErrorImagen("imagen_requerida", 409)
     if (actual.version !== version) throw new ErrorImagen(reemplazo ? "version_desactualizada" : "conflicto_version", 409)
     await validarArchivoImagen(contenido)
-    const publicId = `angel-tears/${process.env.NODE_ENV === "production" ? "produccion" : "desarrollo"}/productos/${id}/${randomUUID()}`
+    const publicId = `angel-tears/${carpetaImagenes()}/productos/${id}/${randomUUID()}`
     let escrituraTerminada = false
     let persistiendo = false
     let resultado: ImagenGuardada | undefined

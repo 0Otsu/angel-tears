@@ -1,4 +1,5 @@
 import "server-only"
+import { carpetaImagenes } from "./carpeta-imagenes"
 import { randomUUID } from "node:crypto"
 import { and, asc, eq } from "drizzle-orm"
 import type { NodePgDatabase } from "drizzle-orm/node-postgres"
@@ -48,7 +49,7 @@ export function crearGaleriaProductos({ db, exigir, almacen }: { db: NodePgDatab
     if (medioId && !anterior) throw new ErrorImagen("medio_inexistente", 404)
     if (!medioId && anteriores.length >= MAXIMO_MEDIOS) throw new ErrorImagen("limite_medios", 409)
     await validarArchivoImagen(contenido)
-    const publicId = `angel-tears/${process.env.NODE_ENV === "production" ? "produccion" : "desarrollo"}/productos/${id}/${randomUUID()}`
+    const publicId = `angel-tears/${carpetaImagenes()}/productos/${id}/${randomUUID()}`
     try {
       const imagen = esquemaReferenciaImagen.parse(await almacen.almacenarImagen({ contenido, publicId }))
       if (imagen.publicId !== publicId) throw new ErrorImagen("error_proveedor", 502)
