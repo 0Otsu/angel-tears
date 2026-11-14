@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Instagram, MessageCircle } from "lucide-react"
+import { Instagram, LockKeyhole, MessageCircle } from "lucide-react"
 import { negocioPublico } from "@/lib/negocio-publico"
 
 export function Footer() {
@@ -13,6 +13,7 @@ export function Footer() {
             <p className="mb-4 max-w-xs text-sm leading-relaxed text-muted-foreground">Bijouterie y accesorios en Concordia, Entre Ríos. Detalles para vos y para regalar.</p>
             <div className="flex items-center gap-3">
               {[{href:negocioPublico.instagram,nombre:'Instagram',Icono:Instagram},{href:negocioPublico.whatsapp,nombre:'WhatsApp',Icono:MessageCircle}].map(({href,nombre,Icono})=><a key={nombre} href={href} target="_blank" rel="noopener noreferrer" aria-label={`${nombre} de Angel Tears (abre otra pestaña)`} className="inline-flex size-11 items-center justify-center rounded-full bg-background text-primary boty-shadow boty-transition hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"><Icono className="size-5" aria-hidden="true"/></a>)}
+              <Link href="/admin/login" aria-label="Acceder a administración" title="Administración" className="inline-flex size-11 items-center justify-center rounded-full bg-background text-primary boty-shadow boty-transition hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"><LockKeyhole className="size-5" aria-hidden="true" /></Link>
             </div>
           </div>
           <div><h3 className="mb-4 font-medium text-foreground">Catálogo</h3><ul className="space-y-3 text-sm text-muted-foreground"><li><Link href="/catalogo" className="boty-transition hover:text-foreground">Todos los accesorios</Link></li><li><Link href="/#coleccion" className="boty-transition hover:text-foreground">Selección Angel Tears</Link></li></ul></div>
