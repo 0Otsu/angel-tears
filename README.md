@@ -1,78 +1,50 @@
 # Angel Tears
 
-Sitio público de accesorios en Concordia y base visual para la administración del negocio.
+Sitio público y panel administrativo para una tienda de accesorios en Concordia. Es un monolito modular con Next.js App Router, React, TypeScript y Tailwind CSS. Drizzle y `pg` conectan con PostgreSQL. Better Auth gestiona identidad y sesiones. Cloudinary almacena imágenes de productos y Resend entrega correos de recuperación.
 
-## Estado
+## Estado actual
 
-**UI foundation / implementación inicial.** Sitio público navegable y panel administrativo visual con datos mock. Auth, base de datos, CRUD y persistencia **no están implementados**. No usar esta base para operar con información real.
+- **Sitio público.** Inicio, catálogo, fichas de producto con galería y consultas por WhatsApp e Instagram. Catálogo y fichas leen productos publicados y disponibilidad desde PostgreSQL.
+- **Administración.** Inicio y cierre de sesión, cuenta y recuperación de contraseña. Productos con categorías predefinidas, imágenes, visibilidad y destacados. Carga inicial de stock en el alta, ajustes e historial de inventario.
+- **Operaciones.** Gestión de proveedores y registro, consulta y anulación de compras, ventas y gastos. El resumen calcula el resultado aproximado a partir de las operaciones vigentes.
+- **Pendientes.** La configuración administrativa sigue siendo una pantalla de muestra. Las categorías personalizadas, el entorno comercial y la validación de sus servicios siguen pendientes.
 
-## Stack
+## Puesta en marcha local
 
-- Next.js 16.0.10, App Router: una aplicación para público y administración.
-- React / React DOM 19.2.0.
-- TypeScript 5.9.3.
-- Tailwind CSS 4.3.3 y componentes visuales Boty/shadcn adaptados.
-- PostgreSQL: decidido para persistencia futura, todavía no conectado.
+1. Usá Node **24.15.0** (ver [`.nvmrc`](.nvmrc)), pnpm **11.25.0** e instalá con `pnpm install --frozen-lockfile`. El proyecto obtiene fuentes al compilar.
+2. Arrancá tu PostgreSQL local. Para preparar una instancia nueva, seguí la [guía de bases locales](docs/DESARROLLO.md#base-de-datos-local-y-pruebas-de-integración). En una instancia existente, verificá primero el destino y el historial de migraciones.
+3. Copiá [`.env.example`](.env.example) a `.env.local` y completá `DATABASE_URL`, `BETTER_AUTH_SECRET` y `BETTER_AUTH_URL`. El puerto de PostgreSQL debe coincidir con el que expone la instancia local. Si habilitás pruebas de integración, configurá una base local separada en `DATABASE_URL_TEST`.
+4. Confirmá que `DATABASE_URL` apunta a tu base local de desarrollo. En una base nueva, aplicá las migraciones con `pnpm db:migrate` y seguí el [alta controlada de la administradora](docs/DESARROLLO.md#alta-de-la-administradora). El alta de productos necesita que las [categorías iniciales estén cargadas](docs/DESARROLLO.md#base-de-datos-local-y-pruebas-de-integración).
+5. Ejecutá `pnpm dev`. Abrí [Inicio](http://localhost:3000) o [el acceso administrativo](http://localhost:3000/admin/login).
 
-Arquitectura complementaria aprobada, todavía sin integración: Drizzle, Better Auth, Resend, Zod, Vitest/React Testing Library/Playwright y Cloudinary. Ver [blueprint del MVP](docs/BLUEPRINT_IMPLEMENTACION_MVP.md) y [ADR](docs/adr/README.md). No instalar/implementar todo automáticamente al abrir el repositorio.
+| Variable | Uso |
+| --- | --- |
+| `DATABASE_URL` | Conexión de la aplicación y Drizzle Kit. Contiene credenciales. |
+| `DATABASE_URL_TEST` | PostgreSQL local aislado, con nombre terminado en `_test`. |
+| `BETTER_AUTH_SECRET` | Secreto aleatorio y exclusivo por entorno. El ejemplo incluye cómo generarlo. |
+| `BETTER_AUTH_URL` | Origen del login y de los enlaces de recuperación. En local, `http://localhost:3000`. |
+| `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Carga y gestión de imágenes, en servidor. Sin estas variables se puede guardar un borrador oculto. Para publicarlo se exige una imagen principal. |
+| `CLOUDINARY_CARPETA_ENTORNO` | Prefijo opcional de almacenamiento. En la demo distingue sus imágenes. |
+| `RESEND_API_KEY`, `RESEND_FROM` | Envío de recuperación de contraseña. Sin configuración, la solicitud conserva su respuesta genérica y el correo no sale. |
+| `SITE_URL` | Origen público HTTPS para enlaces canónicos, sitemap y enlaces de fichas. Se puede dejar vacío en local. WhatsApp puede abrir el mensaje sin enlace si no hay origen público. |
 
-## Requisitos locales
-
-Node **24.15.0** (ver `.nvmrc`) y pnpm **11.25.0** (`packageManager` en package.json). Instalar requiere acceso al registro de paquetes; next/font obtiene las fuentes durante la compilación. No se requieren credenciales ni variables de BD para esta etapa.
-
-## Instalar
-
-```sh
-pnpm install --frozen-lockfile
-```
-
-## Desarrollo
-
-```sh
-pnpm dev
-```
-
-Abrir http://localhost:3000. Desarrollo usa webpack por compatibilidad del flujo de fuentes del prototipo en Windows; no cambia la UI. Para ejecutar el build local: `pnpm build` y `pnpm start`.
+Mantené los valores reales en archivos ignorados o en el gestor de secretos del entorno.
 
 ## Validación
 
-```sh
-pnpm lint
-pnpm typecheck
-pnpm build
-```
+- `pnpm lint`, `pnpm typecheck`, `pnpm build` validan código, tipos y compilación.
+- `pnpm test` ejecuta pruebas unitarias y de componentes. Para acotar una corrida, usá `pnpm exec vitest run --project unitarias ruta/al/archivo.test.ts` o el proyecto `componentes`.
+- `pnpm test:integration` aplica las migraciones a la base de pruebas y ejecuta pruebas contra PostgreSQL. El arnés puede escribir y limpiar datos de esa base.
+- `pnpm test:e2e` usa Playwright y un servidor en el puerto 3100. Consultá [requisitos y alcance de cada comando](docs/DESARROLLO.md#pruebas) antes de ejecutarlo.
 
-El build comprueba tipos; no tiene ignoreBuildErrors. Testing está elegido pero no instalado: aún no existe `pnpm test`. CI definitivo sigue pendiente.
+## Entornos
 
-## Rutas públicas
+| Entorno | Datos y operación |
+| --- | --- |
+| Desarrollo y pruebas | Bases locales separadas. Para revisar la aplicación, usá un entorno local con todas las migraciones aplicadas. Usá cuentas de desarrollo separadas si necesitás probar Cloudinary o Resend. |
+| Demo académica | Vercel, PostgreSQL y Cloudinary con datos de muestra. Su preparación y comandos protegidos están en [la guía de la demo](docs/features/DEMO_DEFENSA_2026.md). Un push a `origin/main` puede iniciar el despliegue automático. |
+| Producción comercial | Entorno por validar. Requiere hosting comercial, origen HTTPS, base y secretos propios, cuenta de Sofía y verificación de publicación y recuperación por correo. |
 
-- `/`
-- `/catalogo`
-- `/catalogo/collar-aura` (patrón `/catalogo/[slug]`)
+## Retomar el proyecto
 
-Home incluye `/#el-local`, `/#de-ustedes` y `/#contacto`. Instagram, Maps y WhatsApp están activos; el teléfono confirmado es +54 9 3454 26-6760. El local muestra una imagen de Google Street View aportada por el usuario, editada para retirar controles, con atribución conservada y encuadre centrado en el acceso. No es una foto nueva del comercio. Imágenes y precios de catálogo son demostrativos. Las historias aportadas son reales; los horarios siguen pendientes de confirmar.
-
-## Administración
-
-- `/admin/login`
-- `/admin`
-- `/admin/productos`
-- `/admin/stock`
-- `/admin/proveedores`
-- `/admin/compras`
-- `/admin/ventas`
-- `/admin/egresos`
-- `/admin/reportes`
-- `/admin/configuracion`
-
-**El acceso administrativo todavía utiliza navegación mock y NO constituye autenticación.** Cualquier valor que cumpla los campos requeridos permite navegar de login a `/admin`; no se envía, guarda ni valida identidad. Cerrar sesión vuelve a `/admin/login`. Las rutas administrativas son accesibles directamente y muestran DATOS DE DEMOSTRACIÓN. No hay cookies, tokens ni localStorage de auth.
-
-## Documentación
-
-Consultar [docs/](docs/), [AGENTS.md](AGENTS.md), [arquitectura](docs/ARQUITECTURA.md), [ADR-002 aceptado](docs/adr/ADR-002-nextjs-fullstack.md), [desarrollo](docs/DESARROLLO.md), [migración y validación](docs/MIGRACION_UI.md) y [decisiones pendientes](docs/DECISIONES_PENDIENTES.md). SRS/RUP validados y trazabilidad RF/CU siguen pendientes; no se inventan identificadores.
-
-Para planificar el trabajo: [mapa de implementación](docs/MAPA_IMPLEMENTACION.md) y [decisiones de producto del MVP](docs/DECISIONES_PRODUCTO_MVP.md).
-
-Para Ronda 1: [blueprint y ownership](docs/BLUEPRINT_IMPLEMENTACION_MVP.md), [trazabilidad SRS/RUP](docs/TRAZABILIDAD_MVP.md) y [OpenSpec con Codex](docs/OPENSPEC.md). Emi: Auth/Cuenta; Claudio: Inventario/Proveedores/Compras; Augusto: Productos/Público/SEO. Solo tres changes activos, ninguno implementado. OpenSpec CLI global 1.14.3; seis skills del proyecto en `.agents/skills`, sin reemplazar AGENTS.
-
-Antes de implementar una funcionalidad, revisar el mapa de implementación, las decisiones de producto y las fuentes de mayor prioridad definidas en AGENTS.md.
+Leé [AGENTS.md](AGENTS.md) y [Arquitectura](docs/ARQUITECTURA.md) para ubicar responsabilidades, luego seguí [Desarrollo](docs/DESARROLLO.md) y el [flujo Git](docs/GIT_WORKFLOW.md). Revisá el estado de la rama y preservá los commits locales antes de sincronizar. Las [decisiones aprobadas](docs/DECISIONES_PRODUCTO_MVP.md), los [ADR](docs/adr/README.md) y el [blueprint](docs/BLUEPRINT_IMPLEMENTACION_MVP.md) conservan el contexto de diseño. El [mapa de implementación](docs/MAPA_IMPLEMENTACION.md) y la [migración de UI](docs/MIGRACION_UI.md) registran el prototipo histórico. Los archivos de esa etapa pueden consultarse en los commits mencionados en esos documentos.

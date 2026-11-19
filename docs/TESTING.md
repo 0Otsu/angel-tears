@@ -1,6 +1,6 @@
 # Estrategia de testing
 
-Stack aprobado expresamente el 19/10/2026: Vitest, React Testing Library y Playwright, [ADR-006](adr/ADR-006-testing.md). No se instalan ni implementan pruebas en esta preparación. No exigir 100% de cobertura: priorizar riesgos e invariantes; SRS/RUP canónicos y criterios pendientes se mantienen explícitos.
+Stack aprobado expresamente el 19/10/2026: Vitest, React Testing Library y Playwright, [ADR-006](adr/ADR-006-testing.md). El arnés está disponible en la aplicación actual. No exigir 100% de cobertura: priorizar riesgos e invariantes; SRS/RUP canónicos y criterios pendientes se mantienen explícitos.
 
 ## Pruebas unitarias y de dominio
 
@@ -35,4 +35,4 @@ Playwright contra Next real: login/protección/logout/reset, producto/imagen/pub
 
 Revisar responsive, accesibilidad básica y objetivos de SEO cuando corresponda. Mantener los tests existentes funcionando. No desactivar pruebas para hacer pasar una entrega.
 
-Cada bloque de tareas OpenSpec incluye sus tests/docs; no acumular toda la calidad al final. Existen `pnpm lint`, `pnpm typecheck`, `pnpm build` y el arnés `pnpm test`, `pnpm test:integration` y `pnpm test:e2e` (ver [DESARROLLO](DESARROLLO.md#pruebas)). Hoy las pruebas cubren infraestructura de base de datos, el guard de la base de pruebas, el formulario de acceso y un humo E2E de la página de login: **todavía no hay pruebas de las reglas de negocio** ni de autenticación real. Emi coordina scripts/arnés compartidos en R1; cada owner prueba su dominio. Evidencia manual histórica en MIGRACION_UI.md no prueba el negocio futuro. No marcar test PASS por este plan.
+Cada bloque de tareas OpenSpec incluye sus tests/docs; no acumular toda la calidad al final. Existen `pnpm lint`, `pnpm typecheck`, `pnpm build` y el arnés `pnpm test`, `pnpm test:integration` y `pnpm test:e2e` (ver [DESARROLLO](DESARROLLO.md#pruebas)). El repositorio contiene pruebas de autenticación real, validaciones de dominio y operaciones transaccionales, además de pruebas de componentes y recorridos E2E. Emi coordina scripts/arnés compartidos en R1; cada owner prueba su dominio. Evidencia manual histórica en MIGRACION_UI.md no prueba el negocio futuro. No marcar test PASS por este plan.

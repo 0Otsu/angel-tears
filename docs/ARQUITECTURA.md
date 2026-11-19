@@ -1,44 +1,37 @@
 # Arquitectura
 
-## Dirección inicial
+Angel Tears es un **monolito modular** desplegable como una aplicación Next.js con PostgreSQL. Los módulos tienen responsabilidades y contratos explícitos. La [decisión de arquitectura](adr/ADR-001-monolito-modular.md), el [stack](adr/ADR-002-nextjs-fullstack.md) y el [blueprint](BLUEPRINT_IMPLEMENTACION_MVP.md) documentan el diseño aprobado.
 
-**Monolito modular: una aplicación y una base de datos, con módulos del dominio bien separados.** Estado: ACEPTADO. Ver [ADR-001](adr/ADR-001-monolito-modular.md).
+## Capas y entradas
 
-Priorizar simplicidad, modularidad, mantenibilidad, facilidad de evolución y reglas de negocio explícitas. Evitar microservicios, múltiples repositorios, event-driven innecesario, infraestructura compleja y abstracciones sin necesidad real.
-
-## Módulos previstos
-
-| Módulo | Responsabilidad prevista |
+| Ruta de código | Responsabilidad |
 | --- | --- |
-| autenticacion / cuenta | Identidad, sesiones, provisión única, recuperación y cambio de contraseña. Emi R1. |
-| productos | Producto único, categorías, imagen, slug, publicación y destacado simple. Augusto R1. |
-| inventario | Saldo, mínimo, stock bajo, ajustes e historia. Claudio R1. |
-| proveedores | Datos mínimos e inactivación con historia. Claudio R1. |
-| compras | Registro multilínea, consulta y anulación transaccional. Claudio R1. |
-| ventas | Registro, consulta y anulación de ventas. |
-| finanzas / egresos | Resultado aproximado y egresos manuales. R2 sin responsable asignado. |
-| catalogo / experiencia publica / SEO | Proyección pública Producto+Inventario; no otro Product. Augusto R1. |
-| apariencia admin | Tema persistente claro/oscuro admin-only. R3 sin responsable asignado. |
+| `app/` | App Router. Inicio y Catálogo son públicos. `app/admin/(panel)/` agrupa las pantallas protegidas. Los Route Handlers reciben autenticación y archivos de producto, y las Server Actions coordinan los formularios administrativos. |
+| `components/` | Presentación e interacción. `admin/` aloja el panel, `publico/` aloja catálogo y fichas y `boty/` contiene la composición del sitio. `ui/` tiene componentes reutilizables. |
+| `lib/modulos/` | Casos de uso, validaciones, contratos y consultas por dominio. |
+| `lib/infraestructura/` | Conexión Drizzle/`pg`, esquemas PostgreSQL, Better Auth y adaptador de correo. Las migraciones versionadas están en `drizzle/`. |
+| `lib/presentacion/` | Formatos y adaptación de filtros para las pantallas administrativas. |
+| `lib/negocio-publico.ts` | Datos de contacto públicos. |
+| `pruebas/`, `e2e/`, `scripts/` | Arnés de pruebas, recorridos de navegador y comandos operativos. Los datos de la demo viven en `scripts/demo/`. |
 
-Los límites, ownership de archivos, modelo global, contratos y dependencias se definen en [BLUEPRINT_IMPLEMENTACION_MVP.md](BLUEPRINT_IMPLEMENTACION_MVP.md), aprobado como planificación el 19/10/2026. El blueprint es el plano central: este documento orienta y enlaza, sin duplicar sus tablas. Admin es shell/navegación de capacidades diferentes, no un módulo único. No duplicar stock ni resultados en pantallas.
+Los Server Components consultan servicios en servidor. La UI llama a Server Actions y Route Handlers según el flujo. Las pantallas privadas, acciones y handlers validan permisos en servidor. Las interfaces administrativas y públicas reciben proyecciones ajustadas a su uso.
 
-## Stack aceptado
+## Responsabilidades de los módulos
 
-Next.js full-stack, TypeScript y PostgreSQL para un monolito modular full-stack. Estado: **ACEPTADO**, por autorización humana del 16/10/2026. Ver [ADR-002](adr/ADR-002-nextjs-fullstack.md).
+| Módulo | Responsabilidad actual |
+| --- | --- |
+| Autenticación y cuenta | Sesión persistida con Better Auth, provisión controlada de una administradora, cambio y recuperación de contraseña. Resend se usa para entregar correos de recuperación. |
+| Productos | Datos comerciales, categorías predefinidas, slug estable, imágenes en Cloudinary, visibilidad y destacados. |
+| Inventario | Saldos, ajustes y movimientos. Recibe la transacción del alta de Productos para inicializar saldo y registrar la carga inicial cuando corresponde. |
+| Proveedores | Datos de proveedores y estado activo/inactivo. |
+| Compras y Ventas | Operaciones con líneas, importes e historial. Registran efectos sobre stock y sus reversas a través de Inventario. |
+| Egresos y Finanzas | Gastos manuales y sus anulaciones. Finanzas compone ventas, compras y gastos vigentes para el resultado aproximado. |
+| Catálogo | Proyección pública de Productos e Inventario. Las listas y las fichas aplican sus propias condiciones de visibilidad. |
 
-La aplicación usa App Router y Tailwind de la UI aprobada. PostgreSQL está elegido pero no integrado. Drizzle, Better Auth, Resend, Zod y Vitest/RTL/Playwright aprobados expresamente el 19/10; Cloudinary elegido bajo autorización técnica. Formalizados en [ADR-003..008](adr/README.md), sin instalación funcional. Hosting, proveedor PostgreSQL, observabilidad final, analytics y CI/CD avanzado siguen pendientes.
+El saldo se guarda en Inventario. Las operaciones que afectan stock coordinan sus cambios en PostgreSQL con transacciones, claves de idempotencia y restricciones. Las pantallas públicas consultan el catálogo por solicitud. Los productos publicados agotados mantienen su ficha y los ocultos quedan fuera del sitio público. Ver [ADR-008](adr/ADR-008-nextjs-fronteras.md) y [reglas de dominio](REGLAS_DOMINIO.md).
 
-## Superficies públicas y administrativas
+## Rutas vigentes y pendientes
 
-Las rutas y la UI foundation están en [UX_UI.md](UX_UI.md). El acceso administrativo requiere autenticación y autorización del servidor. Ocultar un enlace no aporta seguridad.
+`/admin` muestra el resumen. Productos, Inventario y Operaciones tienen sus propios destinos. Las rutas `/admin/finanzas`, `/admin/reportes` y `/admin/egresos` redirigen para mantener enlaces anteriores. `/admin/configuracion` conserva una pantalla de muestra protegida. El tema administrativo persistente y las categorías personalizadas quedan para entregas posteriores.
 
-## Diseño acordado y decisiones futuras
-
-RSC para lecturas; Client solo interacción; Actions autorizadas para formularios y Handlers para auth/upload. Módulos proporcionales bajo `lib/modulos` y esquemas separados bajo infraestructura, sin mover masivamente `app/components`. Una transacción incluye operación, líneas, saldo e historia; locks ordenados y restricciones impiden negativos/reversiones dobles. Ver blueprint/ADR para detalles técnicos, dinero, imágenes y tema aislado. Las [reglas](REGLAS_DOMINIO.md) y [seguridad](SEGURIDAD.md) siguen siendo obligatorias; SRS/RUP y gaps no se dan por formalizados.
-
-
-## Estructura ejecutable actual
-
-`app/` contiene Home, `/catalogo`, `/catalogo/[slug]` y Admin con grupo de layout `(panel)` separado del login. `components/` aloja UI pública, Boty, admin y los componentes shadcn usados. `lib/mock/` centraliza fixtures; `lib/negocio-publico.ts` los datos de contacto; `public/` contiene siete assets alcanzables: seis migrados y la imagen del acceso incorporada durante la revisión. No existen ORM, conexión de BD, rutas legacy ni módulos vacíos.
-
-Las rutas públicas tienen metadata y HTML inicial; las siete PDP de muestra se prerenderizan. Admin es solo una superficie visual accesible sin auth, con robots noindex; no constituye un límite de seguridad. Los módulos de la tabla se crearán al implementar cada slice, no en esta preparación. [OpenSpec](OPENSPEC.md) contiene solo tres changes activos de R1 y tareas sin ejecutar; el roadmap posterior está en el [plan](PLAN_IMPLEMENTACION.md).
+Para levantar el proyecto y verificar datos y servicios por entorno, seguí el [README](../README.md) y [Desarrollo](DESARROLLO.md). Los documentos de planificación histórica y los ADR conservan el contexto de sus respectivas etapas.

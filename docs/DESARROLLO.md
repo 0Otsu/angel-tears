@@ -2,9 +2,9 @@
 
 ## Estado y preparación
 
-Existe una UI foundation ejecutable en App Router con público y administración visual. Los mocks no guardan información. El acceso administrativo solo navega; no autentica.
+El sitio público y el panel administrativo consultan PostgreSQL. Better Auth gestiona el acceso y la cuenta, y los módulos comerciales registran compras, ventas, gastos y movimientos de stock. [Arquitectura](ARQUITECTURA.md) ubica las responsabilidades y el [README](../README.md) resume las diferencias entre entornos.
 
-El bootstrap del 16/10/2026 y la arquitectura/OpenSpec del 19/10/2026 están autorizados. Stack complementario aceptado en ADR-003..008, sin integración funcional. Fuentes académicas canónicas/trazabilidad y pendientes de producto/operación siguen abiertos.
+El bootstrap y las decisiones iniciales de arquitectura se registraron en octubre de 2026. Los [ADR](adr/README.md), las decisiones aprobadas y la trazabilidad conservan el contexto. Las fuentes académicas canónicas siguen pendientes de formalización.
 
 ## Trabajo de humanos y agentes
 
@@ -13,7 +13,7 @@ El bootstrap del 16/10/2026 y la arquitectura/OpenSpec del 19/10/2026 están aut
 3. Identificar reglas aplicables, criterios de aceptación, supuestos y decisiones necesarias. Resolver cambios de alcance, reglas o arquitectura mediante revisión humana y las fuentes de mayor prioridad.
 4. Crear una rama acotada y trabajar según [GIT_WORKFLOW.md](GIT_WORKFLOW.md).
 5. El responsable revisa lo asistido por IA y debe poder explicarlo; ejecutar los tests correspondientes.
-6. Antes del merge, integrar main reciente de forma segura, resolver conflictos entendidos y comprobar [la definición de terminado](DEFINICION_TERMINADO.md): tests aplicables, lint/typecheck/build, OpenSpec y diff. Con checks correctos, mergear a main, push y avisar al equipo.
+6. Antes del merge, integrar main reciente de forma segura, resolver conflictos entendidos y comprobar [la definición de terminado](DEFINICION_TERMINADO.md): tests aplicables, lint/typecheck/build, OpenSpec y diff. Integrar y publicar según la autorización de la tarea. Revisar los commits locales antes de sincronizar. Un push a `origin/main` puede desplegar la demo en Vercel.
 
 La IA no sustituye las fuentes ni responsabilidad humana. R1: Emi Auth/Cuenta; Claudio Inventario/Proveedores/Compras; Augusto Productos/Público/SEO. [Blueprint](BLUEPRINT_IMPLEMENTACION_MVP.md) fija modelo/contratos/archivos y coordinación de dependencias/migraciones. R2/R3 sin owners. El workflow vigente de esta etapa no exige PR, aprobación de otro integrante ni revisión cruzada; otra revisión es recomendable, no un gate. Se mantienen ramas individuales, sincronización, coordinación, checks, trazabilidad y alcance.
 
@@ -31,26 +31,30 @@ Son ejemplos de nomenclatura; no son archivos o funciones a crear ahora. `.edito
 
 ## Dependencias y decisiones
 
-Justificar necesidad/impacto de dependencias en el slice. Drizzle/pg, Better Auth/Resend, Zod, Vitest/RTL/Playwright y Cloudinary ya tienen decisión en ADR; no se instalan como efecto del blueprint. Hosting/DB administrada/observabilidad/analytics/CI avanzado siguen pendientes. Tailwind/Boty son referencia visual, no fuente de requisitos. Cambios funcionales nuevos se proponen antes de ejecutar.
+Justificar necesidad/impacto de dependencias en el slice. Drizzle/pg, Better Auth/Resend, Zod, Vitest/RTL/Playwright y Cloudinary ya tienen decisión en ADR; no se instalan como efecto del blueprint. La demo usa hosting y base administrada propios. La elección y validación del entorno comercial siguen pendientes. Tailwind/Boty son referencia visual, no fuente de requisitos. Cambios funcionales nuevos se proponen antes de ejecutar.
 
 ## Ejecución local
 
-Node 24.15.0 y pnpm 11.25.0. `pnpm install --frozen-lockfile`, `pnpm dev`, `pnpm lint`, `pnpm typecheck`, `pnpm build`, `pnpm start`. El script dev usa webpack; build usa Next con validación de tipos activa. ESLint flat config hereda Next core-web-vitals y TypeScript, sin desactivar reglas. Arnés de tests: ver «Pruebas» abajo; hoy cubre infraestructura y el formulario de acceso, no reglas de negocio.
+Node 24.15.0 y pnpm 11.25.0. `pnpm install --frozen-lockfile`, `pnpm dev`, `pnpm lint`, `pnpm typecheck`, `pnpm build`, `pnpm start`. El script dev usa webpack; build usa Next con validación de tipos activa. ESLint flat config hereda Next core-web-vitals y TypeScript, sin desactivar reglas. Las pruebas abarcan componentes, reglas de negocio, PostgreSQL y recorridos de navegador. Ver [Pruebas](#pruebas) para elegir el alcance.
 
-Los scripts nativos permitidos de pnpm están limitados a sharp y unrs-resolver; `esbuild` (dependencia transitiva de Vitest y drizzle-kit) queda explícitamente en `false` en `pnpm-workspace.yaml`. Ver historia en [MIGRACION_UI.md](MIGRACION_UI.md). `work/` contiene evidencia local no versionada. La UI foundation no necesita secretos; la base de datos sí necesita variables locales (ver abajo).
+Los scripts nativos permitidos de pnpm están limitados a sharp y unrs-resolver; `esbuild` (dependencia transitiva de Vitest y drizzle-kit) queda explícitamente en `false` en `pnpm-workspace.yaml`. Ver historia en [MIGRACION_UI.md](MIGRACION_UI.md). `work/` contiene evidencia local no versionada. El servidor carga las credenciales y el secreto de sesión en el entorno local.
 
 ### Base de datos local y pruebas de integración
 
-Requiere una instancia de PostgreSQL local. Crear el rol `angel_tears` y las bases `angel_tears_dev` y `angel_tears_test` con `psql -U postgres -h localhost -f scripts/db/crear-bases-locales.sql` (pide la contraseña del superusuario y define la del rol por entrada oculta; es idempotente y solo para desarrollo local). Copiar `.env.example` a `.env.local` (Git lo ignora) y completar la contraseña.
+Para una instancia local nueva, el script `psql -U postgres -h localhost -f scripts/db/crear-bases-locales.sql` prepara el rol `angel_tears` y las bases `angel_tears_dev` y `angel_tears_test`. El script pide el secreto del superusuario y establece la contraseña del rol de aplicación por entrada oculta. En una instancia existente, usá el rol y las bases ya preparados y verificá el puerto expuesto. Copiá `.env.example` desde la raíz del repositorio a `.env.local` y completá los valores de desarrollo.
 
 | Variable | Uso |
 | --- | --- |
 | `DATABASE_URL` | Base de desarrollo de la aplicación y de `drizzle-kit`. |
 | `DATABASE_URL_TEST` | Base aislada para pruebas de integración. Debe ser local, terminar en `_test` y ser distinta de `DATABASE_URL`; el guard (`pruebas/guardia-url-bd.ts`) se niega a ejecutar contra otra. |
 | `BETTER_AUTH_SECRET` | Secreto con el que Better Auth firma cookies y tokens. Largo y aleatorio, distinto en cada entorno, nunca versionado (el comando para generar uno está en `.env.example`). |
-| `BETTER_AUTH_URL` | URL pública de la aplicación; en desarrollo, `http://localhost:3000`. |
+| `BETTER_AUTH_URL` | Origen de autenticación y recuperación. En desarrollo, `http://localhost:3000`. |
 
-`pnpm db:generate`, `pnpm db:migrate` y `pnpm db:check` usan Drizzle Kit; los schemas viven en `lib/infraestructura/esquemas/*.ts` y las migraciones en `drizzle/`. La conexión es `lib/infraestructura/db.ts`, solo servidor. Tras clonar o actualizar `main`: `pnpm db:migrate` aplica las migraciones pendientes a tu base de desarrollo.
+El [README](../README.md#puesta-en-marcha-local) explica las variables de Cloudinary, Resend y del origen público.
+
+`pnpm db:generate`, `pnpm db:migrate` y `pnpm db:check` usan Drizzle Kit; los schemas viven en `lib/infraestructura/esquemas/*.ts` y las migraciones en `drizzle/`. La conexión es `lib/infraestructura/db.ts`, solo servidor. `pnpm db:migrate` aplica cambios a la base que indica `DATABASE_URL`. Antes de usarlo, confirmá host, puerto y nombre de base sin imprimir la cadena completa. Para una base existente, contrastá el historial aplicado con los archivos versionados y revisá las migraciones pendientes. Si el historial y el esquema difieren, diagnosticá esa diferencia antes de ejecutar migraciones. En particular, el registro de [recuperación local](features/RECUPERACION_2026_11_13.md) describe una base de revisión separada, con el esquema completo.
+
+Las migraciones crean la tabla de categorías sin filas. El formulario de alta necesita las categorías iniciales. En una base nueva su preparación es una operación explícita con `sembrarCategorias` de `lib/modulos/productos/persistencia.ts`; el CLI de demo está reservado para el entorno académico y valida su destino. El arranque de la aplicación y el build no aplican migraciones ni cargan datos.
 
 **Autenticación (migración `0000_auth-base`).** Crea las tablas de Better Auth (`user`, `session`, `account`, `verification`, `rate_limit`) a partir de `lib/infraestructura/esquemas/auth.ts`. La configuración de Better Auth está en `lib/infraestructura/auth-config.ts` y la instancia de la aplicación en `lib/infraestructura/auth.ts` (solo servidor). El schema se generó con la CLI de Better Auth 1.7.11 y se ajustó a mano (fechas `timestamptz`, índices de vencimiento, unicidad de cuenta por proveedor); el encabezado del archivo lista los ajustes. Para regenerarlo al actualizar Better Auth o sumar plugins:
 
@@ -70,7 +74,7 @@ Stack de [ADR-006](adr/ADR-006-testing.md). Una vez: `pnpm install --frozen-lock
 | `pnpm test:integration` | Vitest, proyecto `integracion` (`*.integracion.test.ts`) contra PostgreSQL real. Antes de las pruebas aplica las migraciones a la base `_test`, una sola vez por corrida (`pruebas/preparar-integracion.ts`). Falla de forma explícita si falta `DATABASE_URL_TEST`; no se da por pasada una prueba que no pudo ejecutarse. | Base `_test` local. |
 | `pnpm test:e2e` | Playwright (carpeta `e2e/`, `*.spec.ts`). Hace `pnpm build`, levanta `pnpm start` en el puerto 3100 y prueba en Chromium. | Navegador instalado; la base `_test` cuando los tests la usen. |
 
-Los E2E nunca usan la base de desarrollo: el servidor recibe `DATABASE_URL_TEST` validada por el guard y, si falta, una `DATABASE_URL` vacía. El correo de recuperación se probará con un doble que reemplace a Resend (tarea 3.1): ningún test envía correos reales ni usa servicios o datos productivos. No hay CI configurado; estos comandos se ejecutan en local. OpenSpec global 1.14.3 y seis skills de Codex se documentan en OPENSPEC; su instalación no modifica package/lock. Solo tres changes activos; no ejecutar apply/archivar automáticamente.
+Los E2E nunca usan la base de desarrollo: el servidor recibe `DATABASE_URL_TEST` validada por el guard y, si falta, una `DATABASE_URL` vacía. Para pruebas de recuperación usá un doble de correo y mantené las credenciales de Resend fuera del entorno de pruebas. La configuración de E2E deshabilita las credenciales de Cloudinary. No hay CI configurado; estos comandos se ejecutan en local. OpenSpec global 1.14.3 y seis skills de Codex se documentan en OPENSPEC; su instalación no modifica package/lock. Consultar los changes vigentes antes de aplicar o archivar uno.
 
 ### Contrato `exigirAdministradora`
 
@@ -160,4 +164,4 @@ Para evitar migraciones incompatibles entre owners (ADR-003; blueprint, seccione
 4. **Una migración ya integrada a `main` nunca se edita ni se regenera**: un cambio posterior es una migración nueva. Las migraciones se aplican con `pnpm db:migrate` (sobre `DATABASE_URL`); las pruebas de integración las aplican a la base `_test`.
 5. **Conflictos en `drizzle/meta/_journal.json` o en los snapshots al integrar `main`:** no se mezclan a mano. Si tu migración todavía no entró a `main`, descartarla (borrar su `.sql` y su snapshot y restaurar el journal de `main`), traer `main` y regenerarla. Antes de integrar, correr `pnpm db:check`, que detecta inconsistencias del historial, y `pnpm db:generate`: si no cambiaste ningún schema debe responder «No schema changes, nothing to migrate» (si genera una migración que no esperabas, algo cambió; revisarla antes de seguir) (mientras no exista ninguna migración, crea un `drizzle/meta/_journal.json` vacío: no commitearlo; el journal nace con la primera migración real).
 6. **Orden de dependencias:** el schema de Auth entra primero, porque las tablas de Inventario, Compras y Ventas referencian a la usuaria (`actorId`). Las columnas o FK de origen de `CompraLinea` y `VentaLinea` llegan junto con su tabla. Nadie importa schemas que todavía no existen.
-7. **Sin migraciones automáticas** en `build` ni en el arranque, y sin datos de demostración en producción. El procedimiento de migración en producción sigue pendiente (hosting y base administrada sin decidir).
+7. **Sin migraciones automáticas** en `build` ni en el arranque, y sin datos de demostración en producción. La demo tiene un procedimiento propio. El de producción comercial sigue pendiente.
