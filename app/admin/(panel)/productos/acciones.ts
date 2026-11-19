@@ -16,7 +16,11 @@ async function guardar(formulario: FormData, edicion: boolean): Promise<Resultad
     const encabezados = await headers()
     const resultado = edicion
       ? await administracion.editar(encabezados, { id: formulario.get("id"), version: formulario.get("version") }, datosDe(formulario))
-      : await administracion.crear(encabezados, datosDe(formulario))
+      : await administracion.crear(encabezados, {
+        ...datosDe(formulario),
+        stockInicial: formulario.get("stockInicial"),
+        claveSolicitud: formulario.get("claveSolicitud"),
+      })
     if (resultado.estado === "ok") {
       revalidatePath("/admin/productos")
       revalidatePath("/")

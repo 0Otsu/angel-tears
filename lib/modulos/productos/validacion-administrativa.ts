@@ -13,6 +13,17 @@ export const esquemaReferenciaEdicion = z.object({
   version: z.coerce.number().int().positive(),
 })
 
+export const esquemaExistenciasIniciales = z.object({
+  stockInicial: z.preprocess((valor) => {
+    if (valor == null || (typeof valor === "string" && !valor.trim())) return 0
+    if (typeof valor === "string" && /^\d+$/.test(valor.trim())) return Number(valor)
+    return valor
+  }, z.int32({ error: "Ingresá una cantidad entera entre 0 y 2.147.483.647." })
+    .nonnegative({ error: "El stock inicial no puede ser negativo." })),
+  claveSolicitud: z.uuid({ error: "La referencia del alta no es válida. Recargá la página." })
+    .transform((clave) => clave.toLowerCase()).nullish(),
+})
+
 export function erroresProducto(error: z.ZodError): Record<string, string> {
   const errores: Record<string, string> = {}
   for (const problema of error.issues) errores[String(problema.path[0] ?? "formulario")] ??= problema.message

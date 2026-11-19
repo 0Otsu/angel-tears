@@ -1,17 +1,42 @@
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react"
 import { beforeEach, expect, it, vi } from "vitest"
-import { EditorProducto } from "./editor-producto"
+import { EditorProducto, NuevoProducto } from "./editor-producto"
 import { ProductosAdmin } from "./productos-admin"
 import { AccionesProducto } from "./acciones-producto"
 import type { ProductoAdministrativo } from "@/lib/modulos/productos/administracion-contrato"
-const { editar, publicar, navegar, refrescar, previa } = vi.hoisted(() => ({ editar: vi.fn(), publicar: vi.fn(), navegar: vi.fn(), refrescar: vi.fn(), previa: vi.fn() }))
+const { crear, editar, publicar, navegar, refrescar, previa } = vi.hoisted(() => ({ crear: vi.fn(), editar: vi.fn(), publicar: vi.fn(), navegar: vi.fn(), refrescar: vi.fn(), previa: vi.fn() }))
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: refrescar, push: navegar }) }))
-vi.mock("@/app/admin/(panel)/productos/acciones", () => ({ crearProductoAccion: vi.fn(), editarProductoAccion: editar }))
+vi.mock("@/app/admin/(panel)/productos/acciones", () => ({ crearProductoAccion: crear, editarProductoAccion: editar }))
 vi.mock("@/app/admin/(panel)/productos/publicacion-acciones", () => ({ cambiarPublicacionAccion: publicar }))
 vi.mock("@/app/admin/(panel)/productos/vista-previa-acciones", () => ({ consultarVistaPreviaAccion: previa }))
 vi.mock("./galeria-producto", () => ({ GaleriaProducto: ({ version, alGuardar, alCambiarOcupado, alCambiarPendiente, alCambiarGuardando }: { version: number; alGuardar: (valor: unknown) => void; alCambiarOcupado: (valor: boolean) => void; alCambiarPendiente: (valor: boolean) => void; alCambiarGuardando?: (valor: number) => void }) => <><button onClick={() => { alCambiarOcupado(true); alCambiarPendiente(true); alCambiarGuardando?.(2) }}>Seleccion de prueba</button><button onClick={() => { alGuardar({ version: version + 1, imagen: { urlSegura: "https://example.test/B.png", ancho: 20, alto: 20 } }); alCambiarOcupado(false); alCambiarPendiente(false); alCambiarGuardando?.(0) }}>Confirmar imagen de prueba</button></> }))
 const producto: ProductoAdministrativo = { id: "cd12704c-e5a7-4216-b16e-ad6d7ae47490", nombre: "Collar", slug: "collar", precio: "222.00", categoriaCodigo: "collares", categoriaNombre: "Collares", descripcion: null, material: null, medida: null, color: null, cuidados: null, publicado: false, destacado: false, version: 1, tieneImagen: false, imagen: null }
 const categorias = [{ codigo: "collares" as const, nombre: "Collares" }]
+
+it("alta conserva el stock y la clave tras un error y continúa a Imágenes al confirmar", async () => {
+  crear.mockReset()
+    .mockResolvedValueOnce({ estado: "datos_invalidos", errores: { stockInicial: "Ingresá un entero." } })
+    .mockResolvedValueOnce({ estado: "ok", productoId: producto.id })
+  render(<NuevoProducto categorias={categorias} />)
+  const stock = screen.getByRole<HTMLInputElement>("textbox", { name: "Stock inicial" })
+  expect(stock.value).toBe("0")
+  fireEvent.change(screen.getByLabelText("Nombre *"), { target: { value: "Collar nuevo" } })
+  fireEvent.change(stock, { target: { value: "2.5" } })
+  fireEvent.submit(screen.getByRole("form", { name: "Nuevo producto" }))
+  await screen.findByText("Ingresá un entero.")
+  expect(stock.value).toBe("2.5")
+  expect((screen.getByLabelText("Nombre *") as HTMLInputElement).value).toBe("Collar nuevo")
+
+  fireEvent.change(stock, { target: { value: "5" } })
+  fireEvent.submit(screen.getByRole("form", { name: "Nuevo producto" }))
+  await waitFor(() => expect(navegar).toHaveBeenCalledWith(`/admin/productos/${producto.id}/editar?paso=imagen&alta=1`))
+  const primero: FormData = crear.mock.calls[0][0]
+  const segundo: FormData = crear.mock.calls[1][0]
+  expect(segundo.get("stockInicial")).toBe("5")
+  expect(segundo.get("claveSolicitud")).toMatch(/^[\da-f-]{36}$/)
+  expect(segundo.get("claveSolicitud")).toBe(primero.get("claveSolicitud"))
+})
+
 it("publicacion pendiente bloquea solo su producto y vuelve a permitir tras error", async () => {
  let resolver!: (valor: unknown) => void
  publicar.mockImplementationOnce(() => new Promise(r => { resolver = r }))
@@ -45,6 +70,7 @@ it("filtra productos persistidos y distingue filtro vacio", () => {
 it("imagen propia actualiza version sin perder el borrador ni adoptar cambios ajenos", async () => {
   editar.mockResolvedValue({ estado: "ok", productoId: producto.id })
   render(<EditorProducto producto={producto} categorias={categorias} />)
+  expect(screen.queryByLabelText("Stock inicial")).toBeNull()
   fireEvent.change(screen.getByLabelText("Nombre *"), { target: { value: "Borrador conservado" } })
   fireEvent.click(screen.getByRole("button", { name: "2. Imágenes" }))
   fireEvent.click(screen.getByRole("button", { name: "Confirmar imagen de prueba" }))

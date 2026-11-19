@@ -153,6 +153,14 @@ export function esErrorProductoSinSaldo(error: unknown): error is ErrorProductoS
  */
 export type CrearSaldoCero = (tx: TransaccionLlamador, productoId: string) => Promise<void>
 
+/** Registra la carga inicial positiva en la transaccion del alta. Lanza si no se confirma. */
+export type RegistrarStockInicial = (tx: TransaccionLlamador, comando: {
+  productoId: string
+  actorId: string
+  claveSolicitud: string
+  cantidad: number
+}) => Promise<void>
+
 /**
  * Aplica variaciones firmadas bajo lock de filas ordenadas por producto, verifica no
  * negatividad de todas antes de modificar y registra movimientos. Lanza

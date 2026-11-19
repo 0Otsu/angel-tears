@@ -71,8 +71,12 @@ export function FormularioProducto({ producto, categorias, cancelar, versionProp
   accionCancelar?: ReactNode
 }) {
   const [valores, setValores] = useState(() => valoresIniciales(producto))
-  const [guardados, setGuardados] = useState(() => valoresIniciales(producto))
-  useEffect(() => { alCambiarBorrador?.(JSON.stringify(valores) !== JSON.stringify(guardados)) }, [valores, guardados, alCambiarBorrador])
+  const [stockInicial, setStockInicial] = useState("0")
+  const [guardados, setGuardados] = useState(() => ({ ...valoresIniciales(producto), stockInicial: "0" }))
+  const claveAlta = useRef<string | null>(null)
+  useEffect(() => {
+    alCambiarBorrador?.(JSON.stringify({ ...valores, stockInicial }) !== JSON.stringify(guardados))
+  }, [valores, stockInicial, guardados, alCambiarBorrador])
   const [versionEsperada, setVersionEsperada] = useState(producto?.version ?? 0)
   const [resultado, setResultado] = useState<EstadoFormularioProducto>({ estado: "inicial" })
   const [guardando, ocupar] = useState(false)
@@ -102,6 +106,10 @@ export function FormularioProducto({ producto, categorias, cancelar, versionProp
     try {
       let respuesta: EstadoFormularioProducto
       try {
+        if (!producto) {
+          claveAlta.current ??= crypto.randomUUID()
+          datos.set("claveSolicitud", claveAlta.current)
+        }
         respuesta = await (producto ? editarProductoAccion(datos) : crearProductoAccion(datos))
       } catch {
         respuesta = { estado: "error_tecnico" }
@@ -110,7 +118,7 @@ export function FormularioProducto({ producto, categorias, cancelar, versionProp
         ? { ...respuesta, errores: { ...respuesta.errores, precio: errorPrecio(valores.precio, respuesta.errores.precio) } }
         : respuesta)
       if (respuesta.estado === "ok") {
-        setGuardados(valores)
+        setGuardados({ ...valores, stockInicial })
         if (producto) setVersionEsperada(Math.max(versionEsperada, versionPropia ?? 0) + 1)
         if (producto) {
           alGuardar?.(respuesta.productoId, valoresEnviados)
@@ -149,10 +157,20 @@ export function FormularioProducto({ producto, categorias, cancelar, versionProp
           </select>
           {errores.categoriaCodigo && <p id="error-categoriaCodigo" className="text-sm text-destructive">{errores.categoriaCodigo}</p>}
         </div>
+        {!producto && <div className="min-w-0 space-y-2">
+          <Label htmlFor="producto-stock-inicial">Stock inicial</Label>
+          <Input id="producto-stock-inicial" name="stockInicial" inputMode="numeric" value={stockInicial}
+            onChange={(e) => setStockInicial(e.target.value)} className="min-h-11 bg-background"
+            aria-invalid={Boolean(errores.stockInicial)}
+            aria-describedby={errores.stockInicial ? "ayuda-stock-inicial error-stock-inicial" : "ayuda-stock-inicial"} />
+          <p id="ayuda-stock-inicial" className="text-sm text-muted-foreground">Indicá cuántas unidades tenés actualmente. Podés dejarlo en cero y modificarlo después.</p>
+          {errores.stockInicial && <p id="error-stock-inicial" className="text-sm text-destructive">{errores.stockInicial}</p>}
+        </div>}
       </fieldset>
       {resultado.estado === "ok" && <AvisoProductoGuardado key={versionEsperada} texto={producto ? "Cambios guardados." : "Producto creado."} />}
       {mensaje(resultado) && <div role="alert" className="space-y-2 text-sm text-destructive">
         <p>{mensaje(resultado)}</p>
+        {errores.claveSolicitud && <p>{errores.claveSolicitud}</p>}
         {resultado.estado === "sesion_requerida" && <Link href="/admin/login" className="underline">Iniciar sesión</Link>}
         {(resultado.estado === "conflicto_version" || resultado.estado === "no_encontrado") && <Button type="button" variant="outline" onClick={() => { window.location.reload() }}>Recargar datos</Button>}
       </div>}

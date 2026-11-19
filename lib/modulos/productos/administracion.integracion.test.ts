@@ -1,13 +1,16 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest"
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest"
 import { eq, sql } from "drizzle-orm"
 import type { ConexionBd } from "@/lib/infraestructura/conexion-bd"
 import { categoria, producto } from "@/lib/infraestructura/esquemas/producto"
-import { inventario } from "@/lib/infraestructura/esquemas/inventario"
+import { ajusteStock, inventario, movimientoStock } from "@/lib/infraestructura/esquemas/inventario"
+import { user } from "@/lib/infraestructura/esquemas/auth"
 import { crearExigirAdministradora } from "@/lib/modulos/autenticacion/contrato"
 import { crearVerificadorDeSesion } from "@/lib/modulos/autenticacion/verificador-better-auth"
 import { crearAuth } from "@/lib/infraestructura/auth-config"
 import { aprovisionarAdministradora } from "@/lib/modulos/autenticacion/aprovisionar-administradora"
 import { crearContratoInventario } from "@/lib/modulos/inventario/persistencia"
+import { crearRegistroStockInicial } from "@/lib/modulos/inventario/ajustes"
+import { crearAdministracionInventario } from "@/lib/modulos/inventario/administracion"
 import { crearConexionPruebas } from "@/pruebas/arnes-bd"
 import { crearAdministracionProductos } from "./administracion"
 import { sembrarCategorias } from "./persistencia"
@@ -19,8 +22,12 @@ const identidad = { id: "admin-productos-21", nombre: "Administradora", email: "
 describe("administracion Producto 2.1 sobre PostgreSQL", () => {
   let conexion: ConexionBd
   const db = () => conexion.db
-  const c0 = () => crearContratoInventario(db()).crearSaldoCero
-  const servicio = () => crearAdministracionProductos({ db: db(), exigir: crearExigirAdministradora(async () => identidad), crearSaldoCero: c0() })
+  const contrato = () => crearContratoInventario(db())
+  const c0 = () => contrato().crearSaldoCero
+  const registro = () => crearRegistroStockInicial(db(), contrato())
+  const exigir = crearExigirAdministradora(async () => identidad)
+  const servicio = (registrarStockInicial = registro()) =>
+    crearAdministracionProductos({ db: db(), exigir, crearSaldoCero: c0(), registrarStockInicial })
   async function limpiar() {
     await db().delete(inventario)
     await db().delete(producto)
@@ -37,7 +44,7 @@ describe("administracion Producto 2.1 sobre PostgreSQL", () => {
   afterAll(async () => { if (conexion) { await limpiar(); await conexion.pool.end() } })
 
   it("sin sesion rechaza alta/edicion y consulta antes de acceder a datos", async () => {
-    const sinSesion = crearAdministracionProductos({ db: db(), exigir: crearExigirAdministradora(async () => null), crearSaldoCero: c0() })
+    const sinSesion = crearAdministracionProductos({ db: db(), exigir: crearExigirAdministradora(async () => null), crearSaldoCero: c0(), registrarStockInicial: registro() })
     expect(await sinSesion.crear(encabezados, entrada)).toEqual({ estado: "sesion_requerida" })
     expect(await sinSesion.editar(encabezados, {}, entrada)).toEqual({ estado: "sesion_requerida" })
     await expect(sinSesion.consultar(encabezados)).rejects.toMatchObject({ codigo: "SESION_REQUERIDA" })
@@ -54,13 +61,82 @@ describe("administracion Producto 2.1 sobre PostgreSQL", () => {
   })
 
   it("si C0 falla despues de insertar saldo, revierte ambos registros", async () => {
-    const fallido = crearAdministracionProductos({ db: db(), exigir: crearExigirAdministradora(async () => identidad), crearSaldoCero: async (tx, id) => {
+    const fallido = crearAdministracionProductos({ db: db(), exigir, registrarStockInicial: registro(), crearSaldoCero: async (tx, id) => {
       await c0()(tx, id)
       throw new Error("fallo C0 deliberado")
     } })
     await expect(fallido.crear(encabezados, entrada)).rejects.toThrow("fallo C0 deliberado")
     expect(await db().select().from(producto)).toEqual([])
     expect(await db().select().from(inventario)).toEqual([])
+  })
+
+  describe("stock inicial en el alta", () => {
+    beforeEach(async () => {
+      await db().insert(user).values({ id: identidad.id, email: identidad.email, name: identidad.nombre })
+    })
+    afterEach(async () => {
+      await db().delete(movimientoStock).where(eq(movimientoStock.actorId, identidad.id))
+      await db().delete(ajusteStock).where(eq(ajusteStock.actorId, identidad.id))
+      await db().delete(user).where(eq(user.id, identidad.id))
+    })
+
+    it.each(["", "0"])("acepta %j sin movimiento y reintenta la misma alta", async (stockInicial) => {
+      const datos = { ...entrada, stockInicial, claveSolicitud: crypto.randomUUID() }
+      const id = await crear(datos)
+      expect(await crear(datos)).toBe(id)
+      expect(await db().select().from(producto)).toMatchObject([{ id, publicado: false, imagenAssetId: null }])
+      expect(await db().select().from(inventario)).toMatchObject([{ productoId: id, cantidad: 0 }])
+      expect(await db().select().from(ajusteStock)).toEqual([])
+      expect(await db().select().from(movimientoStock)).toEqual([])
+    })
+
+    it("confirma un solo ajuste INICIAL ante reintentos concurrentes y admite un ajuste posterior", async () => {
+      const datos = { ...entrada, stockInicial: "5", claveSolicitud: crypto.randomUUID() }
+      const [id, repetido] = await Promise.all([crear(datos), crear(datos)])
+      expect(repetido).toBe(id)
+      expect(await db().select().from(producto)).toMatchObject([{ id, publicado: false, imagenAssetId: null }])
+      expect(await db().select().from(inventario)).toMatchObject([{ productoId: id, cantidad: 5 }])
+      const ajustes = await db().select().from(ajusteStock)
+      expect(ajustes).toMatchObject([{
+        productoId: id, tipo: "INICIAL", cantidad: 5, motivo: "Carga inicial",
+        actorId: identidad.id, claveSolicitud: datos.claveSolicitud,
+      }])
+      expect(await db().select().from(movimientoStock)).toMatchObject([{
+        ajusteId: ajustes[0].id, productoId: id, delta: 5, saldoResultante: 5,
+      }])
+
+      const inventarioAdmin = crearAdministracionInventario({ db: db(), exigir, contrato: contrato() })
+      const ajuste = { productoId: id, tipo: "DECREMENTO", cantidad: "2", claveSolicitud: crypto.randomUUID() }
+      expect(await inventarioAdmin.ajustar(encabezados, { ...ajuste, motivo: "" })).toMatchObject({ estado: "datos_invalidos" })
+      expect(await inventarioAdmin.ajustar(encabezados, { ...ajuste, motivo: "Recuento" })).toMatchObject({ estado: "ok", saldoResultante: 3 })
+      expect(await crear(datos)).toBe(id)
+      expect(await db().select().from(inventario)).toMatchObject([{ productoId: id, cantidad: 3 }])
+      expect(await db().select().from(movimientoStock)).toHaveLength(2)
+    })
+
+    it.each(["-1", "1.5", "2.0", "2147483648"])("rechaza el stock %s sin persistir", async (stockInicial) => {
+      const datos = { ...entrada, stockInicial, claveSolicitud: crypto.randomUUID() }
+      expect(await servicio().crear(encabezados, datos)).toMatchObject({
+        estado: "datos_invalidos", errores: { stockInicial: expect.any(String) },
+      })
+      expect(await db().select().from(producto)).toEqual([])
+      expect(await db().select().from(inventario)).toEqual([])
+    })
+
+    it("revierte producto, saldo, ajuste y movimiento si falla el alta y permite reintentar", async () => {
+      const datos = { ...entrada, stockInicial: "5", claveSolicitud: crypto.randomUUID() }
+      const fallido = servicio(async (tx, comando) => {
+        await registro()(tx, comando)
+        throw new Error("fallo deliberado después del ajuste")
+      })
+      await expect(fallido.crear(encabezados, datos)).rejects.toThrow("fallo deliberado")
+      expect(await db().select().from(producto)).toEqual([])
+      expect(await db().select().from(inventario)).toEqual([])
+      expect(await db().select().from(ajusteStock)).toEqual([])
+      expect(await db().select().from(movimientoStock)).toEqual([])
+      const id = await crear(datos)
+      expect(await db().select().from(inventario)).toMatchObject([{ productoId: id, cantidad: 5 }])
+    })
   })
 
   it.each(["nombre", "precio", "categoriaCodigo"])("rechaza obligatorio %s sin persistir", async (campo) => {
@@ -138,7 +214,7 @@ describe("administracion Producto 2.1 sobre PostgreSQL", () => {
       expect(respuesta.status).toBe(200)
       const cookie = respuesta.headers.getSetCookie().find((c) => c.includes("session_token"))?.split(";")[0]
       expect(cookie).toBeTruthy()
-      const real = crearAdministracionProductos({ db: db(), exigir: crearExigirAdministradora(crearVerificadorDeSesion(auth)), crearSaldoCero: c0() })
+      const real = crearAdministracionProductos({ db: db(), exigir: crearExigirAdministradora(crearVerificadorDeSesion(auth)), crearSaldoCero: c0(), registrarStockInicial: registro() })
       const sesion = new Headers({ cookie: cookie! })
       const alta = await real.crear(sesion, entrada)
       expect(alta).toMatchObject({ estado: "ok" })

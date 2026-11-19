@@ -3,10 +3,10 @@ import { and, asc, eq, sql } from "drizzle-orm"
 import type { NodePgDatabase } from "drizzle-orm/node-postgres"
 import { categoria, producto } from "@/lib/infraestructura/esquemas/producto"
 import { conAdministradora, type ExigirAdministradora } from "@/lib/modulos/autenticacion/contrato"
-import type { CrearSaldoCero } from "@/lib/modulos/inventario/contrato"
+import type { CrearSaldoCero, RegistrarStockInicial } from "@/lib/modulos/inventario/contrato"
 import type { ConsultaAdministrativa, ResultadoGuardarProducto } from "./administracion-contrato"
 import { insertarProductoOcultoConSaldo } from "./persistencia"
-import { erroresProducto, esquemaProductoAdministrativo, esquemaReferenciaEdicion } from "./validacion-administrativa"
+import { erroresProducto, esquemaExistenciasIniciales, esquemaProductoAdministrativo, esquemaReferenciaEdicion } from "./validacion-administrativa"
 
 const camposAdministrativos = {
   id: producto.id, slug: producto.slug, nombre: producto.nombre, precio: producto.precio,
@@ -23,8 +23,9 @@ export function crearAdministracionProductos(dependencias: {
   db: NodePgDatabase
   exigir: ExigirAdministradora
   crearSaldoCero: CrearSaldoCero
+  registrarStockInicial: RegistrarStockInicial
 }) {
-  const { db, exigir, crearSaldoCero } = dependencias
+  const { db, exigir, crearSaldoCero, registrarStockInicial } = dependencias
 
   async function consultar(encabezados: Headers, productoId?: string): Promise<ConsultaAdministrativa> {
     await exigir(encabezados)
@@ -46,21 +47,34 @@ export function crearAdministracionProductos(dependencias: {
     entrada: unknown,
     referencia?: unknown,
   ): Promise<ResultadoGuardarProducto> {
-    const autorizado = await conAdministradora(exigir, encabezados, async (): Promise<ResultadoGuardarProducto> => {
+    const autorizado = await conAdministradora(exigir, encabezados, async (administradora): Promise<ResultadoGuardarProducto> => {
       const validacion = esquemaProductoAdministrativo.safeParse(entrada)
       if (!validacion.success) return { estado: "datos_invalidos", errores: erroresProducto(validacion.error) }
       const edicion = referencia === undefined ? null : esquemaReferenciaEdicion.safeParse(referencia)
       if (edicion && !edicion.success) return { estado: "datos_invalidos", errores: erroresProducto(edicion.error) }
+      const alta = edicion ? null : esquemaExistenciasIniciales.safeParse(entrada)
+      if (alta && !alta.success) return { estado: "datos_invalidos", errores: erroresProducto(alta.error) }
 
       return db.transaction(async (tx): Promise<ResultadoGuardarProducto> => {
+        const claveSolicitud = alta?.data?.claveSolicitud
+        if (claveSolicitud) {
+          // La PK identifica el alta ya confirmada, incluso cuando la carga fue en cero.
+          await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${`alta-producto:${claveSolicitud}`}, 0))`)
+          const [existente] = await tx.select({ id: producto.id }).from(producto).where(eq(producto.id, claveSolicitud))
+          if (existente) return { estado: "ok", productoId: existente.id }
+        }
         const [categoriaActual] = await tx.select({ codigo: categoria.codigo }).from(categoria)
           .where(eq(categoria.codigo, validacion.data.categoriaCodigo))
         if (!categoriaActual) {
           return { estado: "datos_invalidos", errores: { categoriaCodigo: "La categoría ya no está disponible. Elegí otra." } }
         }
         if (!edicion) {
-          const id = crypto.randomUUID()
+          const id = claveSolicitud ?? crypto.randomUUID()
           await insertarProductoOcultoConSaldo(tx, id, validacion.data, crearSaldoCero)
+          const cantidad = alta?.data?.stockInicial ?? 0
+          if (cantidad > 0) {
+            await registrarStockInicial(tx, { productoId: id, actorId: administradora.id, claveSolicitud: id, cantidad })
+          }
           return { estado: "ok", productoId: id }
         }
         if (!edicion.success) throw new Error("Referencia de edicion no validada")

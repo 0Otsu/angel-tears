@@ -5,6 +5,7 @@ import {
   esErrorProductoSinSaldo,
   esErrorStockInsuficiente,
   type ContratoInventario,
+  type RegistrarStockInicial,
 } from "@/lib/modulos/inventario/contrato"
 import {
   evaluarAjuste,
@@ -44,10 +45,13 @@ export type ResultadoRegistroAjuste =
   | { estado: "stock_insuficiente"; disponible: number; requerido: number }
   | { estado: "producto_sin_saldo" }
 
+type TransaccionAjuste = Parameters<Parameters<NodePgDatabase["transaction"]>[0]>[0]
+
 export async function registrarAjuste(
   db: NodePgDatabase,
   inventarioContrato: ContratoInventario,
   comando: ComandoAjuste,
+  transaccion?: TransaccionAjuste,
 ): Promise<ResultadoRegistroAjuste> {
   const evaluado = evaluarAjuste(comando)
   if (!evaluado.ok) return { estado: "datos_invalidos", errores: evaluado.errores }
@@ -59,78 +63,88 @@ export async function registrarAjuste(
     motivo: evaluado.motivo,
   })
 
-  try {
-    return await db.transaction(async (tx) => {
-      const [insertado] = await tx
-        .insert(ajusteStock)
-        .values({
-          productoId: comando.productoId,
-          tipo: evaluado.tipo,
-          cantidad: evaluado.cantidad,
-          motivo: evaluado.motivo,
-          actorId: comando.actorId,
-          claveSolicitud: comando.claveSolicitud,
-          huella,
-        })
-        // Si otra transaccion ya confirmo esa clave, no se inserta nada y se resuelve abajo.
-        .onConflictDoNothing({ target: ajusteStock.claveSolicitud })
-        .returning()
-
-      if (!insertado) {
-        const [existente] = await tx
-          .select()
-          .from(ajusteStock)
-          .where(eq(ajusteStock.claveSolicitud, comando.claveSolicitud))
-        if (clasificarSolicitud(existente.huella, huella) === "CONFLICTO") {
-          return { estado: "conflicto_solicitud" } as const
-        }
-        const [movimiento] = await tx
-          .select()
-          .from(movimientoStock)
-          .where(and(eq(movimientoStock.ajusteId, existente.id), eq(movimientoStock.tipo, "ORIGINAL")))
-        return {
-          estado: "ok",
-          repetido: true,
-          ajuste: {
-            id: existente.id,
-            productoId: existente.productoId,
-            tipo: evaluado.tipo,
-            cantidad: existente.cantidad,
-            motivo: existente.motivo,
-            saldoResultante: movimiento.saldoResultante,
-          },
-        } as const
-      }
-
-      // Si el saldo no alcanza, esto lanza y la transaccion revierte tambien el ajuste insertado.
-      const resultado = await inventarioContrato.aplicarMovimientos(tx, {
+  const guardar = async (tx: TransaccionAjuste): Promise<ResultadoRegistroAjuste> => {
+    const [insertado] = await tx
+      .insert(ajusteStock)
+      .values({
+        productoId: comando.productoId,
+        tipo: evaluado.tipo,
+        cantidad: evaluado.cantidad,
+        motivo: evaluado.motivo,
         actorId: comando.actorId,
-        variaciones: [
-          {
-            productoId: comando.productoId,
-            delta: evaluado.delta,
-            origen: { tipo: "AJUSTE", ajusteId: insertado.id },
-          },
-        ],
+        claveSolicitud: comando.claveSolicitud,
+        huella,
       })
+      // Si otra transaccion ya confirmo esa clave, no se inserta nada y se resuelve abajo.
+      .onConflictDoNothing({ target: ajusteStock.claveSolicitud })
+      .returning()
+
+    if (!insertado) {
+      const [existente] = await tx
+        .select()
+        .from(ajusteStock)
+        .where(eq(ajusteStock.claveSolicitud, comando.claveSolicitud))
+      if (clasificarSolicitud(existente.huella, huella) === "CONFLICTO") {
+        return { estado: "conflicto_solicitud" } as const
+      }
+      const [movimiento] = await tx
+        .select()
+        .from(movimientoStock)
+        .where(and(eq(movimientoStock.ajusteId, existente.id), eq(movimientoStock.tipo, "ORIGINAL")))
       return {
         estado: "ok",
-        repetido: false,
+        repetido: true,
         ajuste: {
-          id: insertado.id,
-          productoId: insertado.productoId,
+          id: existente.id,
+          productoId: existente.productoId,
           tipo: evaluado.tipo,
-          cantidad: insertado.cantidad,
-          motivo: insertado.motivo,
-          saldoResultante: resultado.saldos[0].saldoResultante,
+          cantidad: existente.cantidad,
+          motivo: existente.motivo,
+          saldoResultante: movimiento.saldoResultante,
         },
       } as const
+    }
+
+    // Si el saldo no alcanza, esto lanza y la transaccion revierte tambien el ajuste insertado.
+    const resultado = await inventarioContrato.aplicarMovimientos(tx, {
+      actorId: comando.actorId,
+      variaciones: [
+        {
+          productoId: comando.productoId,
+          delta: evaluado.delta,
+          origen: { tipo: "AJUSTE", ajusteId: insertado.id },
+        },
+      ],
     })
+    return {
+      estado: "ok",
+      repetido: false,
+      ajuste: {
+        id: insertado.id,
+        productoId: insertado.productoId,
+        tipo: evaluado.tipo,
+        cantidad: insertado.cantidad,
+        motivo: insertado.motivo,
+        saldoResultante: resultado.saldos[0].saldoResultante,
+      },
+    } as const
+  }
+
+  try {
+    return await (transaccion ? guardar(transaccion) : db.transaction(guardar))
   } catch (error) {
     if (esErrorStockInsuficiente(error)) {
       return { estado: "stock_insuficiente", disponible: error.disponible, requerido: error.requerido }
     }
     if (esErrorProductoSinSaldo(error)) return { estado: "producto_sin_saldo" }
     throw error
+  }
+}
+
+
+export function crearRegistroStockInicial(db: NodePgDatabase, inventario: ContratoInventario): RegistrarStockInicial {
+  return async (tx, comando) => {
+    const resultado = await registrarAjuste(db, inventario, { ...comando, tipo: "INICIAL", motivo: "Carga inicial" }, tx as TransaccionAjuste)
+    if (resultado.estado !== "ok") throw new Error(`No se confirmó la carga inicial: ${resultado.estado}`)
   }
 }

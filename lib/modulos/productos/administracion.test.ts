@@ -10,7 +10,7 @@ describe("frontera privada de Producto 2.1", () => {
     const crearSaldoCero = vi.fn()
     const servicio = crearAdministracionProductos({
       db: { select, transaction } as unknown as NodePgDatabase,
-      exigir: crearExigirAdministradora(async () => null), crearSaldoCero,
+      exigir: crearExigirAdministradora(async () => null), crearSaldoCero, registrarStockInicial: vi.fn(),
     })
     expect(await servicio.crear(new Headers(), null)).toEqual({ estado: "sesion_requerida" })
     expect(await servicio.editar(new Headers(), null, null)).toEqual({ estado: "sesion_requerida" })
