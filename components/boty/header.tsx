@@ -33,6 +33,7 @@ export function Header() {
         {abierto && <div id="menu-publico-movil" className="pb-6 lg:hidden"><div className="flex flex-col gap-4 border-t border-border/50 pt-4">
           {enlaces.map(enlace => <Link key={enlace.nombre} href={enlace.href} onClick={() => setAbierto(false)} className="flex min-h-11 items-center text-sm tracking-wide text-foreground/70 hover:text-foreground">{enlace.nombre}</Link>)}
           <a href={negocioPublico.instagram} target="_blank" rel="noopener noreferrer" className="flex min-h-11 items-center text-sm tracking-wide text-foreground/70 hover:text-foreground">Instagram · {negocioPublico.usuarioInstagram}</a>
+          <Link href="/admin/login" onClick={() => setAbierto(false)} className="flex min-h-11 items-center text-sm tracking-wide text-foreground/70 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">Iniciar sesión</Link>
         </div></div>}
       </nav>
     </header>

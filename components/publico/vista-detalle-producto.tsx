@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Instagram } from "lucide-react"
+import { Instagram, MessageCircle } from "lucide-react"
 import type { ProductoPublico } from "@/lib/modulos/catalogo/contrato"
 import { formatearPrecioPublico as formatPrice } from "@/lib/modulos/catalogo/presentacion"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
@@ -7,7 +7,14 @@ import { negocioPublico } from "@/lib/negocio-publico"
 import { GaleriaPublica } from "./galeria-publica"
 import estilos from "./vista-detalle-producto.module.css"
 
-function InformacionProducto({ product, nivelTitulo, enlacesEnOtraPestana }: { product: ProductoPublico; nivelTitulo: "h1" | "h2"; enlacesEnOtraPestana: boolean }) {
+type PropiedadesInformacion = {
+  product: ProductoPublico
+  nivelTitulo: "h1" | "h2"
+  enlacesEnOtraPestana: boolean
+  enlaceWhatsApp?: string
+}
+
+function InformacionProducto({ product, nivelTitulo, enlacesEnOtraPestana, enlaceWhatsApp }: PropiedadesInformacion) {
   const Titulo = nivelTitulo
   return (
     <div className="flex min-w-0 flex-col [overflow-wrap:anywhere]">
@@ -22,25 +29,41 @@ function InformacionProducto({ product, nivelTitulo, enlacesEnOtraPestana }: { p
         <span className="rounded-full bg-card px-3 py-1 text-xs text-foreground">{product.disponible ? "Disponible" : "Sin stock"}</span>
       </div>
 
-      <div className="mb-9 flex flex-col gap-3 sm:flex-row">
-        <a
-          href={negocioPublico.instagram}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-primary px-8 py-4 text-sm tracking-wide text-primary-foreground boty-shadow boty-transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-        >
-          <Instagram className="size-4" aria-hidden="true" />
-          Consultar por Instagram
-        </a>
-        <Link prefetch={false}
-          href="/catalogo"
-          target={enlacesEnOtraPestana ? "_blank" : undefined}
-          rel={enlacesEnOtraPestana ? "noopener noreferrer" : undefined}
-          aria-label={enlacesEnOtraPestana ? "Volver al catálogo (abre otra pestaña)" : undefined}
-          className="inline-flex flex-1 items-center justify-center rounded-full border border-foreground/20 px-8 py-4 text-sm tracking-wide text-foreground boty-transition hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-        >
-          Volver al catálogo
-        </Link>
+      <div className={`mb-9 gap-3 ${enlacesEnOtraPestana ? "flex flex-col" : "grid auto-rows-fr"}`}>
+        {enlaceWhatsApp && (
+          <a
+            href={enlaceWhatsApp}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Consultar por WhatsApp (abre otra pestaña)"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-[#146c43] px-8 py-4 text-center text-sm tracking-wide text-white boty-shadow boty-transition hover:bg-[#105735] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#146c43] focus-visible:ring-offset-2"
+          >
+            <MessageCircle className="size-4 shrink-0" aria-hidden="true" />
+            Consultar por WhatsApp
+          </a>
+        )}
+        <div className={enlacesEnOtraPestana ? "flex flex-col gap-3 sm:flex-row" : "contents"}>
+          <a
+            href={negocioPublico.instagram}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`inline-flex flex-1 items-center justify-center gap-2 rounded-full px-8 py-4 text-center text-sm tracking-wide boty-transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${enlaceWhatsApp ? "border border-border bg-card text-foreground hover:bg-accent" : "bg-primary text-primary-foreground boty-shadow hover:bg-primary/90"}`}
+          >
+            <span className={enlaceWhatsApp ? "grid size-6 shrink-0 place-items-center rounded-md bg-linear-to-tr from-[#a14116] via-[#a52364] to-[#6543a3] text-white" : undefined}>
+              <Instagram className="size-4 shrink-0" aria-hidden="true" />
+            </span>
+            Consultar por Instagram
+          </a>
+          <Link prefetch={false}
+            href="/catalogo"
+            target={enlacesEnOtraPestana ? "_blank" : undefined}
+            rel={enlacesEnOtraPestana ? "noopener noreferrer" : undefined}
+            aria-label={enlacesEnOtraPestana ? "Volver al catálogo (abre otra pestaña)" : undefined}
+            className="inline-flex flex-1 items-center justify-center rounded-full border border-foreground/20 px-8 py-4 text-center text-sm tracking-wide text-foreground boty-transition hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          >
+            Volver al catálogo
+          </Link>
+        </div>
       </div>
 
       <Accordion type="single" collapsible defaultValue="details" className="border-t border-border/50">
@@ -58,7 +81,7 @@ function InformacionProducto({ product, nivelTitulo, enlacesEnOtraPestana }: { p
         </AccordionItem>}
         <AccordionItem value="availability" className="border-border/50">
           <AccordionTrigger>Consulta y disponibilidad</AccordionTrigger>
-          <AccordionContent><p className="leading-relaxed text-muted-foreground">Escribinos a {negocioPublico.usuarioInstagram} para confirmar disponibilidad y consultar por esta pieza.</p></AccordionContent>
+          <AccordionContent><p className="leading-relaxed text-muted-foreground">{enlaceWhatsApp ? "Escribinos por WhatsApp o Instagram" : `Escribinos a ${negocioPublico.usuarioInstagram}`} para confirmar disponibilidad y consultar por esta pieza.</p></AccordionContent>
         </AccordionItem>
       </Accordion>
     </div>
@@ -66,9 +89,15 @@ function InformacionProducto({ product, nivelTitulo, enlacesEnOtraPestana }: { p
 }
 
 // Presentacion compartida: sin consultas, permisos, metadata ni estado administrativo.
-export function VistaDetalleProducto({ product, nivelTitulo = "h1", enlacesEnOtraPestana = false, sizesImagen }: { product: ProductoPublico; nivelTitulo?: "h1" | "h2"; enlacesEnOtraPestana?: boolean; sizesImagen?: string }) {
+export function VistaDetalleProducto({ product, nivelTitulo = "h1", enlacesEnOtraPestana = false, sizesImagen, enlaceWhatsApp }: {
+  product: ProductoPublico
+  nivelTitulo?: "h1" | "h2"
+  enlacesEnOtraPestana?: boolean
+  sizesImagen?: string
+  enlaceWhatsApp?: string
+}) {
   return <section aria-label="Detalle del producto" className={estilos.contenedor}><div className={estilos.detalle}>
     <GaleriaPublica principal={product.imagen} medios={product.galeria} sizes={sizesImagen} />
-    <InformacionProducto product={product} nivelTitulo={nivelTitulo} enlacesEnOtraPestana={enlacesEnOtraPestana} />
+    <InformacionProducto product={product} nivelTitulo={nivelTitulo} enlacesEnOtraPestana={enlacesEnOtraPestana} enlaceWhatsApp={enlaceWhatsApp} />
   </div></section>
 }
