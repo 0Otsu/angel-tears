@@ -1,14 +1,15 @@
-import Image from "next/image"
+import Image, { type StaticImageData } from "next/image"
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 
-export function Hero() {
+export function Hero({ foto }: { foto?: StaticImageData }) {
   return (
     <section className="relative flex min-h-svh items-center overflow-hidden bg-[#e3e1e2] pb-36 pt-32 lg:min-h-screen lg:py-0" aria-labelledby="hero-heading">
-      {/* Placeholder de accesorios existente. Reemplazar por foto/video real de
-          Angel Tears conservando este encuadre de fondo y la composición Boty. */}
-      <div className="absolute inset-0">
-        <Image src="/images/products/angel-tears-gold-jewelry.png" alt="" fill priority sizes="100vw" className="object-cover" />
+      <div aria-hidden="true" className="absolute inset-0">
+        {foto && <>
+          <Image src={foto} alt="" fill preload sizes="100vw" className="object-cover" />
+          <div className="absolute inset-0 bg-white/55" />
+        </>}
         <div className="absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-background via-background/50 to-transparent" />
       </div>
 

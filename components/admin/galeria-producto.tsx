@@ -61,7 +61,7 @@ export function GaleriaProducto({ productoId, nombre, version, alGuardar, alCamb
     {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
     {bloqueado && <Button className="min-h-11" variant="outline" onClick={() => window.location.reload()}>Recargar datos</Button>}
     {datos && <>
-      {datos.limpiezaPendiente && <p role="note">El cambio está guardado. Quedó pendiente limpiar un recurso anterior; requiere conciliación operativa.</p>}
+      {datos.limpiezaPendiente && <p role="note">El cambio está guardado. No pudimos confirmar que se eliminó la imagen anterior. No hace falta repetir la operación. Avisá a quien te ayuda con Angel Tears.</p>}
       <ul aria-label="Imágenes guardadas" className="grid gap-4 sm:grid-cols-2">{datos.medios.map((m, i) => <li key={m.id} className="min-w-0 space-y-3 rounded-xl border p-4">
         <Image src={m.urlSegura} sizes="256px" width={m.ancho} height={m.alto} alt={m.principal ? `Imagen actual de ${nombre}` : `Imagen ${i + 1} de ${nombre}`} className="h-36 w-full rounded-lg object-contain" />
         {detalles[m.id] && <p className="break-all text-xs text-muted-foreground">{detalles[m.id].nombre} · {(detalles[m.id].tamano / (1024 * 1024)).toFixed(2)} MiB</p>}

@@ -53,7 +53,7 @@ describe("adapter Cloudinary (SDK sustituido, sin red)", () => {
   })
   it("convierte un error del SDK a un mensaje neutro sin arrastrar secretos", async () => {
     fallo = new Error("api_secret=valor que no debe salir")
-    await expect(crearAlmacenCloudinary(entorno).almacenarImagen({ contenido: new Uint8Array(), publicId })).rejects.toMatchObject({ message: "No pudimos almacenar la imagen. Podés reintentar." })
+    await expect(crearAlmacenCloudinary(entorno).almacenarImagen({ contenido: new Uint8Array(), publicId })).rejects.toMatchObject({ message: "La nueva imagen no se agregó al producto. Podés reintentar la carga. Si vuelve a fallar, pedí ayuda técnica." })
   })
   it.each([
     [401, "Unknown API key dato-privado", "clave_api_rechazada"],

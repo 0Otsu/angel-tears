@@ -8,7 +8,7 @@ vi.mock("@/lib/infraestructura/auth-cliente", () => ({
   authClient: { requestPasswordReset: pedir, resetPassword: vi.fn() },
 }))
 
-const NEUTRO = /si el correo corresponde a la cuenta/i
+const NEUTRO = "Si el correo corresponde a la cuenta, podés recibir un enlace para elegir una contraseña nueva. Sirve una sola vez y vence en 1 hora. Si no llega, revisá spam, esperá al menos 5 minutos y probá una vez más. Si sigue sin llegar, contactá a quien te ayuda con Angel Tears."
 
 function enviarCon(email: string) {
   render(<FormularioRecuperar />)
@@ -38,7 +38,7 @@ describe("formulario de recuperacion de contrasena", () => {
     enviarCon("admin@ejemplo.com")
 
     const estado = await screen.findByRole("status")
-    expect(estado.textContent).toMatch(NEUTRO)
+    expect(estado.textContent).toBe(NEUTRO)
     expect(estado.textContent).toContain("1 hora")
     expect(pedir).toHaveBeenCalledWith({ email: "admin@ejemplo.com", redirectTo: "/admin/restablecer" })
   })
@@ -49,7 +49,7 @@ describe("formulario de recuperacion de contrasena", () => {
     enviarCon("admin@ejemplo.com")
 
     const estado = await screen.findByRole("status")
-    expect(estado.textContent).toMatch(NEUTRO)
+    expect(estado.textContent).toBe(NEUTRO)
     expect(estado.textContent).not.toMatch(/select|error|falló|problema/i)
   })
 
@@ -58,7 +58,7 @@ describe("formulario de recuperacion de contrasena", () => {
 
     enviarCon("admin@ejemplo.com")
 
-    expect((await screen.findByRole("status")).textContent).toMatch(NEUTRO)
+    expect((await screen.findByRole("status")).textContent).toBe(NEUTRO)
   })
 
   it("con un correo mal escrito lo senala y no llama al servidor", async () => {

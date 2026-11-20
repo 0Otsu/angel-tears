@@ -14,8 +14,8 @@ import { solicitarRecuperacion, type ClienteRecuperacion } from "@/lib/modulos/a
 const cliente: ClienteRecuperacion = authClient
 
 const MENSAJE_NEUTRO =
-  "Si el correo corresponde a la cuenta, te enviamos un enlace para elegir una contraseña nueva. Sirve una sola vez y vence en 1 hora. Revisá también la carpeta de spam."
-const MENSAJE_LIMITE = "Hiciste demasiados pedidos. Esperá unos minutos y volvé a probar."
+  "Si el correo corresponde a la cuenta, podés recibir un enlace para elegir una contraseña nueva. Sirve una sola vez y vence en 1 hora. Si no llega, revisá spam, esperá al menos 5 minutos y probá una vez más. Si sigue sin llegar, contactá a quien te ayuda con Angel Tears."
+const MENSAJE_LIMITE = "Hiciste demasiados pedidos. Esperá al menos 5 minutos antes de volver a probar."
 
 export function FormularioRecuperar() {
   const [errorEmail, setErrorEmail] = useState<string | null>(null)

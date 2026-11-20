@@ -4,29 +4,16 @@ Material de trabajo. Las altas, pagos, migraciones y despliegues quedan para una
 
 ## Sofía
 
-- [ ] Definir si WhatsApp e Instagram solo reciben consultas o si allí se confirma la venta. Si se concreta a distancia, acordar quién atiende arrepentimientos y reclamos, cómo se registran y quién responde dentro de 24 horas.
-- [ ] Confirmar con su contadora los datos del vendedor, los importes a exhibir y Data Fiscal. Acordar pagos, entrega/retiro, costos, garantía y comprobantes. Completar el [borrador de privacidad y atención al consumidor](PRIVACIDAD_Y_CONSUMO.md) y validar dónde se publicará.
-- [ ] Confirmar dominio, correo que controla, recuperación de cuentas y presupuesto. Aprobar dirección, horarios, canales, fotos de productos y el hero. La foto propia de la fachada puede llegar después. Confirmar permiso para publicar las historias y fotos aportadas.
+- [ ] Confirmar el correo de la administradora, titularidad de las cuentas, MFA y recuperación, dominio deseado y presupuesto. Las autorizaciones, pagos y contraseñas se hacen desde su sesión.
+- [ ] Facilitar el hero y la foto del interior autorizados. Confirmar derechos de las historias y fotos publicadas, y aprobar dirección, horarios, mapa y canales. Elegir catálogo nuevo o lista de productos a conservar.
+- [ ] Confirmar los datos de [privacidad y atención al consumidor](PRIVACIDAD_Y_CONSUMO.md) y revisar con la contadora los precios, datos fiscales y comprobantes. WhatsApp e Instagram son para consultas y la compra se concreta en el local. Confirmar si hay entregas después de una compra presencial.
 
 ## Desarrollador
 
-- [ ] Fijar el SHA aprobado. Antes de sincronizar, confirmar un bundle privado recuperable y registrar el deployment activo de la demo. Con autorización posterior, separar la integración Git de Vercel y revisar deploy hooks y otros disparadores. Verificar que la URL de demo siga funcionando. Después comparar `origin/main` con `main`, publicar solo el avance lineal autorizado y comprobar SHA remoto y deployment activo. Si no se puede verificar la separación, mantener GitHub intacto.
-- [ ] Preparar Railway y una base Neon comercial separada. Revisar los destinos y aplicar las migraciones `0000`–`0008`, categorías iniciales y cuenta única. Confirmar backups cifrados, restauración aislada, alertas y responsable de seguimiento.
-- [ ] Completar y validar los avisos comerciales y de privacidad en el sitio antes de abrirlo. Confirmar los ajustes de logs, conservación y regiones de los proveedores. Dejar la demo con `noindex`.
-
-## Accesos y configuración para la instalación
-
-- [ ] Sofía controla las cuentas y conserva MFA y recuperación en su gestor. Ingresar credenciales fuera del chat y compartir por invitación nominal cuando sea posible.
-- [ ] **Neon y Railway.** Conexión de mantenimiento directa, rol de aplicación y su `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`. Acordar TLS y origen. Configurar `BETTER_AUTH_TRUSTED_IP_HEADER` solo tras verificar el proxy. Mantener `SITE_URL` sin definir hasta aprobar la apertura.
-- [ ] **Cloudinary y Resend.** Cuenta, credenciales del servidor y carpeta de imágenes. Clave de correo, remitente verificado y DNS de autenticación. Acordar dónde se guardarán las fotos originales.
-- [ ] **Dominio y DNS.** Confirmar acceso a NIC Argentina y gestión DNS, HTTPS y una sola URL pública. Preparar la verificación de Search Console para después de aprobar el lanzamiento.
-
-## Pruebas de aceptación antes de anunciar la URL
-
-- [ ] Inicio y Catálogo en móvil y escritorio. Publicar una ficha real con imagen, precio y stock inicial. Probar filtros, «Cómo llegar» y mensaje de WhatsApp con enlace al producto. Confirmar precios y datos visibles.
-- [ ] Sofía entra desde una sesión nueva y valida la recuperación real de contraseña y la revocación de la sesión anterior. Revisar cookies de visitante y del panel, recepción de correo y ausencia de tokens en logs.
-- [ ] Verificar lectura de datos, carga de imágenes, copia restaurada y alerta operativa. Si se vende a distancia, recorrer la solicitud de arrepentimiento y la respuesta con código.
-- [ ] Activar `SITE_URL` solo en el dominio comercial aprobado. Comprobar canonical, robots, sitemap, LocalBusiness y Search Console. Volver a comprobar `noindex` en la demo.
+- [ ] Revisar el encuadre de las fotos en escritorio y móvil, completar los avisos aprobados y fijar el SHA. Verificar el bundle y separar los disparadores de Vercel antes de sincronizar el repositorio. Confirmar que la demo sigue disponible y con `noindex`.
+- [ ] Seguir el [orden de instalación](DESPLIEGUE_COMERCIAL.md#secuencia-de-instalación) y la [tabla de variables](DESPLIEGUE_COMERCIAL.md#variables-del-servicio). Identificar Neon comercial, aprovisionar la cuenta, preparar medios y correo, y configurar Railway, DNS y HTTPS. Mantener `SITE_URL` sin definir hasta aprobar la apertura.
+- [ ] Si se elige conservar productos, documentar la selección, el stock real y los originales autorizados antes de copiar. Usar el [procedimiento selectivo](DESPLIEGUE_COMERCIAL.md#opción-b-copia-selectiva-de-productos).
+- [ ] Recorrer la [aceptación en el dominio comercial](DESPLIEGUE_COMERCIAL.md#4-https-aceptación-y-entrega) con Sofía. Confirmar login, cambio y recuperación de contraseña, publicación de una ficha, respaldo restaurado y recepción de [alertas](DESPLIEGUE_COMERCIAL.md#alertas-para-configurar-al-desplegar). Dejar anotado el contacto de ayuda técnica. Activar SEO después de la aprobación.
 
 ## SEO de esta etapa
 

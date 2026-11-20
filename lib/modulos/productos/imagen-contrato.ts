@@ -35,8 +35,8 @@ export const mensajesErrorImagen = {
   imagen_corrupta: "No pudimos leer esa imagen. Elegí un archivo válido.",
   exceso_bytes: "La imagen supera el máximo de 3 MiB.",
   exceso_pixeles: "La imagen supera el máximo de 20 megapíxeles.",
-  servicio_no_disponible: "La carga de imágenes no está disponible en este momento. Intentá más tarde.",
-  error_proveedor: "No pudimos almacenar la imagen. Podés reintentar.",
+  servicio_no_disponible: "La imagen no se guardó porque la carga no está disponible. Probá más tarde. Si vuelve a fallar, pedí ayuda técnica.",
+  error_proveedor: "La nueva imagen no se agregó al producto. Podés reintentar la carga. Si vuelve a fallar, pedí ayuda técnica.",
   error_tecnico: "No pudimos confirmar el guardado. Recargá el listado antes de reintentar.",
 } as const
 export type CodigoErrorImagen = keyof typeof mensajesErrorImagen

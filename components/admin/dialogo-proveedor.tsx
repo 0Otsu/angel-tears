@@ -28,7 +28,7 @@ function mensaje(r: ResultadoProveedorAdmin | null) {
     case "conflicto_version": return "El proveedor cambió desde que lo abriste. Recargá los datos para no pisar esa edición."
     case "no_encontrado": return "El proveedor ya no está disponible. Recargá el listado."
     case "sesion_requerida": return "Tu sesión venció. Volvé a iniciar sesión antes de guardar."
-    case "error_tecnico": return "No pudimos guardar el proveedor. Conservamos tus datos para que puedas reintentar."
+    case "error_tecnico": return "No pudimos confirmar el guardado del proveedor. Conservamos tus datos en el formulario. Revisá el listado antes de volver a guardar para evitar duplicados. Si el problema sigue, pedí ayuda técnica."
     default: return null
   }
 }

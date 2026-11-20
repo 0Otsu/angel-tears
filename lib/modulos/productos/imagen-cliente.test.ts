@@ -33,7 +33,7 @@ describe("transporte XHR real por eventos (sin timers de progreso)", () => {
     expect(alProcesar).toHaveBeenCalledTimes(1)
     xhr.responseText = JSON.stringify({ estado: "error", codigo: "servicio_no_disponible", mensaje: "No mostrar texto arbitrario" })
     xhr.onload?.()
-    expect(await peticion).toMatchObject({ estado: "error", codigo: "servicio_no_disponible", mensaje: "La carga de imágenes no está disponible en este momento. Intentá más tarde." })
+    expect(await peticion).toMatchObject({ estado: "error", codigo: "servicio_no_disponible", mensaje: "La imagen no se guardó porque la carga no está disponible. Probá más tarde. Si vuelve a fallar, pedí ayuda técnica." })
   })
   it("fallo de red resuelve error neutro sin interpretar un HTML de proxy", async () => {
     vi.stubGlobal("XMLHttpRequest", XhrPrueba)

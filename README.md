@@ -1,13 +1,17 @@
 # Angel Tears
 
-Sitio público y panel administrativo para una tienda de accesorios en Concordia. Es un monolito modular con Next.js App Router, React, TypeScript y Tailwind CSS. Drizzle y `pg` conectan con PostgreSQL. Better Auth gestiona identidad y sesiones. Cloudinary almacena imágenes de productos y Resend entrega correos de recuperación.
+Catálogo y panel administrativo para una bijouterie física de Concordia, Entre Ríos. El sitio permite descubrir productos y consultar por WhatsApp e Instagram. Las compras se concretan en el local. El proyecto nació como trabajo de Ingeniería de Software II y continuó con una preparación comercial.
+
+[Ver la demo académica](https://angel-tears-demo.vercel.app/) · [Arquitectura y decisiones](docs/ARQUITECTURA.md) · [Guía de despliegue comercial](docs/DESPLIEGUE_COMERCIAL.md)
+
+El sistema es un monolito modular con Next.js App Router, React, TypeScript y Tailwind CSS. Usa PostgreSQL con Drizzle y `pg`, Better Auth para identidad y sesiones, Cloudinary para fotos de productos y Resend para recuperación por correo.
 
 ## Estado actual
 
 - **Sitio público.** Inicio, catálogo, fichas de producto con galería y consultas por WhatsApp e Instagram. Catálogo y fichas leen productos publicados y disponibilidad desde PostgreSQL.
 - **Administración.** Inicio y cierre de sesión, cuenta y recuperación de contraseña. Productos con [categorías dinámicas](docs/features/CATEGORIAS_DINAMICAS.md), imágenes, visibilidad y destacados. Carga inicial de stock en el alta, ajustes e historial de inventario. [Configuración del negocio](docs/features/CONFIGURACION_NEGOCIO.md) permite editar los datos públicos del local.
 - **Operaciones.** Gestión de proveedores y registro, consulta y anulación de compras, ventas y gastos. El resumen calcula el resultado aproximado a partir de las operaciones vigentes.
-- **Pendientes.** El entorno comercial y la [validación de sus servicios](docs/features/CIERRE_SEGURIDAD_SEO.md) siguen pendientes.
+- **Estado de entrega.** La demo usa datos separados y permanece fuera del índice. La instalación y la validación del entorno comercial siguen pendientes.
 
 ## Puesta en marcha local
 
@@ -17,19 +21,7 @@ Sitio público y panel administrativo para una tienda de accesorios en Concordia
 4. Confirmá que `DATABASE_URL` apunta a tu base local de desarrollo. En una base nueva, aplicá las migraciones con `pnpm db:migrate` y seguí el [alta controlada de la administradora](docs/DESARROLLO.md#alta-de-la-administradora). El alta de productos necesita que las [categorías iniciales estén cargadas](docs/DESARROLLO.md#base-de-datos-local-y-pruebas-de-integración).
 5. Ejecutá `pnpm dev`. Abrí [Inicio](http://localhost:3000) o [el acceso administrativo](http://localhost:3000/admin/login).
 
-| Variable | Uso |
-| --- | --- |
-| `DATABASE_URL` | Conexión de la aplicación y Drizzle Kit. Contiene credenciales. |
-| `DATABASE_URL_TEST` | PostgreSQL local aislado, con nombre terminado en `_test`. |
-| `BETTER_AUTH_SECRET` | Secreto aleatorio y exclusivo por entorno. El ejemplo incluye cómo generarlo. |
-| `BETTER_AUTH_URL` | Origen del login y de los enlaces de recuperación. En local, `http://localhost:3000`. |
-| `BETTER_AUTH_TRUSTED_IP_HEADER` | Opcional. Cabecera de IP que sobrescribe el proxy verificado. Vacía, Better Auth aplica un límite compartido por ruta. |
-| `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Carga y gestión de imágenes, en servidor. Sin estas variables se puede guardar un borrador oculto. Para publicarlo se exige una imagen principal. |
-| `CLOUDINARY_CARPETA_ENTORNO` | Prefijo opcional de almacenamiento. En la demo distingue sus imágenes. |
-| `RESEND_API_KEY`, `RESEND_FROM` | Envío de recuperación de contraseña. Sin configuración, la solicitud conserva su respuesta genérica y el correo no sale. |
-| `SITE_URL` | Origen HTTPS del dominio comercial para enlaces canónicos y sitemap. Dejar vacío en local y demo. WhatsApp puede abrir el mensaje sin enlace si no hay origen público. |
-
-Mantené los valores reales en archivos ignorados o en el gestor de secretos del entorno.
+[.env.example](.env.example) explica la configuración local. La [tabla del entorno comercial](docs/DESPLIEGUE_COMERCIAL.md#variables-del-servicio) distingue las variables obligatorias y opcionales. Guardá los valores reales en archivos ignorados o en el gestor de secretos del entorno.
 
 ## Validación
 
@@ -49,3 +41,7 @@ Mantené los valores reales en archivos ignorados o en el gestor de secretos del
 ## Retomar el proyecto
 
 Leé [AGENTS.md](AGENTS.md) y [Arquitectura](docs/ARQUITECTURA.md) para ubicar responsabilidades, luego seguí [Desarrollo](docs/DESARROLLO.md) y el [flujo Git](docs/GIT_WORKFLOW.md). Revisá el estado de la rama y preservá los commits locales antes de sincronizar. Las [decisiones aprobadas](docs/DECISIONES_PRODUCTO_MVP.md), los [ADR](docs/adr/README.md) y el [blueprint](docs/BLUEPRINT_IMPLEMENTACION_MVP.md) conservan el contexto de diseño. El [mapa de implementación](docs/MAPA_IMPLEMENTACION.md) y la [migración de UI](docs/MIGRACION_UI.md) registran el prototipo histórico. Los archivos de esa etapa pueden consultarse en los commits mencionados en esos documentos.
+
+## Equipo
+
+Augusto inició y coordinó el proyecto, trabajó en Productos, sitio público y SEO y continuó la preparación comercial. Emi trabajó en Autenticación, Cuenta y Ventas. Claudio trabajó en Inventario, Proveedores y Compras. El historial conserva las contribuciones del equipo.

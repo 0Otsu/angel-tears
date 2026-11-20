@@ -31,7 +31,7 @@ function mensajeDeAnulacion(r: Exclude<ResultadoAnulacionAdmin, { estado: "ok" |
   switch (r.estado) {
     case "no_encontrada": return "No encontramos esta venta. Recargá la página."
     case "sesion_requerida": return "Tu sesión venció. Volvé a iniciar sesión."
-    default: return "No pudimos anular la venta. No se hizo ningún cambio; podés reintentar."
+    default: return "No pudimos confirmar la anulación de la venta. Revisá su estado en el listado antes de volver a intentar. Si el problema sigue, pedí ayuda técnica."
   }
 }
 

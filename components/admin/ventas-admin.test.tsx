@@ -248,14 +248,14 @@ describe("detalle y anulacion", () => {
     expect(refresh).toHaveBeenCalledTimes(1)
   })
 
-  it("si la anulacion falla no cambia nada y deja reintentar", async () => {
+  it("si la respuesta de anulación falla indica revisar el estado de la venta", async () => {
     detalle.mockResolvedValue({ estado: "ok", venta: ventaDetalle() })
     anular.mockResolvedValue({ estado: "error_tecnico" })
     abrirDetalle()
     fireEvent.click(await screen.findByRole("button", { name: "Anular venta" }))
     fireEvent.click(screen.getByRole("button", { name: "Sí, anular venta" }))
 
-    expect((await screen.findByRole("alert")).textContent).toContain("No se hizo ningún cambio")
+    expect((await screen.findByRole("alert")).textContent).toContain("Revisá su estado en el listado antes de volver a intentar")
     expect(refresh).not.toHaveBeenCalled()
     expect(screen.getByRole("button", { name: "Sí, anular venta" })).toBeTruthy()
   })

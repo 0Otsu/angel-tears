@@ -36,7 +36,7 @@ function errorDeAnulacion(r: Exclude<ResultadoAnulacionAdmin, { estado: "ok" | "
     }
     case "no_encontrada": return { mensaje: "No encontramos esta compra. Recargá la página." }
     case "sesion_requerida": return { mensaje: "Tu sesión venció. Volvé a iniciar sesión.", sesion: true }
-    default: return { mensaje: "No pudimos anular la compra. No se hizo ningún cambio; podés reintentar." }
+    default: return { mensaje: "No pudimos confirmar la anulación de la compra. Revisá su estado en el listado antes de volver a intentar. Si el problema sigue, pedí ayuda técnica." }
   }
 }
 

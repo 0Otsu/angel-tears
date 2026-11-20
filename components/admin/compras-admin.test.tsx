@@ -198,6 +198,18 @@ describe("detalle y anulacion", () => {
     expect(screen.getByRole("button", { name: "Anular compra" })).toBeTruthy()
   })
 
+  it("si no se confirma la anulación indica revisar el estado de la compra", async () => {
+    anular.mockRejectedValue(new Error("respuesta perdida"))
+    await abrirDetalle()
+    fireEvent.click(screen.getByRole("button", { name: "Anular compra" }))
+    fireEvent.click(screen.getByRole("button", { name: "Sí, anular compra" }))
+
+    const alerta = await screen.findByRole("alert")
+    expect(alerta.textContent).toContain("Revisá su estado en el listado antes de volver a intentar")
+    expect(alerta.textContent).not.toContain("respuesta perdida")
+    expect(anular).toHaveBeenCalledTimes(1)
+  })
+
   it("una compra anulada no ofrece anular de nuevo", async () => {
     await abrirDetalle(compras[1])
     expect(screen.queryByRole("button", { name: "Anular compra" })).toBeNull()
