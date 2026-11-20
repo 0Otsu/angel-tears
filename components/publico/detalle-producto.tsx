@@ -24,7 +24,7 @@ function enlaceConsultaWhatsApp(producto: ProductoPublico, negocioPublico?: Nego
 
   const origen = leerOrigenPublico() ?? leerOrigenVercel()
   const ficha = origen ? new URL(`/catalogo/${encodeURIComponent(producto.slug)}`, origen) : null
-  const consulta = `¡Hola! 😊 Vi ${producto.nombre} en el catálogo de Angel Tears y quería consultar si todavía está disponible. ¡Gracias!`
+  const consulta = `¡Hola! Vi ${producto.nombre} en el catálogo de Angel Tears y quería consultar si todavía está disponible. ¡Gracias!`
   const mensaje = ficha ? `${consulta}\n${ficha.href}` : consulta
   const whatsapp = new URL(negocioPublico.whatsapp)
   whatsapp.searchParams.set("text", mensaje)

@@ -17,9 +17,10 @@ it("muestra la configuración vigente en el local, el contacto y el pie", () => 
   expect(screen.getAllByText(/Calle de prueba 123/)).toHaveLength(2)
   expect(screen.getByText(/Lunes, Sábado/)).toBeTruthy()
   expect(screen.getByText(/09:30 a 12:15/)).toBeTruthy()
-  for (const mapa of screen.getAllByRole("link", { name: "Cómo llegar" })) {
-    expect(mapa.getAttribute("href")).toBe(configuracionPrueba.comoLlegar)
-  }
+  const local = within(screen.getByRole("region", { name: "Vení a conocer Angel Tears" }))
+  expect(local.queryByRole("img")).toBeNull()
+  expect(local.getByRole("link", { name: "Cómo llegar" }).getAttribute("href"))
+    .toBe(configuracionPrueba.comoLlegar)
   const contacto = within(screen.getByRole("region", { name: "¿Tenés alguna consulta?" }))
   expect(contacto.getByRole("link", { name: "Consultar por WhatsApp" }).getAttribute("href"))
     .toBe("https://wa.me/5491100000000")

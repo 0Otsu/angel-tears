@@ -1,5 +1,7 @@
 # Despliegue comercial de Angel Tears
 
+Para la reunión, usá la [checklist operativa](REUNION_COMERCIAL.md) y revisá el [borrador de privacidad y atención al consumidor](PRIVACIDAD_Y_CONSUMO.md) con Sofía.
+
 Base aprobada `487ffafd7f0b34c330647cc7dd8b7b0b99bcc523`. Esta guía prepara el lanzamiento con Sofía. Los pasos que crean cuentas, aplican migraciones o publican el sitio quedan para la reunión y requieren su autorización.
 
 ## Arquitectura y presupuesto

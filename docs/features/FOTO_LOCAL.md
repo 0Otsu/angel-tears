@@ -1,5 +1,7 @@
 # Imagen de la fachada del local
 
+**Registro histórico.** La captura se retiró de la versión comercial. La sección del local conserva la dirección, los horarios y «Cómo llegar». Una futura foto debe ser propia y contar con autorización de publicación.
+
 ## RF relacionado
 PENDIENTE: SRS validada aún no incorporada.
 

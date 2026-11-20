@@ -12,7 +12,7 @@ La migración `0007_configuracion-negocio` crea una tabla limitada a la fila `id
 
 La lectura pública comparte una proyección de los campos editables y se memoriza solo por solicitud. El guardado invalida las rutas públicas afectadas. Cuando una lectura falla, la página puede seguir mostrando su contenido y omite contactos y horarios que no pudo confirmar. Los datos de `LocalBusiness` se generan a partir de la misma proyección y usan el serializador JSON-LD existente.
 
-La imagen de la fachada sigue siendo una referencia histórica de Google Street View. Editar la dirección actualiza el texto y el enlace configurado, y el área de envíos conserva su política independiente.
+La sección del local muestra la dirección, los horarios y el enlace «Cómo llegar». Acepta una fotografía propia autorizada como recurso estático. Editar la dirección actualiza el texto y el enlace configurado. El área de envíos conserva su política independiente.
 
 ## Validación manual
 

@@ -23,6 +23,10 @@ export function Catalogo({ productos, negocioPublico }: { productos: ProductoPub
   const filteredProducts = selectedCategory === "Todos"
     ? productos
     : productos.filter((product) => product.categoriaCodigo === selectedCategory)
+  const cantidad = filteredProducts.length
+  const sinResultados = productos.length === 0
+    ? "No hay productos disponibles por el momento."
+    : "No hay productos disponibles en esta categoría."
 
   return (
     <main className={`min-h-screen ${identidad.sitio}`}>
@@ -72,7 +76,9 @@ export function Catalogo({ productos, negocioPublico }: { productos: ProductoPub
             )}
           </div>
 
-          <p role="status" className="mb-6 text-sm text-muted-foreground">{filteredProducts.length === 0 ? (productos.length === 0 ? "No hay productos disponibles por el momento." : "No hay productos disponibles en esta categoría.") : `${filteredProducts.length} productos disponibles`}</p>
+          <p role="status" className="mb-6 text-sm text-muted-foreground">
+            {cantidad === 0 ? sinResultados : cantidad === 1 ? "1 producto disponible" : `${cantidad} productos disponibles`}
+          </p>
           <div className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
             {filteredProducts.map((product, indice) => (
               <TarjetaProducto key={product.id} product={product} prioridad={selectedCategory === "Todos" && indice === 0} />

@@ -19,7 +19,7 @@ it("filtra en ambos controles, identifica una categoría adicional y restablece 
   fireEvent.keyDown(mas, { key: "ArrowDown" })
   fireEvent.keyDown(await screen.findByRole("option", { name: "Categoría 6" }), { key: "Enter" })
   expect(mas.textContent).toBe("Categoría 6")
-  expect(screen.getByRole("status").textContent).toContain("1 productos disponibles")
+  expect(screen.getByRole("status").textContent).toContain("1 producto disponible")
   expect(screen.getByRole("heading", { name: "Pieza 6" })).toBeTruthy()
   expect(screen.queryByRole("heading", { name: "Pieza 0" })).toBeNull()
 

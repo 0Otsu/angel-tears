@@ -46,7 +46,7 @@ it.each([
   const destino = new URL(enlace.href)
   expect(destino.origin + destino.pathname).toBe("https://wa.me/5491100000000")
   expect(destino.searchParams.get("text")).toBe(
-    `¡Hola! 😊 Vi Aros Luz & Cía. + ✨ en el catálogo de Angel Tears y quería consultar si todavía está disponible. ¡Gracias!\n${origen}/catalogo/aros-luz-y-cia`,
+    `¡Hola! Vi Aros Luz & Cía. + ✨ en el catálogo de Angel Tears y quería consultar si todavía está disponible. ¡Gracias!\n${origen}/catalogo/aros-luz-y-cia`,
   )
   expect([...destino.searchParams.keys()]).toEqual(["text"])
   expect(enlace.target).toBe("_blank")
@@ -63,7 +63,7 @@ it.each([undefined, "localhost:3000"])("permite consultar sin URL pública con o
   const destino = new URL(enlace.href)
   expect(destino.origin + destino.pathname).toBe("https://wa.me/5491100000000")
   expect(destino.searchParams.get("text")).toBe(
-    "¡Hola! 😊 Vi Aros Luz & Cía. + ✨ en el catálogo de Angel Tears y quería consultar si todavía está disponible. ¡Gracias!",
+    "¡Hola! Vi Aros Luz & Cía. + ✨ en el catálogo de Angel Tears y quería consultar si todavía está disponible. ¡Gracias!",
   )
   expect(ficha.getByRole("link", { name: "Consultar por Instagram" }).getAttribute("href")).toBe(negocioPublico.instagram)
 })
