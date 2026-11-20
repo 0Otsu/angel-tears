@@ -44,7 +44,7 @@ Mantené los valores reales en archivos ignorados o en el gestor de secretos del
 | --- | --- |
 | Desarrollo y pruebas | Bases locales separadas. Para revisar la aplicación, usá un entorno local con todas las migraciones aplicadas. Usá cuentas de desarrollo separadas si necesitás probar Cloudinary o Resend. |
 | Demo académica | Vercel, PostgreSQL y Cloudinary con datos de muestra. Su preparación y comandos protegidos están en [la guía de la demo](docs/features/DEMO_DEFENSA_2026.md). Un push a `origin/main` puede iniciar el despliegue automático. |
-| Producción comercial | Entorno por validar. Requiere hosting comercial, origen HTTPS, base y secretos propios, cuenta de Sofía y verificación de publicación y recuperación por correo. |
+| Producción comercial | Entorno por validar. La [guía de despliegue comercial](docs/DESPLIEGUE_COMERCIAL.md) describe la preparación, la reunión con Sofía, las copias y el checklist de lanzamiento. |
 
 ## Retomar el proyecto
 
