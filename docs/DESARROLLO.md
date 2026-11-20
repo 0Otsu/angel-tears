@@ -122,7 +122,7 @@ Pendiente: el procedimiento en producción y el soporte seguro si se pierde el a
 
 ### Cuenta y cambio de contraseña
 
-`/admin/cuenta` (en el menú como «Cuenta») muestra el nombre y el correo de la Administradora **de solo lectura** (no hay edición de identidad, perfil ni roles), el formulario para cambiar la contraseña y el acceso a «Cerrar sesión». `/admin/configuracion` **no** es la cuenta: queda reservada solo al tema claro/oscuro persistente de `/admin/*`, sin efectos en la parte pública, y pertenece a la Ronda 3 (hoy sigue siendo la pantalla de muestra).
+`/admin/cuenta` (en el menú como «Cuenta») muestra el nombre y el correo de la Administradora **de solo lectura** (no hay edición de identidad, perfil ni roles), el formulario para cambiar la contraseña y el acceso a «Cerrar sesión». `/admin/configuracion` edita los datos públicos del local y sus contactos. Consultá la [guía de Configuración del negocio](features/CONFIGURACION_NEGOCIO.md). El tema administrativo sigue pendiente.
 
 **Política del cambio autenticado** (`DECISIONES_PRODUCTO_MVP.md`, sección 10, 21/10/2026): se verifica la contraseña actual, **se conserva la sesión desde la que se hace el cambio sin extender su máximo de 30 días** y se invalidan todas las demás. En la recuperación por email rige otra política (se invalidan todas y se vuelve a iniciar sesión).
 

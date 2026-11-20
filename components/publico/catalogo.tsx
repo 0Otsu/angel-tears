@@ -2,13 +2,14 @@
 
 import { useState } from "react"
 import { Header } from "@/components/boty/header"
+import type { NegocioPublico } from "@/lib/negocio-publico"
 import { Footer } from "@/components/boty/footer"
 import type { ProductoPublico } from "@/lib/modulos/catalogo/contrato"
 import { CATEGORIAS_INICIALES } from "@/lib/modulos/productos/categorias"
 import { TarjetaProducto } from "@/components/publico/tarjeta-producto"
 import identidad from "@/components/publico/identidad.module.css"
 
-export function Catalogo({ productos }: { productos: ProductoPublico[] }) {
+export function Catalogo({ productos, negocioPublico }: { productos: ProductoPublico[]; negocioPublico?: NegocioPublico }) {
   const [selectedCategory, setSelectedCategory] = useState("Todos")
   const filteredProducts = selectedCategory === "Todos"
     ? productos
@@ -16,7 +17,7 @@ export function Catalogo({ productos }: { productos: ProductoPublico[] }) {
 
   return (
     <main className={`min-h-screen ${identidad.sitio}`}>
-      <Header />
+      <Header negocioPublico={negocioPublico} />
 
       <section className="px-6 pb-12 pt-32 lg:px-8 lg:pt-40">
         <div className="mx-auto max-w-7xl">
@@ -58,7 +59,7 @@ export function Catalogo({ productos }: { productos: ProductoPublico[] }) {
         </div>
       </section>
 
-      <Footer />
+      <Footer negocioPublico={negocioPublico} />
     </main>
   )
 }

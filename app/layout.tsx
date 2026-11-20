@@ -16,8 +16,8 @@ const playfairDisplay = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: { default: 'Angel Tears — Bijouterie en Concordia', template: '%s | Angel Tears' },
-  description: 'Bijouterie y accesorios en Concordia, Entre Ríos. Conocé nuestros accesorios y la información del local.',
+  title: { default: 'Angel Tears — Bijouterie y accesorios', template: '%s | Angel Tears' },
+  description: 'Bijouterie y accesorios. Conocé nuestros accesorios y la información del local.',
 }
 
 export const viewport: Viewport = {

@@ -2,7 +2,7 @@ import { VistaDetalleProducto } from "./vista-detalle-producto"
 import Link from "next/link"
 import type { ProductoPublico } from "@/lib/modulos/catalogo/contrato"
 import { leerOrigenPublico } from "@/lib/modulos/catalogo/origen-publico"
-import { negocioPublico } from "@/lib/negocio-publico"
+import type { NegocioPublico } from "@/lib/negocio-publico"
 import { TarjetaProducto } from "./tarjeta-producto"
 import { ChevronLeft } from "lucide-react"
 import { Header } from "@/components/boty/header"
@@ -19,8 +19,8 @@ function leerOrigenVercel(): string | null {
   }
 }
 
-function enlaceConsultaWhatsApp(producto: ProductoPublico): string | undefined {
-  if (!/^https:\/\/wa\.me\/[1-9]\d{1,14}\/?$/.test(negocioPublico.whatsapp)) return
+function enlaceConsultaWhatsApp(producto: ProductoPublico, negocioPublico?: NegocioPublico): string | undefined {
+  if (!negocioPublico || !/^https:\/\/wa\.me\/[1-9]\d{1,14}\/?$/.test(negocioPublico.whatsapp)) return
 
   const origen = leerOrigenPublico() ?? leerOrigenVercel()
   const ficha = origen ? new URL(`/catalogo/${encodeURIComponent(producto.slug)}`, origen) : null
@@ -31,10 +31,10 @@ function enlaceConsultaWhatsApp(producto: ProductoPublico): string | undefined {
   return whatsapp.href
 }
 
-export function DetalleProducto({ product, relacionados }: { product: ProductoPublico; relacionados: ProductoPublico[] }) {
+export function DetalleProducto({ product, relacionados, negocioPublico }: { product: ProductoPublico; relacionados: ProductoPublico[]; negocioPublico?: NegocioPublico }) {
   return (
     <main className={`min-h-screen ${identidad.sitio}`}>
-      <Header />
+      <Header negocioPublico={negocioPublico} />
       <div className="px-6 pb-24 pt-32 lg:px-8 lg:pt-40">
         <div className="mx-auto max-w-7xl">
           <Link href="/catalogo" prefetch={false} className="mb-8 inline-flex items-center gap-2 text-sm text-muted-foreground boty-transition hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
@@ -42,7 +42,7 @@ export function DetalleProducto({ product, relacionados }: { product: ProductoPu
             Volver al catálogo
           </Link>
 
-          <VistaDetalleProducto product={product} enlaceWhatsApp={enlaceConsultaWhatsApp(product)} />
+          <VistaDetalleProducto product={product} negocioPublico={negocioPublico} enlaceWhatsApp={enlaceConsultaWhatsApp(product, negocioPublico)} />
 
           {relacionados.length > 0 && <section className="mt-24 border-t border-border/50 pt-16" aria-labelledby="related-products-heading">
             <div className="mb-8 flex items-end justify-between gap-4">
@@ -58,7 +58,7 @@ export function DetalleProducto({ product, relacionados }: { product: ProductoPu
           </section>}
         </div>
       </div>
-      <Footer />
+      <Footer negocioPublico={negocioPublico} />
     </main>
   )
 }

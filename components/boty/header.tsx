@@ -3,7 +3,7 @@
 import { useRef, useState } from "react"
 import Link from "next/link"
 import { Menu, X, Instagram, MessageCircle } from "lucide-react"
-import { negocioPublico } from "@/lib/negocio-publico"
+import type { NegocioPublico } from "@/lib/negocio-publico"
 
 const enlaces = [
   { nombre: "Catálogo", href: "/catalogo" },
@@ -11,7 +11,7 @@ const enlaces = [
   { nombre: "Contacto", href: "/#contacto" },
 ]
 
-export function Header() {
+export function Header({ negocioPublico }: { negocioPublico?: NegocioPublico }) {
   const botonMenu = useRef<HTMLButtonElement>(null)
   const [abierto, setAbierto] = useState(false)
   return (
@@ -26,13 +26,13 @@ export function Header() {
           </div>
           <Link href="/" onClick={() => setAbierto(false)} aria-label="Angel Tears, inicio" className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap font-serif text-[26px] tracking-wider text-foreground sm:text-3xl">Angel Tears</Link>
           <div className="flex items-center gap-2 sm:gap-4">
-            <a href={negocioPublico.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram de Angel Tears (abre otra pestaña)" className="hidden min-h-11 min-w-11 items-center justify-center text-foreground/70 boty-transition hover:text-foreground sm:flex"><Instagram className="size-5" /></a>
-            <a href={negocioPublico.whatsapp} target="_blank" rel="noopener noreferrer" title={`WhatsApp: ${negocioPublico.telefonoWhatsApp}`} aria-label="WhatsApp de Angel Tears (abre otra pestaña)" className="inline-flex size-11 items-center justify-center text-foreground/70 boty-transition hover:text-foreground"><MessageCircle className="size-5" aria-hidden="true" /></a>
+            {negocioPublico && <a href={negocioPublico.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram de Angel Tears (abre otra pestaña)" className="hidden min-h-11 min-w-11 items-center justify-center text-foreground/70 boty-transition hover:text-foreground sm:flex"><Instagram className="size-5" /></a>}
+            {negocioPublico && <a href={negocioPublico.whatsapp} target="_blank" rel="noopener noreferrer" title={`WhatsApp: ${negocioPublico.telefonoWhatsApp}`} aria-label="WhatsApp de Angel Tears (abre otra pestaña)" className="inline-flex size-11 items-center justify-center text-foreground/70 boty-transition hover:text-foreground"><MessageCircle className="size-5" aria-hidden="true" /></a>}
           </div>
         </div>
         {abierto && <div id="menu-publico-movil" className="pb-6 lg:hidden"><div className="flex flex-col gap-4 border-t border-border/50 pt-4">
           {enlaces.map(enlace => <Link key={enlace.nombre} href={enlace.href} onClick={() => setAbierto(false)} className="flex min-h-11 items-center text-sm tracking-wide text-foreground/70 hover:text-foreground">{enlace.nombre}</Link>)}
-          <a href={negocioPublico.instagram} target="_blank" rel="noopener noreferrer" className="flex min-h-11 items-center text-sm tracking-wide text-foreground/70 hover:text-foreground">Instagram · {negocioPublico.usuarioInstagram}</a>
+          {negocioPublico && <a href={negocioPublico.instagram} target="_blank" rel="noopener noreferrer" className="flex min-h-11 items-center text-sm tracking-wide text-foreground/70 hover:text-foreground">Instagram · {negocioPublico.usuarioInstagram}</a>}
           <Link href="/admin/login" onClick={() => setAbierto(false)} className="flex min-h-11 items-center text-sm tracking-wide text-foreground/70 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">Iniciar sesión</Link>
         </div></div>}
       </nav>

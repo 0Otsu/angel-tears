@@ -1,6 +1,5 @@
 import type { ReactNode } from "react"
 import type { LucideIcon } from "lucide-react"
-import { Info } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export function PanelAdmin({ children, className, ...props }: React.ComponentProps<"section">) {
@@ -21,8 +20,4 @@ export function EncabezadoAdmin({ titulo, descripcion, simple = false, children 
 
 export function EtiquetaEstado({ children, tono = "neutro" }: { children: ReactNode; tono?: "oliva" | "alerta" | "neutro" }) {
   return <span className={cn("inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-medium", tono === "oliva" ? "bg-success-subtle text-success" : tono === "alerta" ? "bg-destructive/10 text-destructive" : "bg-card text-muted-foreground")}><span className="size-1.5 rounded-full bg-current" aria-hidden="true" />{children}</span>
-}
-
-export function AvisoDemo() {
-  return <div className="flex items-start gap-2.5 rounded-xl border border-border/70 bg-card/40 px-4 py-3 text-xs leading-relaxed text-muted-foreground"><Info className="mt-0.5 size-3.5 shrink-0 text-primary" aria-hidden="true" /><p><span className="font-medium text-foreground">DATOS DE DEMOSTRACIÓN</span> No hay autenticación, guardado ni operaciones reales.</p></div>
 }

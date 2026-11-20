@@ -1,11 +1,26 @@
-// Fuente: capturas aportadas y teléfono confirmado por el usuario. Horarios pendientes.
-export const negocioPublico = {
-  instagram: "https://www.instagram.com/angeltears.ac/",
-  usuarioInstagram: "@angeltears.ac",
-  whatsapp: "https://wa.me/5493454266760",
-  telefonoWhatsApp: "+54 9 3454 26-6760",
-  direccion: "Entre Ríos 924",
-  referencia: "Planta baja, detrás de las escaleras",
-  ciudad: "Concordia, Entre Ríos",
-  comoLlegar: "https://maps.app.goo.gl/xch8vm33VuDuykjw9",
+import type { ConfiguracionNegocio, DiaAtencion } from "@/lib/modulos/configuracion/contrato"
+
+export const NOMBRES_DIAS: Record<DiaAtencion, string> = {
+  lunes: "Lunes", martes: "Martes", miercoles: "Miércoles", jueves: "Jueves",
+  viernes: "Viernes", sabado: "Sábado", domingo: "Domingo",
 }
+
+export function proyectarNegocioPublico(datos: ConfiguracionNegocio) {
+  return {
+    direccion: datos.direccion,
+    referencia: datos.referencia,
+    localidad: datos.localidad,
+    provincia: datos.provincia,
+    ciudad: `${datos.localidad}, ${datos.provincia}`,
+    diasAtencion: datos.diasAtencion,
+    apertura: datos.apertura,
+    cierre: datos.cierre,
+    comoLlegar: datos.comoLlegar,
+    telefonoWhatsApp: `+${datos.telefonoWhatsApp}`,
+    whatsapp: `https://wa.me/${datos.telefonoWhatsApp}`,
+    usuarioInstagram: `@${datos.usuarioInstagram}`,
+    instagram: `https://www.instagram.com/${datos.usuarioInstagram}/`,
+  }
+}
+
+export type NegocioPublico = ReturnType<typeof proyectarNegocioPublico>

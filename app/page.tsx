@@ -1,3 +1,4 @@
+import { obtenerNegocioPublico } from "@/lib/modulos/configuracion/aplicacion"
 import { Header } from "@/components/boty/header"
 import { Hero } from "@/components/boty/hero"
 import { SeleccionHome } from "@/components/publico/seleccion-home"
@@ -10,19 +11,25 @@ import { metadataPublica } from "@/lib/modulos/catalogo/metadata-publica"
 import { datosLocal, serializarDatosEstructurados } from "@/lib/modulos/catalogo/datos-estructurados"
 
 export const dynamic = "force-dynamic"
-export function generateMetadata() { return { ...metadataPublica("Bijouterie en Concordia, Entre Ríos", "Conocé los aros, collares, pulseras, anillos y otros accesorios de Angel Tears. Visitá nuestro local en Concordia, Entre Ríos, o consultanos por WhatsApp.", "/"), title: { absolute: "Bijouterie en Concordia, Entre Ríos | Angel Tears" } } }
+export async function generateMetadata() {
+  const negocioPublico = await obtenerNegocioPublico()
+  const titulo = negocioPublico ? `Bijouterie en ${negocioPublico.ciudad}` : "Bijouterie y accesorios"
+  const descripcion = "Conocé los aros, collares, pulseras, anillos y otros accesorios de Angel Tears. Visitá nuestro local o consultanos por WhatsApp."
+  return { ...metadataPublica(titulo, descripcion, "/"), title: { absolute: `${titulo} | Angel Tears` } }
+}
 
-export default function HomePage() {
+export default async function HomePage() {
+  const negocioPublico = await obtenerNegocioPublico()
   return (
     <main className={identidad.sitio}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializarDatosEstructurados(datosLocal()) }} />
-      <Header />
+      {negocioPublico && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializarDatosEstructurados(datosLocal(negocioPublico)) }} />}
+      <Header negocioPublico={negocioPublico} />
       <Hero />
       <SeleccionHome />
-      <FeatureSection />
-      <Testimonials />
-      <Contacto />
-      <Footer />
+      <FeatureSection negocioPublico={negocioPublico} />
+      <Testimonials negocioPublico={negocioPublico} />
+      <Contacto negocioPublico={negocioPublico} />
+      <Footer negocioPublico={negocioPublico} />
     </main>
   )
 }

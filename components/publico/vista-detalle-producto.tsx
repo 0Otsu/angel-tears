@@ -3,7 +3,7 @@ import { Instagram, MessageCircle } from "lucide-react"
 import type { ProductoPublico } from "@/lib/modulos/catalogo/contrato"
 import { formatearPrecioPublico as formatPrice } from "@/lib/modulos/catalogo/presentacion"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { negocioPublico } from "@/lib/negocio-publico"
+import type { NegocioPublico } from "@/lib/negocio-publico"
 import { GaleriaPublica } from "./galeria-publica"
 import estilos from "./vista-detalle-producto.module.css"
 
@@ -12,9 +12,10 @@ type PropiedadesInformacion = {
   nivelTitulo: "h1" | "h2"
   enlacesEnOtraPestana: boolean
   enlaceWhatsApp?: string
+  negocioPublico?: NegocioPublico
 }
 
-function InformacionProducto({ product, nivelTitulo, enlacesEnOtraPestana, enlaceWhatsApp }: PropiedadesInformacion) {
+function InformacionProducto({ product, nivelTitulo, enlacesEnOtraPestana, enlaceWhatsApp, negocioPublico }: PropiedadesInformacion) {
   const Titulo = nivelTitulo
   return (
     <div className="flex min-w-0 flex-col [overflow-wrap:anywhere]">
@@ -43,7 +44,7 @@ function InformacionProducto({ product, nivelTitulo, enlacesEnOtraPestana, enlac
           </a>
         )}
         <div className={enlacesEnOtraPestana ? "flex flex-col gap-3 sm:flex-row" : "contents"}>
-          <a
+          {negocioPublico && <a
             href={negocioPublico.instagram}
             target="_blank"
             rel="noopener noreferrer"
@@ -53,7 +54,7 @@ function InformacionProducto({ product, nivelTitulo, enlacesEnOtraPestana, enlac
               <Instagram className="size-4 shrink-0" aria-hidden="true" />
             </span>
             Consultar por Instagram
-          </a>
+          </a>}
           <Link prefetch={false}
             href="/catalogo"
             target={enlacesEnOtraPestana ? "_blank" : undefined}
@@ -73,7 +74,7 @@ function InformacionProducto({ product, nivelTitulo, enlacesEnOtraPestana, enlac
         </AccordionItem>}
         <AccordionItem value="delivery" className="border-border/50">
           <AccordionTrigger>Formas de entrega</AccordionTrigger>
-          <AccordionContent><p className="leading-relaxed text-muted-foreground">Podés visitarnos en Entre Ríos 924, planta baja, detrás de las escaleras, en Concordia. Realizamos envíos en Concordia a cargo del cliente. Consultanos por Instagram para coordinar.</p></AccordionContent>
+          <AccordionContent><p className="leading-relaxed text-muted-foreground">{negocioPublico && `Podés visitarnos en ${[negocioPublico.direccion, negocioPublico.referencia, negocioPublico.ciudad].filter(Boolean).join(", ")}. `}Realizamos envíos en Concordia a cargo del cliente.{negocioPublico && " Consultanos por Instagram para coordinar."}</p></AccordionContent>
         </AccordionItem>
         {product.cuidados && <AccordionItem value="care" className="border-border/50">
           <AccordionTrigger>Cuidados</AccordionTrigger>
@@ -81,7 +82,7 @@ function InformacionProducto({ product, nivelTitulo, enlacesEnOtraPestana, enlac
         </AccordionItem>}
         <AccordionItem value="availability" className="border-border/50">
           <AccordionTrigger>Consulta y disponibilidad</AccordionTrigger>
-          <AccordionContent><p className="leading-relaxed text-muted-foreground">{enlaceWhatsApp ? "Escribinos por WhatsApp o Instagram" : `Escribinos a ${negocioPublico.usuarioInstagram}`} para confirmar disponibilidad y consultar por esta pieza.</p></AccordionContent>
+          <AccordionContent><p className="leading-relaxed text-muted-foreground">{negocioPublico ? `${enlaceWhatsApp ? "Escribinos por WhatsApp o Instagram" : `Escribinos a ${negocioPublico.usuarioInstagram}`} para confirmar disponibilidad y consultar por esta pieza.` : "Los canales de contacto no están disponibles en este momento."}</p></AccordionContent>
         </AccordionItem>
       </Accordion>
     </div>
@@ -89,15 +90,16 @@ function InformacionProducto({ product, nivelTitulo, enlacesEnOtraPestana, enlac
 }
 
 // Presentacion compartida: sin consultas, permisos, metadata ni estado administrativo.
-export function VistaDetalleProducto({ product, nivelTitulo = "h1", enlacesEnOtraPestana = false, sizesImagen, enlaceWhatsApp }: {
+export function VistaDetalleProducto({ product, nivelTitulo = "h1", enlacesEnOtraPestana = false, sizesImagen, enlaceWhatsApp, negocioPublico }: {
   product: ProductoPublico
   nivelTitulo?: "h1" | "h2"
   enlacesEnOtraPestana?: boolean
   sizesImagen?: string
   enlaceWhatsApp?: string
+  negocioPublico?: NegocioPublico
 }) {
   return <section aria-label="Detalle del producto" className={estilos.contenedor}><div className={estilos.detalle}>
     <GaleriaPublica principal={product.imagen} medios={product.galeria} sizes={sizesImagen} />
-    <InformacionProducto product={product} nivelTitulo={nivelTitulo} enlacesEnOtraPestana={enlacesEnOtraPestana} enlaceWhatsApp={enlaceWhatsApp} />
+    <InformacionProducto product={product} nivelTitulo={nivelTitulo} enlacesEnOtraPestana={enlacesEnOtraPestana} enlaceWhatsApp={enlaceWhatsApp} negocioPublico={negocioPublico} />
   </div></section>
 }

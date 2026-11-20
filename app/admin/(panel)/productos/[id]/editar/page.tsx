@@ -1,3 +1,4 @@
+import { obtenerNegocioPublico } from "@/lib/modulos/configuracion/aplicacion"
 import { headers } from "next/headers"
 import { notFound } from "next/navigation"
 import { z } from "zod"
@@ -24,5 +25,6 @@ export default async function PaginaEditarProducto({ params, searchParams }: { p
     console.error("[productos] existencias no consultadas", { tipo: error instanceof Error ? error.name : typeof error })
   }
   const buscar = await searchParams
-  return <EditorProducto key={id} producto={producto} existencias={existencias} categorias={consulta.categorias} pasoInicial={buscar.paso === "vista-previa" ? "vista-previa" : buscar.paso === "imagen" ? "imagen" : "datos"} alta={buscar.alta === "1"} />
+  const negocioPublico = await obtenerNegocioPublico()
+  return <EditorProducto key={id} negocioPublico={negocioPublico} producto={producto} existencias={existencias} categorias={consulta.categorias} pasoInicial={buscar.paso === "vista-previa" ? "vista-previa" : buscar.paso === "imagen" ? "imagen" : "datos"} alta={buscar.alta === "1"} />
 }

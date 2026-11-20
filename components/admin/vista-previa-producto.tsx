@@ -1,4 +1,6 @@
 "use client"
+import type { NegocioPublico } from "@/lib/negocio-publico"
+
 import { useEffect, useState, type ReactNode } from "react"
 import Link from "next/link"
 import { ExternalLink } from "lucide-react"
@@ -9,8 +11,8 @@ import { Button } from "@/components/ui/button"
 import { CargandoAdmin } from "./cargando-admin"
 import { PanelAdmin } from "./piezas-admin"
 
-export function VistaPreviaProducto({ productoId, version, publicado, slug, editarDatos, gestionarImagenes, acciones }: {
-  productoId: string; version: number; publicado: boolean; slug: string;
+export function VistaPreviaProducto({ productoId, version, publicado, slug, negocioPublico, editarDatos, gestionarImagenes, acciones }: {
+  productoId: string; version: number; publicado: boolean; slug: string; negocioPublico?: NegocioPublico;
   editarDatos: () => void; gestionarImagenes: () => void; acciones: (listo: boolean, disponible?: boolean) => ReactNode;
 }) {
   const [resultado, recibir] = useState<ResultadoVistaPrevia | null>(null)
@@ -31,7 +33,7 @@ export function VistaPreviaProducto({ productoId, version, publicado, slug, edit
       </div>
     </div>
     <PanelAdmin className="p-4 sm:p-6">
-      {esperando ? <CargandoAdmin tipo="preview" nombre="vista previa"/> : listo ? <div className="mx-auto max-w-7xl"><VistaDetalleProducto product={resultado.producto} nivelTitulo="h2" enlacesEnOtraPestana sizesImagen="(min-width: 1634px) 600px, (min-width: 1314px) calc((100vw - 434px) / 2), (min-width: 1024px) calc(100vw - 354px), (min-width: 640px) calc(100vw - 82px), calc(100vw - 66px)" /></div> : <div className="space-y-3">
+      {esperando ? <CargandoAdmin tipo="preview" nombre="vista previa"/> : listo ? <div className="mx-auto max-w-7xl"><VistaDetalleProducto negocioPublico={negocioPublico} product={resultado.producto} nivelTitulo="h2" enlacesEnOtraPestana sizesImagen="(min-width: 1634px) 600px, (min-width: 1314px) calc((100vw - 434px) / 2), (min-width: 1024px) calc(100vw - 354px), (min-width: 640px) calc(100vw - 82px), calc(100vw - 66px)" /></div> : <div className="space-y-3">
         <p role="alert">{conflicto ? "El producto cambió desde que lo abriste." : resultado?.estado === "sesion_requerida" ? "Tu sesión venció. Volvé a iniciar sesión." : "No pudimos preparar la vista previa."}</p>
         {conflicto ? <Button variant="outline" onClick={() => window.location.reload()}>Recargar datos</Button> : resultado?.estado === "sesion_requerida" ? <Link href="/admin/login" className="underline">Iniciar sesión</Link> : <Button variant="outline" onClick={() => { recibir(null); reintentar(n => n + 1) }}>Reintentar consulta</Button>}
       </div>}

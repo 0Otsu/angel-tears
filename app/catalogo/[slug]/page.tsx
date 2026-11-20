@@ -1,3 +1,4 @@
+import { obtenerNegocioPublico } from "@/lib/modulos/configuracion/aplicacion"
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { DetalleProducto } from "@/components/publico/detalle-producto"
@@ -11,13 +12,14 @@ type Propiedades = { params: Promise<{ slug: string }> }
 export async function generateMetadata({ params }: Propiedades): Promise<Metadata> {
   const producto = await consultarProductoPublico((await params).slug)
   if (!producto) return { title: 'Producto no encontrado' }
-  return metadataProducto(producto)
+  return metadataProducto(producto, undefined, (await obtenerNegocioPublico())?.ciudad)
 }
 export default async function PaginaProducto({ params }: Propiedades) {
   const producto = await consultarProductoPublico((await params).slug)
   if (!producto) notFound()
+  const [relacionados, negocioPublico] = await Promise.all([listarRelacionados(producto.id, producto.categoriaCodigo), obtenerNegocioPublico()])
   return <>
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializarDatosEstructurados(datosProducto(producto)) }} />
-    <DetalleProducto product={producto} relacionados={await listarRelacionados(producto.id, producto.categoriaCodigo)} />
+    <DetalleProducto product={producto} relacionados={relacionados} negocioPublico={negocioPublico} />
   </>
 }

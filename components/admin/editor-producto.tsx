@@ -1,4 +1,7 @@
 "use client"
+
+import type { NegocioPublico } from "@/lib/negocio-publico"
+
 import { useState } from "react"
 import { Check } from "lucide-react"
 import { useRouter } from "next/navigation"
@@ -28,7 +31,7 @@ export function NuevoProducto({ categorias }: { categorias: ConsultaAdministrati
     <FormularioProducto categorias={categorias} cancelar={() => router.push("/admin/productos")} alCambiarBorrador={setCambios} alCambiarOcupado={setOcupado} accionCancelar={<CancelarProducto hayCambios={cambios} ocupado={ocupado} />} alGuardar={id => router.push(`/admin/productos/${id}/editar?paso=imagen&alta=1`)} />
   </>
 }
-export function EditorProducto({ producto, categorias, existencias, pasoInicial = "datos", alta = false }: { producto: ProductoAdministrativo; categorias: ConsultaAdministrativa["categorias"]; existencias?: FilaStock | null; pasoInicial?: Paso; alta?: boolean }) {
+export function EditorProducto({ producto, categorias, existencias, negocioPublico, pasoInicial = "datos", alta = false }: { producto: ProductoAdministrativo; categorias: ConsultaAdministrativa["categorias"]; existencias?: FilaStock | null; negocioPublico?: NegocioPublico; pasoInicial?: Paso; alta?: boolean }) {
   // Solo confirmaciones propias actualizan el snapshot. Una edicion ajena exige recarga.
   const [actual, setActual] = useState(producto)
   const [paso, setPaso] = useState<Paso>(pasoInicial)
@@ -53,6 +56,6 @@ export function EditorProducto({ producto, categorias, existencias, pasoInicial 
       {borradorImagen && !imagenOcupada && guardandoImagenes === 0 && <p role="note" className="mt-3 text-sm">Reintentá o quitá las imágenes con error para continuar.</p>}
       <div className="mt-4 flex flex-wrap gap-3">{cancelar()}<Button className="min-h-11" disabled={imagenOcupada || borradorImagen} onClick={() => setPaso("vista-previa")}>Continuar a vista previa</Button></div>
     </div>
-    {paso === "vista-previa" && (cambios ? <PanelAdmin className="space-y-4 p-5"><div role="note" className="space-y-2 text-sm"><p>Tenés cambios sin guardar.</p><Button variant="outline" className="min-h-11" onClick={() => setPaso(borradorDatos ? "datos" : "imagen")}>{borradorDatos ? "Volver a Datos" : "Volver a Imágenes"}</Button></div>{acciones(false)}</PanelAdmin> : <VistaPreviaProducto productoId={actual.id} version={actual.version} publicado={actual.publicado} slug={actual.slug} editarDatos={() => setPaso("datos")} gestionarImagenes={() => setPaso("imagen")} acciones={acciones} />)}
+    {paso === "vista-previa" && (cambios ? <PanelAdmin className="space-y-4 p-5"><div role="note" className="space-y-2 text-sm"><p>Tenés cambios sin guardar.</p><Button variant="outline" className="min-h-11" onClick={() => setPaso(borradorDatos ? "datos" : "imagen")}>{borradorDatos ? "Volver a Datos" : "Volver a Imágenes"}</Button></div>{acciones(false)}</PanelAdmin> : <VistaPreviaProducto negocioPublico={negocioPublico} productoId={actual.id} version={actual.version} publicado={actual.publicado} slug={actual.slug} editarDatos={() => setPaso("datos")} gestionarImagenes={() => setPaso("imagen")} acciones={acciones} />)}
   </>
 }

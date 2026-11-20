@@ -1,16 +1,19 @@
 import Image from "next/image"
-import { negocioPublico } from "@/lib/negocio-publico"
+import { NOMBRES_DIAS, type NegocioPublico } from "@/lib/negocio-publico"
 import identidad from "@/components/publico/identidad.module.css"
 import { MapPin, Clock, Wallet, Truck } from "lucide-react"
 
-const features = [
-  { icon: MapPin, title: "Ubicación", description: <>Entre Ríos 924<br />Planta baja, detrás de las escaleras</> },
-  { icon: Clock, title: "Horarios", description: <>Lunes a viernes<br />16:00 a 20:30</> },
-  { icon: Wallet, title: "Medios de pago", description: <>Efectivo<br />Transferencia</> },
-  { icon: Truck, title: "Envíos", description: <>Envíos en Concordia<br />A cargo del cliente</> },
-]
-
-export function FeatureSection() {
+export function FeatureSection({ negocioPublico }: { negocioPublico?: NegocioPublico }) {
+  const features = [
+    { icon: MapPin, title: "Ubicación", description: negocioPublico
+      ? <>{negocioPublico.direccion}<br />{negocioPublico.referencia && <>{negocioPublico.referencia}<br /></>}{negocioPublico.ciudad}</>
+      : "Ubicación no disponible por el momento." },
+    { icon: Clock, title: "Horarios", description: negocioPublico
+      ? <>{negocioPublico.diasAtencion.map(dia => NOMBRES_DIAS[dia]).join(", ")}<br />{negocioPublico.apertura} a {negocioPublico.cierre}</>
+      : "Horarios no disponibles por el momento." },
+    { icon: Wallet, title: "Medios de pago", description: <>Efectivo<br />Transferencia</> },
+    { icon: Truck, title: "Envíos", description: <>Envíos en Concordia<br />A cargo del cliente</> },
+  ]
   return (
     <section id="el-local" aria-labelledby="local-heading" className={`py-16 lg:py-24 bg-background ${identidad.ancla}`}>
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
@@ -31,7 +34,7 @@ export function FeatureSection() {
             />
             </div>
             <figcaption className="mt-3 text-xs text-muted-foreground">
-              Acceso por la puerta central · Imagen de Google Street View
+              Fachada de referencia · Imagen de Google Street View
             </figcaption>
           </figure>
 
@@ -44,7 +47,7 @@ export function FeatureSection() {
               Vení a conocer Angel Tears
             </h2>
             <p className="text-lg text-muted-foreground leading-relaxed mb-8 max-w-md">
-              Estamos en Concordia, Entre Ríos. Conocé nuestro espacio y encontrá cómo visitarnos.
+              {negocioPublico && `Estamos en ${negocioPublico.ciudad}. `}Conocé nuestro espacio y encontrá cómo visitarnos.
 
             </p>
 
@@ -62,7 +65,7 @@ export function FeatureSection() {
                   )}
                   <h3 className="font-medium text-foreground mb-1">{feature.title}</h3>
                   <p className="text-sm text-muted-foreground">{feature.description}</p>
-                  {feature.title === "Ubicación" && (
+                  {feature.title === "Ubicación" && negocioPublico && (
                     <a
                       href={negocioPublico.comoLlegar}
                       target="_blank"

@@ -11,7 +11,7 @@ Angel Tears es un **monolito modular** desplegable como una aplicación Next.js 
 | `lib/modulos/` | Casos de uso, validaciones, contratos y consultas por dominio. |
 | `lib/infraestructura/` | Conexión Drizzle/`pg`, esquemas PostgreSQL, Better Auth y adaptador de correo. Las migraciones versionadas están en `drizzle/`. |
 | `lib/presentacion/` | Formatos y adaptación de filtros para las pantallas administrativas. |
-| `lib/negocio-publico.ts` | Datos de contacto públicos. |
+| `lib/negocio-publico.ts` | Proyección de la configuración hacia las pantallas públicas. |
 | `pruebas/`, `e2e/`, `scripts/` | Arnés de pruebas, recorridos de navegador y comandos operativos. Los datos de la demo viven en `scripts/demo/`. |
 
 Los Server Components consultan servicios en servidor. La UI llama a Server Actions y Route Handlers según el flujo. Las pantallas privadas, acciones y handlers validan permisos en servidor. Las interfaces administrativas y públicas reciben proyecciones ajustadas a su uso.
@@ -26,12 +26,13 @@ Los Server Components consultan servicios en servidor. La UI llama a Server Acti
 | Proveedores | Datos de proveedores y estado activo/inactivo. |
 | Compras y Ventas | Operaciones con líneas, importes e historial. Registran efectos sobre stock y sus reversas a través de Inventario. |
 | Egresos y Finanzas | Gastos manuales y sus anulaciones. Finanzas compone ventas, compras y gastos vigentes para el resultado aproximado. |
+| Configuración del negocio | Dirección, referencia, horario y contacto guardados en una sola fila. La lectura pública proyecta estos campos para mostrar el mismo dato en pantalla y en LocalBusiness. |
 | Catálogo | Proyección pública de Productos e Inventario. Las listas y las fichas aplican sus propias condiciones de visibilidad. |
 
 El saldo se guarda en Inventario. Las operaciones que afectan stock coordinan sus cambios en PostgreSQL con transacciones, claves de idempotencia y restricciones. Las pantallas públicas consultan el catálogo por solicitud. Los productos publicados agotados mantienen su ficha y los ocultos quedan fuera del sitio público. Ver [ADR-008](adr/ADR-008-nextjs-fronteras.md) y [reglas de dominio](REGLAS_DOMINIO.md).
 
 ## Rutas vigentes y pendientes
 
-`/admin` muestra el resumen. Productos, Inventario y Operaciones tienen sus propios destinos. Las rutas `/admin/finanzas`, `/admin/reportes` y `/admin/egresos` redirigen para mantener enlaces anteriores. `/admin/configuracion` conserva una pantalla de muestra protegida. El tema administrativo persistente y las categorías personalizadas quedan para entregas posteriores.
+`/admin` muestra el resumen. Productos, Inventario y Operaciones tienen sus propios destinos. Las rutas `/admin/finanzas`, `/admin/reportes` y `/admin/egresos` redirigen para mantener enlaces anteriores. `/admin/configuracion` permite editar los datos públicos del negocio desde el menú de usuario. El tema administrativo persistente y las categorías personalizadas quedan para entregas posteriores.
 
 Para levantar el proyecto y verificar datos y servicios por entorno, seguí el [README](../README.md) y [Desarrollo](DESARROLLO.md). Los documentos de planificación histórica y los ADR conservan el contexto de sus respectivas etapas.

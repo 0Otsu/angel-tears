@@ -1,3 +1,5 @@
+import { proyectarNegocioPublico } from "@/lib/negocio-publico"
+import { configuracionPrueba } from "@/pruebas/fixtures/configuracion-negocio"
 import { describe, expect, it } from "vitest"
 import type { ProductoPublico } from "./contrato"
 import { datosLocal, datosProducto, serializarDatosEstructurados } from "./datos-estructurados"
@@ -17,12 +19,24 @@ describe("datos estructurados veraces", () => {
     expect(salida).not.toMatch(/[<>&\u2028\u2029]/)
     expect(JSON.parse(salida)).toEqual({ name: texto })
   })
-  it("LocalBusiness solo datos confirmados sin horarios, coordenadas o reviews", () => {
-    const local = datosLocal(null)
-    expect(local).toMatchObject({ name: "Angel Tears", address: { streetAddress: "Entre Ríos 924, Planta baja, detrás de las escaleras", addressLocality: "Concordia", addressRegion: "Entre Ríos" } })
-    expect(local).not.toHaveProperty("openingHours")
+  it("LocalBusiness toma la dirección, horarios y contactos actuales", () => {
+    const negocio = proyectarNegocioPublico({ ...configuracionPrueba, direccion: "Local </script> & 5" })
+    const local = datosLocal(negocio, null)
+    expect(local).toMatchObject({
+      name: "Angel Tears",
+      address: { streetAddress: "Local </script> & 5, Local 2", addressLocality: "Localidad de prueba", addressRegion: "Entre Ríos", addressCountry: "AR" },
+      telephone: "+5491100000000",
+      sameAs: ["https://www.instagram.com/accesorios.prueba/"],
+      hasMap: configuracionPrueba.comoLlegar,
+      openingHoursSpecification: {
+        "@type": "OpeningHoursSpecification", dayOfWeek: ["https://schema.org/Monday", "https://schema.org/Saturday"],
+        opens: "09:30:00", closes: "12:15:00",
+      },
+    })
+    const json = serializarDatosEstructurados(local)
+    expect(json).not.toMatch(/[<>&]/)
+    expect(JSON.parse(json)).toEqual(local)
     expect(local).not.toHaveProperty("geo")
-    expect(local).not.toHaveProperty("review")
     expect(local).not.toHaveProperty("url")
   })
 })

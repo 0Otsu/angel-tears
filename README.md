@@ -5,9 +5,9 @@ Sitio público y panel administrativo para una tienda de accesorios en Concordia
 ## Estado actual
 
 - **Sitio público.** Inicio, catálogo, fichas de producto con galería y consultas por WhatsApp e Instagram. Catálogo y fichas leen productos publicados y disponibilidad desde PostgreSQL.
-- **Administración.** Inicio y cierre de sesión, cuenta y recuperación de contraseña. Productos con categorías predefinidas, imágenes, visibilidad y destacados. Carga inicial de stock en el alta, ajustes e historial de inventario.
+- **Administración.** Inicio y cierre de sesión, cuenta y recuperación de contraseña. Productos con categorías predefinidas, imágenes, visibilidad y destacados. Carga inicial de stock en el alta, ajustes e historial de inventario. [Configuración del negocio](docs/features/CONFIGURACION_NEGOCIO.md) permite editar los datos públicos del local.
 - **Operaciones.** Gestión de proveedores y registro, consulta y anulación de compras, ventas y gastos. El resumen calcula el resultado aproximado a partir de las operaciones vigentes.
-- **Pendientes.** La configuración administrativa sigue siendo una pantalla de muestra. Las categorías personalizadas, el entorno comercial y la validación de sus servicios siguen pendientes.
+- **Pendientes.** Las categorías personalizadas, el entorno comercial y la validación de sus servicios siguen pendientes.
 
 ## Puesta en marcha local
 

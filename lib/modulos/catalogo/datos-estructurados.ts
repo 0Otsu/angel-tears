@@ -1,5 +1,5 @@
 import "server-only"
-import { negocioPublico } from "@/lib/negocio-publico"
+import type { NegocioPublico } from "@/lib/negocio-publico"
 import type { ProductoPublico } from "./contrato"
 import { leerOrigenPublico } from "./origen-publico"
 
@@ -26,13 +26,30 @@ export function datosProducto(producto: ProductoPublico, origen = leerOrigenPubl
   }
 }
 
-export function datosLocal(origen = leerOrigenPublico()) {
-  const [ciudad, provincia] = negocioPublico.ciudad.split(", ")
+const diasSchema = {
+  lunes: "Monday", martes: "Tuesday", miercoles: "Wednesday", jueves: "Thursday",
+  viernes: "Friday", sabado: "Saturday", domingo: "Sunday",
+}
+
+export function datosLocal(negocioPublico: NegocioPublico, origen = leerOrigenPublico()) {
   return {
     "@context": "https://schema.org", "@type": "LocalBusiness", name: "Angel Tears",
     ...(origen ? { url: `${origen}/` } : {}),
     telephone: negocioPublico.telefonoWhatsApp,
     sameAs: [negocioPublico.instagram],
-    address: { "@type": "PostalAddress", streetAddress: `${negocioPublico.direccion}, ${negocioPublico.referencia}`, addressLocality: ciudad, addressRegion: provincia, addressCountry: "AR" },
+    hasMap: negocioPublico.comoLlegar,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: [negocioPublico.direccion, negocioPublico.referencia].filter(Boolean).join(", "),
+      addressLocality: negocioPublico.localidad,
+      addressRegion: negocioPublico.provincia,
+      addressCountry: "AR",
+    },
+    openingHoursSpecification: {
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: negocioPublico.diasAtencion.map(dia => `https://schema.org/${diasSchema[dia]}`),
+      opens: `${negocioPublico.apertura}:00`,
+      closes: `${negocioPublico.cierre}:00`,
+    },
   }
 }

@@ -12,8 +12,8 @@ export function metadataPublica(titulo: string, descripcion: string, ruta: strin
   }
 }
 
-export function metadataProducto(producto: ProductoPublico, origen = leerOrigenPublico()): Metadata {
-  const descripcion = producto.descripcion || `${producto.nombre}. ${producto.categoriaNombre} de Angel Tears en Concordia.`
+export function metadataProducto(producto: ProductoPublico, origen = leerOrigenPublico(), ciudad?: string): Metadata {
+  const descripcion = producto.descripcion || `${producto.nombre}. ${producto.categoriaNombre} de Angel Tears${ciudad ? ` en ${ciudad}` : ""}.`
   const metadata = metadataPublica(producto.nombre, descripcion, `/catalogo/${producto.slug}`, origen)
   const imagenes = producto.imagen ? [{ url: producto.imagen.url, width: producto.imagen.ancho, height: producto.imagen.alto, alt: producto.imagen.alt }] : []
   return { ...metadata, openGraph: { ...metadata.openGraph, images: imagenes }, twitter: { card: "summary_large_image", title: producto.nombre, description: descripcion, images: imagenes } }

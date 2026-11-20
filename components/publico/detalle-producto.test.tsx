@@ -1,3 +1,5 @@
+import { configuracionPrueba } from "@/pruebas/fixtures/configuracion-negocio"
+import { proyectarNegocioPublico } from "@/lib/negocio-publico"
 import { fireEvent, render, screen, within } from "@testing-library/react"
 import { afterEach, beforeEach, expect, it, vi } from "vitest"
 import type { ProductoPublico } from "@/lib/modulos/catalogo/contrato"
@@ -21,6 +23,8 @@ const producto: ProductoPublico = {
   imagen: null,
 }
 
+const negocioPublico = proyectarNegocioPublico(configuracionPrueba)
+
 beforeEach(() => {
   vi.stubEnv("SITE_URL", undefined)
   vi.stubEnv("VERCEL_PROJECT_PRODUCTION_URL", undefined)
@@ -35,37 +39,37 @@ it.each([
   vi.stubEnv("SITE_URL", siteUrl)
   vi.stubEnv("VERCEL_PROJECT_PRODUCTION_URL", "angel-tears-demo.vercel.app")
 
-  render(<DetalleProducto product={producto} relacionados={[]} />)
+  render(<DetalleProducto negocioPublico={negocioPublico} product={producto} relacionados={[]} />)
 
   const ficha = within(screen.getByRole("region", { name: "Detalle del producto" }))
   const enlace = ficha.getByRole<HTMLAnchorElement>("link", { name: "Consultar por WhatsApp (abre otra pestaña)" })
   const destino = new URL(enlace.href)
-  expect(destino.origin + destino.pathname).toBe("https://wa.me/5493454266760")
+  expect(destino.origin + destino.pathname).toBe("https://wa.me/5491100000000")
   expect(destino.searchParams.get("text")).toBe(
     `¡Hola! 😊 Vi Aros Luz & Cía. + ✨ en el catálogo de Angel Tears y quería consultar si todavía está disponible. ¡Gracias!\n${origen}/catalogo/aros-luz-y-cia`,
   )
   expect([...destino.searchParams.keys()]).toEqual(["text"])
   expect(enlace.target).toBe("_blank")
-  expect(ficha.getByRole("link", { name: "Consultar por Instagram" })).toBeTruthy()
+  expect(ficha.getByRole("link", { name: "Consultar por Instagram" }).getAttribute("href")).toBe(negocioPublico.instagram)
   expect(ficha.getByText("Sin stock")).toBeTruthy()
 })
 
 it.each([undefined, "localhost:3000"])("permite consultar sin URL pública con origen de Vercel %s", (dominio) => {
   vi.stubEnv("VERCEL_PROJECT_PRODUCTION_URL", dominio)
-  render(<DetalleProducto product={producto} relacionados={[]} />)
+  render(<DetalleProducto negocioPublico={negocioPublico} product={producto} relacionados={[]} />)
 
   const ficha = within(screen.getByRole("region", { name: "Detalle del producto" }))
   const enlace = ficha.getByRole<HTMLAnchorElement>("link", { name: /Consultar por WhatsApp/ })
   const destino = new URL(enlace.href)
-  expect(destino.origin + destino.pathname).toBe("https://wa.me/5493454266760")
+  expect(destino.origin + destino.pathname).toBe("https://wa.me/5491100000000")
   expect(destino.searchParams.get("text")).toBe(
     "¡Hola! 😊 Vi Aros Luz & Cía. + ✨ en el catálogo de Angel Tears y quería consultar si todavía está disponible. ¡Gracias!",
   )
-  expect(ficha.getByRole("link", { name: "Consultar por Instagram" })).toBeTruthy()
+  expect(ficha.getByRole("link", { name: "Consultar por Instagram" }).getAttribute("href")).toBe(negocioPublico.instagram)
 })
 
 it("muestra el acceso al final del menú móvil y lo cierra al navegar", () => {
-  render(<DetalleProducto product={producto} relacionados={[]} />)
+  render(<DetalleProducto negocioPublico={negocioPublico} product={producto} relacionados={[]} />)
 
   const navegacion = within(screen.getByRole("navigation", { name: "Navegación principal" }))
   const menu = navegacion.getByRole("button", { name: "Abrir menú" })

@@ -5,7 +5,7 @@ import Image from "next/image"
 import { ArrowLeft, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { historiasSociales, type SocialItem } from "@/lib/mock/historias-sociales"
-import { negocioPublico } from "@/lib/negocio-publico"
+import type { NegocioPublico } from "@/lib/negocio-publico"
 
 // Sustituye únicamente el contenido de TestimonialCard por el medio real.
 // Sin citas, estrellas, nombres ni etiquetas añadidas. Se conserva su radio Boty.
@@ -21,7 +21,7 @@ function TestimonialCard({ item }: { item: SocialItem }) {
   )
 }
 
-export function Testimonials() {
+export function Testimonials({ negocioPublico }: { negocioPublico?: NegocioPublico }) {
   const [headerVisible, setHeaderVisible] = useState(false)
   const [current, setCurrent] = useState(0)
   const headerRef = useRef<HTMLDivElement>(null)
@@ -106,9 +106,9 @@ export function Testimonials() {
             <Button type="button" variant="ghost" size="icon" className="rounded-full" aria-label="Historia siguiente" aria-controls="historias-sociales" disabled={current === historiasSociales.length - 1} onClick={() => goTo(current + 1)}><ArrowRight aria-hidden="true" /></Button>
           </div>
         </div>
-        <div className="text-center mt-12">
+        {negocioPublico && <div className="text-center mt-12">
           <a href={negocioPublico.instagram} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 bg-transparent border border-foreground/20 text-foreground px-8 py-4 rounded-full text-sm tracking-wide boty-transition hover:bg-foreground/5">Ver más en {negocioPublico.usuarioInstagram}</a>
-        </div>
+        </div>}
       </div>
     </section>
   )
