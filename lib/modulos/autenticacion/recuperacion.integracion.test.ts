@@ -1,6 +1,6 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
 import { sql } from "drizzle-orm"
-import { crearAuth } from "@/lib/infraestructura/auth-config"
+import { crearAuth, leerConfiguracionAuthWeb } from "@/lib/infraestructura/auth-config"
 import { atenderSolicitudAuth } from "@/lib/infraestructura/auth-manejador"
 import type { ConexionBd } from "@/lib/infraestructura/conexion-bd"
 import { ErrorEnvioCorreo, type MensajeCorreo } from "@/lib/infraestructura/correo"
@@ -24,6 +24,7 @@ describe("recuperacion de contrasena por email", () => {
   let salidas: string[] = []
   let falloDelProveedor: Error | null = null
   let demoraDelProveedorMs = 0
+  let intentosDeEnvio = 0
 
   function con() {
     if (!conexion) throw new Error("La conexion de pruebas no esta disponible.")
@@ -31,9 +32,11 @@ describe("recuperacion de contrasena por email", () => {
   }
 
   // Instancia con el proveedor de correo reemplazado y el "segundo plano" capturado.
-  const auth = () =>
+  const auth = (cabeceraIp?: string) =>
     crearAuth(con().db, {
+      web: leerConfiguracionAuthWeb({ BETTER_AUTH_URL: ORIGEN, BETTER_AUTH_TRUSTED_IP_HEADER: cabeceraIp }),
       enviarCorreo: async (mensaje) => {
+        intentosDeEnvio++
         if (demoraDelProveedorMs) await new Promise((r) => setTimeout(r, demoraDelProveedorMs))
         if (falloDelProveedor) throw falloDelProveedor
         correos.push(mensaje)
@@ -76,8 +79,8 @@ describe("recuperacion de contrasena por email", () => {
       instancia,
     )
 
-  const solicitar = (email: string, extra: Record<string, string> = {}, redirectTo = "/admin/restablecer") =>
-    post("/api/auth/request-password-reset", { email, redirectTo }, extra)
+  const solicitar = (email: string, extra: Record<string, string> = {}, redirectTo = "/admin/restablecer", instancia = auth()) =>
+    post("/api/auth/request-password-reset", { email, redirectTo }, extra, instancia)
 
   const restablecer = (token: string, newPassword: string) => post("/api/auth/reset-password", { token, newPassword })
 
@@ -123,12 +126,14 @@ describe("recuperacion de contrasena por email", () => {
     await con().db.execute(sql`DELETE FROM "user"`)
     await con().db.execute(sql`DELETE FROM verification`)
     await con().db.execute(sql`DELETE FROM rate_limit`)
+    await con().db.execute(sql`DELETE FROM cuota_recuperacion`)
     await aprovisionarAdministradora(con(), { email: EMAIL, nombre: "Sofia", contrasena: ACTUAL })
     correos = []
     pendientes = []
     salidas = []
     falloDelProveedor = null
     demoraDelProveedorMs = 0
+    intentosDeEnvio = 0
     for (const metodo of ["log", "info", "warn", "error", "debug"] as const) {
       vi.spyOn(console, metodo).mockImplementation((...args: unknown[]) => {
         salidas.push(args.map((a) => (a instanceof Error ? `${a.message}\n${a.stack}` : (JSON.stringify(a) ?? String(a)))).join(" "))
@@ -144,6 +149,7 @@ describe("recuperacion de contrasena por email", () => {
     await conexion?.db.execute(sql`DELETE FROM "user"`)
     await conexion?.db.execute(sql`DELETE FROM verification`)
     await conexion?.db.execute(sql`DELETE FROM rate_limit`)
+    await conexion?.db.execute(sql`DELETE FROM cuota_recuperacion`)
   })
 
   afterAll(async () => {
@@ -175,16 +181,16 @@ describe("recuperacion de contrasena por email", () => {
     })
 
     it("responde igual para un email que no existe y no envia ningun correo", async () => {
+      const desconocido = await solicitar("nadie@ejemplo.com")
+      await esperarEnvios()
+      expect(intentosDeEnvio).toBe(0)
+      expect(await filas(sql`SELECT id FROM cuota_recuperacion`)).toEqual([])
+
       const existente = await solicitar(EMAIL)
       await esperarEnvios()
-      correos = []
-
-      const inexistente = await solicitar("nadie@ejemplo.com")
-      await esperarEnvios()
-
-      expect(inexistente.status).toBe(existente.status)
-      expect(inexistente.json).toEqual(existente.json)
-      expect(correos).toHaveLength(0)
+      expect(desconocido.status).toBe(existente.status)
+      expect(desconocido.json).toEqual(existente.json)
+      expect(correos.map(correo => correo.para)).toEqual([EMAIL])
     })
 
     it("si el proveedor falla, la respuesta publica sigue siendo la misma y no se filtra nada", async () => {
@@ -200,6 +206,11 @@ describe("recuperacion de contrasena por email", () => {
       expect(todo).not.toMatch(/reset-password|token|callbackURL|https?:\/\//i)
       expect(todo).not.toContain(EMAIL) // ni siquiera el correo de la cuenta
       expect(salidas.join("\n")).toContain("no se pudo enviar el correo")
+      const repetido = await solicitar(EMAIL)
+      await esperarEnvios()
+      expect(repetido.json).toEqual(referencia.json)
+      expect(intentosDeEnvio).toBe(1)
+      expect(await filas(sql`SELECT intentos FROM cuota_recuperacion`)).toEqual([{ intentos: 1 }])
     })
 
     it("sin configuracion de Resend tampoco se rompe ni se filtra: respuesta neutra y aviso sin valores", async () => {
@@ -252,12 +263,53 @@ describe("recuperacion de contrasena por email", () => {
       expect(r.status).toBe(403)
       expect(await contar("session")).toBe(1) // la sesion no se cerro
     })
-    it("limita los pedidos repetidos (3 por minuto por IP, valor por defecto de la libreria)", async () => {
+    it("comparte el límite nativo cuando falta IP confiable e ignora X-Forwarded-For", async () => {
       const estados: number[] = []
-      for (let i = 0; i < 5; i++) estados.push((await solicitar(EMAIL, { "x-forwarded-for": "203.0.113.70" })).status)
+      estados.push((await solicitar(EMAIL)).status)
+      for (let i = 1; i < 5; i++) estados.push((await solicitar(EMAIL, { "x-forwarded-for": `203.0.113.${i}` })).status)
+      await esperarEnvios()
 
       expect(estados.slice(0, 3)).toEqual([200, 200, 200])
       expect(estados.slice(3)).toEqual([429, 429])
+      expect(intentosDeEnvio).toBe(1)
+    })
+
+    it("comparte la espera entre instancias incluso con solicitudes concurrentes desde IP distintas", async () => {
+      const respuestas = await Promise.all(Array.from({ length: 8 }, (_, i) =>
+        solicitar(EMAIL, { "x-real-ip": `192.0.2.${i + 1}` }, undefined, auth("x-real-ip")),
+      ))
+      await esperarEnvios()
+
+      expect(respuestas.every(r => r.status === 200 && r.cuerpo === respuestas[0].cuerpo)).toBe(true)
+      expect(intentosDeEnvio).toBe(1)
+      expect(await filas(sql`SELECT intentos FROM cuota_recuperacion`)).toEqual([{ intentos: 1 }])
+    })
+
+    it("respeta el presupuesto diario, responde de forma neutra y lo renueva al cambiar el día UTC", async () => {
+      await con().db.execute(sql`
+        INSERT INTO cuota_recuperacion (id, dia_utc, intentos, ultimo_intento)
+        VALUES (1, (statement_timestamp() AT TIME ZONE 'UTC')::date, 11, statement_timestamp() - interval '5 minutes')
+      `)
+      await solicitar(EMAIL)
+      await esperarEnvios()
+      expect(intentosDeEnvio).toBe(1)
+      expect(await filas(sql`SELECT intentos FROM cuota_recuperacion`)).toEqual([{ intentos: 12 }])
+
+      await con().db.execute(sql`UPDATE cuota_recuperacion SET ultimo_intento = statement_timestamp() - interval '5 minutes'`)
+      const agotado = await solicitar(EMAIL)
+      const inexistente = await solicitar("nadie@ejemplo.com")
+      await esperarEnvios()
+      expect(agotado.status).toBe(200)
+      expect(agotado.cuerpo).toBe(inexistente.cuerpo)
+      expect(intentosDeEnvio).toBe(1)
+      expect(await filas(sql`SELECT intentos FROM cuota_recuperacion`)).toEqual([{ intentos: 12 }])
+
+      await con().db.execute(sql`UPDATE cuota_recuperacion SET dia_utc = dia_utc - 1`)
+      const siguiente = await solicitar(EMAIL, { "x-real-ip": "192.0.2.20" }, undefined, auth("x-real-ip"))
+      await esperarEnvios()
+      expect(siguiente.status).toBe(200)
+      expect(intentosDeEnvio).toBe(2)
+      expect(await filas(sql`SELECT intentos FROM cuota_recuperacion`)).toEqual([{ intentos: 1 }])
     })
   })
 
@@ -314,6 +366,7 @@ describe("recuperacion de contrasena por email", () => {
 
       // Un enlace nuevo, usado un segundo antes del limite, todavia vale.
       vi.setSystemTime(new Date("2026-11-03T12:00:00.000Z"))
+      await con().db.execute(sql`UPDATE cuota_recuperacion SET ultimo_intento = statement_timestamp() - interval '5 minutes'`)
       const otro = await pedirEnlace()
       vi.setSystemTime(new Date("2026-11-03T12:00:00.000Z").getTime() + HORA_MS - 1000)
       expect((await restablecer(otro, NUEVA)).status).toBe(200)
@@ -399,6 +452,7 @@ describe("recuperacion de contrasena por email", () => {
   describe("reemision del enlace (caracterizacion: decision de producto pendiente)", () => {
     it("pedir un segundo enlace NO invalida el anterior: ambos valen hasta usarse o vencer", async () => {
       const primero = await pedirEnlace()
+      await con().db.execute(sql`UPDATE cuota_recuperacion SET ultimo_intento = statement_timestamp() - interval '5 minutes'`)
       const segundo = await pedirEnlace()
       expect(segundo).not.toBe(primero)
       expect(await contar("verification")).toBe(2)

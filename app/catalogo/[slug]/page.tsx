@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic"
 type Propiedades = { params: Promise<{ slug: string }> }
 export async function generateMetadata({ params }: Propiedades): Promise<Metadata> {
   const producto = await consultarProductoPublico((await params).slug)
-  if (!producto) return { title: 'Producto no encontrado' }
+  if (!producto) return { title: "Producto no encontrado", robots: { index: false, follow: false } }
   return metadataProducto(producto, undefined, (await obtenerNegocioPublico())?.ciudad)
 }
 export default async function PaginaProducto({ params }: Propiedades) {

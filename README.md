@@ -5,9 +5,9 @@ Sitio público y panel administrativo para una tienda de accesorios en Concordia
 ## Estado actual
 
 - **Sitio público.** Inicio, catálogo, fichas de producto con galería y consultas por WhatsApp e Instagram. Catálogo y fichas leen productos publicados y disponibilidad desde PostgreSQL.
-- **Administración.** Inicio y cierre de sesión, cuenta y recuperación de contraseña. Productos con categorías predefinidas, imágenes, visibilidad y destacados. Carga inicial de stock en el alta, ajustes e historial de inventario. [Configuración del negocio](docs/features/CONFIGURACION_NEGOCIO.md) permite editar los datos públicos del local.
+- **Administración.** Inicio y cierre de sesión, cuenta y recuperación de contraseña. Productos con [categorías dinámicas](docs/features/CATEGORIAS_DINAMICAS.md), imágenes, visibilidad y destacados. Carga inicial de stock en el alta, ajustes e historial de inventario. [Configuración del negocio](docs/features/CONFIGURACION_NEGOCIO.md) permite editar los datos públicos del local.
 - **Operaciones.** Gestión de proveedores y registro, consulta y anulación de compras, ventas y gastos. El resumen calcula el resultado aproximado a partir de las operaciones vigentes.
-- **Pendientes.** Las categorías personalizadas, el entorno comercial y la validación de sus servicios siguen pendientes.
+- **Pendientes.** El entorno comercial y la [validación de sus servicios](docs/features/CIERRE_SEGURIDAD_SEO.md) siguen pendientes.
 
 ## Puesta en marcha local
 
@@ -23,10 +23,11 @@ Sitio público y panel administrativo para una tienda de accesorios en Concordia
 | `DATABASE_URL_TEST` | PostgreSQL local aislado, con nombre terminado en `_test`. |
 | `BETTER_AUTH_SECRET` | Secreto aleatorio y exclusivo por entorno. El ejemplo incluye cómo generarlo. |
 | `BETTER_AUTH_URL` | Origen del login y de los enlaces de recuperación. En local, `http://localhost:3000`. |
+| `BETTER_AUTH_TRUSTED_IP_HEADER` | Opcional. Cabecera de IP que sobrescribe el proxy verificado. Vacía, Better Auth aplica un límite compartido por ruta. |
 | `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Carga y gestión de imágenes, en servidor. Sin estas variables se puede guardar un borrador oculto. Para publicarlo se exige una imagen principal. |
 | `CLOUDINARY_CARPETA_ENTORNO` | Prefijo opcional de almacenamiento. En la demo distingue sus imágenes. |
 | `RESEND_API_KEY`, `RESEND_FROM` | Envío de recuperación de contraseña. Sin configuración, la solicitud conserva su respuesta genérica y el correo no sale. |
-| `SITE_URL` | Origen público HTTPS para enlaces canónicos, sitemap y enlaces de fichas. Se puede dejar vacío en local. WhatsApp puede abrir el mensaje sin enlace si no hay origen público. |
+| `SITE_URL` | Origen HTTPS del dominio comercial para enlaces canónicos y sitemap. Dejar vacío en local y demo. WhatsApp puede abrir el mensaje sin enlace si no hay origen público. |
 
 Mantené los valores reales en archivos ignorados o en el gestor de secretos del entorno.
 

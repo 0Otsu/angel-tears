@@ -21,13 +21,43 @@ async function cuerpoDe(respuesta: Response): Promise<{ code: string; message: s
 }
 
 describe("envoltorio seguro del endpoint de Better Auth", () => {
-  it("devuelve la respuesta de la libreria cuando todo sale bien", async () => {
+  it("conserva cuerpo y estado con cabeceras privadas", async () => {
     const original = new Response("ok", { status: 200 })
 
     const respuesta = await atenderSolicitudAuth(async () => original)
 
-    expect(respuesta).toBe(original)
+    expect(respuesta.status).toBe(200)
+    expect(await respuesta.text()).toBe("ok")
+    expect(respuesta.headers.get("cache-control")).toBe("no-store")
     expect(registros).toHaveLength(0)
+  })
+
+  it("quita tokens del JSON de sesión y conserva las cookies HttpOnly", async () => {
+    const headers = new Headers()
+    headers.append("set-cookie", "session=valor-firmado; HttpOnly; Secure; SameSite=Lax")
+    headers.append("set-cookie", "otra=valor; HttpOnly")
+    const respuesta = await atenderSolicitudAuth(async () => Response.json({
+      token: SECRETO,
+      session: { token: SECRETO, id: "sesion" },
+      user: { name: "Sofía" },
+    }, { headers }))
+
+    expect(await respuesta.json()).toEqual({ session: { id: "sesion" }, user: { name: "Sofía" } })
+    expect(respuesta.headers.getSetCookie()).toEqual(headers.getSetCookie())
+  })
+
+  it("mantiene la redirección de recuperación y evita transmitir el Referer", async () => {
+    const destino = "https://tienda.example/admin/restablecer?token=solo-prueba"
+    const respuesta = await atenderSolicitudAuth(async () => Response.redirect(destino))
+    expect(respuesta.status).toBe(302)
+    expect(respuesta.headers.get("location")).toBe(destino)
+    expect(respuesta.headers.get("referrer-policy")).toBe("no-referrer")
+  })
+
+  it("redacta también un 500 devuelto por la librería", async () => {
+    const respuesta = await atenderSolicitudAuth(async () => Response.json({ message: SECRETO }, { status: 500 }))
+    expect(respuesta.status).toBe(500)
+    expect(await cuerpoDe(respuesta)).toMatchObject({ code: "ERROR_INESPERADO" })
   })
 
   it("responde 503 generico cuando la base de datos no esta disponible", async () => {

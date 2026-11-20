@@ -1,6 +1,6 @@
 import "server-only"
 import { after } from "next/server"
-import { crearAuth } from "@/lib/infraestructura/auth-config"
+import { crearAuth, leerConfiguracionAuthWeb } from "@/lib/infraestructura/auth-config"
 import { obtenerDb } from "@/lib/infraestructura/db"
 
 // Instancia de Better Auth que usa la aplicacion, sobre la base de DATABASE_URL. Se crea en el
@@ -23,6 +23,10 @@ function ejecutarDespuesDeResponder(tarea: Promise<unknown>): void {
 
 export function obtenerAuth(): InstanciaAuth {
   globalAuth.__angelTearsAuth ??= crearAuth(obtenerDb(), {
+    web: leerConfiguracionAuthWeb({
+      BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
+      BETTER_AUTH_TRUSTED_IP_HEADER: process.env.BETTER_AUTH_TRUSTED_IP_HEADER,
+    }),
     ejecutarEnSegundoPlano: ejecutarDespuesDeResponder,
   })
   return globalAuth.__angelTearsAuth

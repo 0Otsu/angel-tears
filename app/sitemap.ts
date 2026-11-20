@@ -1,10 +1,10 @@
 import type { MetadataRoute } from "next"
 import { listarProductosIndexables } from "@/lib/modulos/catalogo/aplicacion"
-import { leerOrigenPublico } from "@/lib/modulos/catalogo/origen-publico"
+import { leerOrigenIndexable } from "@/lib/modulos/catalogo/origen-publico"
 
 export const dynamic = "force-dynamic"
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const origen = leerOrigenPublico()
+  const origen = leerOrigenIndexable()
   if (!origen) return []
   const productos = await listarProductosIndexables()
   return [

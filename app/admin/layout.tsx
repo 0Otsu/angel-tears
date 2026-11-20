@@ -7,6 +7,6 @@ export const metadata: Metadata = {
 }
 
 export default function LayoutAdmin({ children }: { children: ReactNode }) {
-  // Solo metadata compartida. No hay verificación de acceso en este prototipo.
+  // El grupo (panel) y sus páginas verifican la sesión. Login y recuperación son públicos.
   return children
 }

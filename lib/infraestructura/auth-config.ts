@@ -5,6 +5,8 @@ import { crearEnviadorDesdeEntorno, type EnviarCorreo } from "./correo"
 // Ruta relativa a proposito: la herramienta que genera el schema no resuelve el alias `@/`.
 import * as esquemaAuth from "./esquemas/auth"
 import { construirCorreoRecuperacion } from "../modulos/autenticacion/correo-recuperacion"
+import { isIP } from "node:net"
+import { reservarIntentoRecuperacion } from "./cuota-recuperacion"
 
 // Configuracion de Better Auth (ADR-004). Se arma en una funcion para poder usarla con la base
 // de la aplicacion, con la de pruebas y con la herramienta que genera el schema. No importa
@@ -18,6 +20,7 @@ export const DURACION_MAXIMA_SESION_SEGUNDOS = 60 * 60 * 24 * 30
 export const VIGENCIA_ENLACE_RECUPERACION_SEGUNDOS = 60 * 60
 
 export type OpcionesAuth = {
+  web?: { origen: string; cabecerasIp: string[] }
   /**
    * Habilita el registro por email. SOLO para el proceso de alta de la Administradora
    * (modulos/autenticacion/aprovisionar-administradora.ts), que corre aparte, con un lock y
@@ -38,6 +41,26 @@ export type OpcionesAuth = {
   ejecutarEnSegundoPlano?: (tarea: Promise<unknown>) => void
 }
 
+export function leerConfiguracionAuthWeb(entorno: { BETTER_AUTH_URL?: string; BETTER_AUTH_TRUSTED_IP_HEADER?: string }): NonNullable<OpcionesAuth["web"]> {
+  let url: URL
+  try {
+    url = new URL(entorno.BETTER_AUTH_URL ?? "")
+  } catch {
+    throw new Error("BETTER_AUTH_URL debe ser el origen de la aplicación.")
+  }
+  const host = url.hostname
+  const loopback = host === "localhost" || host === "[::1]" || isIP(host) === 4 && host.startsWith("127.")
+  if (!(url.protocol === "https:" || url.protocol === "http:" && loopback)
+    || url.username || url.password || url.pathname !== "/" || url.search || url.hash) {
+    throw new Error("BETTER_AUTH_URL debe ser un origen HTTPS o una dirección de desarrollo local.")
+  }
+  const cabecera = entorno.BETTER_AUTH_TRUSTED_IP_HEADER?.trim().toLowerCase()
+  if (cabecera && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(cabecera)) {
+    throw new Error("BETTER_AUTH_TRUSTED_IP_HEADER debe identificar una sola cabecera HTTP.")
+  }
+  return { origen: url.origin, cabecerasIp: cabecera ? [cabecera] : [] }
+}
+
 function ejecutarSinEsperar(tarea: Promise<unknown>): void {
   void tarea.catch(() => undefined)
 }
@@ -45,8 +68,15 @@ function ejecutarSinEsperar(tarea: Promise<unknown>): void {
 export function crearAuth(db: NodePgDatabase, opciones: OpcionesAuth = {}) {
   return betterAuth({
     appName: "Angel Tears",
-    // `secret` y `baseURL` salen de BETTER_AUTH_SECRET y BETTER_AUTH_URL (ver .env.example). El
-    // enlace del correo se arma con esa URL base y no con datos de la solicitud.
+    // En la aplicación web el origen es obligatorio y explícito. Las herramientas locales
+    // y las pruebas que llaman al factory usan su propia configuración de Better Auth.
+    ...(opciones.web && { baseURL: opciones.web.origen }),
+    // La identidad administrativa es de solo lectura. disabledPaths afecta solo al router HTTP.
+    disabledPaths: ["/update-user"],
+    // El logger nativo puede recibir mensajes o excepciones completas, incluidos SQL y datos.
+    logger: { log: (nivel) => {
+      if (nivel === "warn" || nivel === "error") console.warn("[auth] diagnóstico de Better Auth", { nivel })
+    } },
     database: drizzleAdapter(db, {
       provider: "pg",
       schema: esquemaAuth,
@@ -68,6 +98,9 @@ export function crearAuth(db: NodePgDatabase, opciones: OpcionesAuth = {}) {
       sendResetPassword: async ({ user, url }) => {
         try {
           const enviar = opciones.enviarCorreo ?? crearEnviadorDesdeEntorno()
+          // Solo se llega aquí para un usuario encontrado por Better Auth. La reserva es
+          // global y corre en segundo plano junto con el envío. Si falla, no se llama a Resend.
+          if (!await reservarIntentoRecuperacion(db)) return
           await enviar(construirCorreoRecuperacion({ para: user.email, url }))
         } catch (error) {
           console.error("[auth] no se pudo enviar el correo de recuperacion", {
@@ -79,6 +112,8 @@ export function crearAuth(db: NodePgDatabase, opciones: OpcionesAuth = {}) {
     },
     advanced: {
       backgroundTasks: { handler: opciones.ejecutarEnSegundoPlano ?? ejecutarSinEsperar },
+      // Sin una cabecera verificada, Better Auth usa un límite compartido por ruta.
+      ...(opciones.web && { ipAddress: { ipAddressHeaders: opciones.web.cabecerasIp } }),
       // Proteccion contra CSRF y redirecciones abiertas, fijada de forma EXPLICITA: Better Auth
       // las apaga por defecto cuando NODE_ENV=test, asi que sin esto los tests no las ejercitarian
       // y un entorno mal configurado podria dejarlas apagadas. `redirectTo` y `callbackURL` solo
@@ -97,12 +132,12 @@ export function crearAuth(db: NodePgDatabase, opciones: OpcionesAuth = {}) {
     // Limite de intentos persistente (SEGURIDAD.md): una sola instancia en memoria no es una
     // garantia productiva. Se activa en todos los entornos (por defecto Better Auth solo lo
     // hace en produccion) para que desarrollo y pruebas ejerciten el mismo comportamiento.
-    // Los valores (ventana y maximo) son los POR DEFECTO de Better Auth 1.7.11, sin valores
-    // propios: no hay cifras de producto aprobadas. Sus reglas especiales por defecto cubren
-    // /sign-in*, /sign-up*, /change-password* y /change-email* (3 por ventana de 10 s) y
-    // /request-password-reset (3 por ventana de 60 s); el resto, 100 por 10 s. Cada ventana es
-    // temporal, asi que nunca bloquea de forma indefinida a la unica administradora. Ver
-    // docs/DESARROLLO.md.
-    rateLimit: { enabled: true, storage: "database" },
+    // Se fija la regla de recuperación por IP que ya aplicaba Better Auth. La cuota de
+    // entregas se controla aparte. Login y demás rutas conservan las reglas de la librería.
+    rateLimit: {
+      enabled: true,
+      storage: "database",
+      customRules: { "/request-password-reset": { window: 60, max: 3 } },
+    },
   })
 }

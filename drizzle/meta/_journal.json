@@ -57,6 +57,13 @@
       "when": 1795129020634,
       "tag": "0007_configuracion-negocio",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1795143941313,
+      "tag": "0008_cuota-recuperacion",
+      "breakpoints": true
     }
   ]
 }

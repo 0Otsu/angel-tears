@@ -134,7 +134,10 @@ test("sitemap y robots siguen visibilidad real, incluido agotado y ocultacion po
   expect(robots.status()).toBe(200)
   expect(sitemap.status()).toBe(200)
   if (!process.env.SITE_URL) {
-    expect(await robots.text()).toContain("Disallow: /")
+    const reglas = await robots.text()
+    expect(reglas).toContain("Disallow: /admin")
+    expect(reglas).not.toMatch(/^Disallow: \/$/m)
+    expect(reglas).not.toContain("Sitemap:")
     expect(await sitemap.text()).not.toContain("<loc>")
     return
   }
