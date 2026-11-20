@@ -1,5 +1,5 @@
 import type { DatosProducto } from "./validacion"
-import type { CodigoCategoria } from "./categorias"
+import type { CategoriaProducto } from "./categorias"
 
 // Proyeccion propia del admin; no altera el DTO compartido ProductoInterno ni duplica stock.
 export type ProductoAdministrativo = DatosProducto & {
@@ -15,7 +15,7 @@ export type ProductoAdministrativo = DatosProducto & {
 
 export type ConsultaAdministrativa = {
   productos: ProductoAdministrativo[]
-  categorias: { codigo: CodigoCategoria; nombre: string }[]
+  categorias: CategoriaProducto[]
 }
 
 export type ResultadoGuardarProducto =
@@ -27,3 +27,7 @@ export type ResultadoGuardarProducto =
   | { estado: "error_tecnico" }
 
 export type EstadoFormularioProducto = ResultadoGuardarProducto | { estado: "inicial" }
+
+export type ResultadoAltaCategoria =
+  | { estado: "ok"; categoria: CategoriaProducto }
+  | { estado: "nombre_invalido" | "duplicada" | "sesion_requerida" | "error_tecnico" }

@@ -5,12 +5,21 @@ import { Header } from "@/components/boty/header"
 import type { NegocioPublico } from "@/lib/negocio-publico"
 import { Footer } from "@/components/boty/footer"
 import type { ProductoPublico } from "@/lib/modulos/catalogo/contrato"
-import { CATEGORIAS_INICIALES } from "@/lib/modulos/productos/categorias"
+import { categoriasVisibles } from "@/lib/modulos/catalogo/categorias-visibles"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { TarjetaProducto } from "@/components/publico/tarjeta-producto"
 import identidad from "@/components/publico/identidad.module.css"
 
 export function Catalogo({ productos, negocioPublico }: { productos: ProductoPublico[]; negocioPublico?: NegocioPublico }) {
-  const [selectedCategory, setSelectedCategory] = useState("Todos")
+  const categorias = categoriasVisibles(productos)
+  const [seleccion, seleccionar] = useState("Todos")
+  const selectedCategory = categorias.some(categoria => categoria.codigo === seleccion) ? seleccion : "Todos"
+  if (seleccion !== selectedCategory) seleccionar(selectedCategory)
+
+  const principales = [{ codigo: "Todos", nombre: "Todos" }, ...categorias.slice(0, 5)]
+  const restantes = categorias.slice(5)
+  const enRestantes = restantes.some(categoria => categoria.codigo === selectedCategory)
+  const menu = "max-h-[min(18rem,var(--radix-select-content-available-height))] max-w-[calc(100vw-1rem)] [&_[data-radix-select-viewport]]:h-auto"
   const filteredProducts = selectedCategory === "Todos"
     ? productos
     : productos.filter((product) => product.categoriaCodigo === selectedCategory)
@@ -31,23 +40,36 @@ export function Catalogo({ productos, negocioPublico }: { productos: ProductoPub
 
       <section className="px-6 pb-24 lg:px-8">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-10 -mx-6 overflow-x-auto px-6 pb-2 lg:mx-0 lg:px-0">
-            <div className="flex min-w-max gap-2 lg:flex-wrap">
-              {[{ codigo: "Todos", nombre: "Todos" }, ...CATEGORIAS_INICIALES].map((category) => {
-                const isActive = selectedCategory === category.codigo
-                return (
-                  <button
-                    key={category.codigo}
-                    type="button"
-                    onClick={() => setSelectedCategory(category.codigo)}
-                    aria-pressed={isActive}
-                    className={`rounded-full px-5 py-2.5 text-sm transition-colors ${isActive ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:text-foreground"}`}
-                  >
-                    {category.nombre}
-                  </button>
-                )
-              })}
-            </div>
+          <div className="mb-8 lg:hidden">
+            <label htmlFor="filtro-categoria" className="mb-2 block text-sm font-medium">Filtrar por categoría</label>
+            <Select value={selectedCategory} onValueChange={seleccionar}>
+              <SelectTrigger id="filtro-categoria" className="w-full max-w-md rounded-full bg-card data-[size=default]:h-11"><SelectValue /></SelectTrigger>
+              <SelectContent collisionPadding={8} className={menu}>
+                <SelectItem value="Todos" className="min-h-11">Todas las categorías</SelectItem>
+                {categorias.map(categoria => <SelectItem key={categoria.codigo} value={categoria.codigo} className="min-h-11 whitespace-normal [overflow-wrap:anywhere]">{categoria.nombre}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div role="group" aria-label="Categorías del catálogo" className="mb-8 hidden flex-wrap items-center gap-2 lg:flex">
+            {principales.map(categoria => (
+              <button
+                key={categoria.codigo}
+                type="button"
+                aria-pressed={selectedCategory === categoria.codigo}
+                onClick={() => seleccionar(categoria.codigo)}
+                className={`min-h-11 max-w-56 rounded-full px-5 py-2.5 text-sm transition-colors [overflow-wrap:anywhere] ${selectedCategory === categoria.codigo ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:text-foreground"}`}
+              >{categoria.nombre}</button>
+            ))}
+            {restantes.length > 0 && (
+              <Select value={enRestantes ? selectedCategory : ""} onValueChange={seleccionar}>
+                <SelectTrigger aria-label="Más categorías" className={`max-w-56 rounded-full data-[size=default]:h-11 ${enRestantes ? "border-primary bg-primary text-primary-foreground [&_svg]:text-primary-foreground" : "bg-card"}`}>
+                  <SelectValue placeholder="Más categorías" />
+                </SelectTrigger>
+                <SelectContent collisionPadding={8} className={menu}>
+                  {restantes.map(categoria => <SelectItem key={categoria.codigo} value={categoria.codigo} className="min-h-11 whitespace-normal [overflow-wrap:anywhere]">{categoria.nombre}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            )}
           </div>
 
           <p role="status" className="mb-6 text-sm text-muted-foreground">{filteredProducts.length === 0 ? (productos.length === 0 ? "No hay productos disponibles por el momento." : "No hay productos disponibles en esta categoría.") : `${filteredProducts.length} productos disponibles`}</p>

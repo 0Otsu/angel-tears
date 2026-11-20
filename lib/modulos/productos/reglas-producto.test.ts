@@ -21,9 +21,10 @@ describe("datos de Producto (formato, no politica comercial pendiente)", () => {
     if (!resultado.success) expect(resultado.error.issues[0].path).toEqual([campo])
   })
 
-  it("rechaza nombre en blanco y categoria inventada", () => {
+  it("rechaza nombre en blanco y valida el formato del código de categoría", () => {
     expect(esquemaDatosProducto.safeParse({ ...datosMinimos, nombre: "   " }).success).toBe(false)
-    expect(esquemaDatosProducto.safeParse({ ...datosMinimos, categoriaCodigo: "combos" }).success).toBe(false)
+    expect(esquemaDatosProducto.safeParse({ ...datosMinimos, categoriaCodigo: "Combos / Sets" }).success).toBe(false)
+    expect(esquemaDatosProducto.safeParse({ ...datosMinimos, categoriaCodigo: "cat-" + "a".repeat(64) }).success).toBe(true)
   })
 
   it("normaliza blancos opcionales y descarta saldo, slug o publicacion aportados por entrada", () => {

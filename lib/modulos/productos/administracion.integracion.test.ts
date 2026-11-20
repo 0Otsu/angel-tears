@@ -14,6 +14,8 @@ import { crearAdministracionInventario } from "@/lib/modulos/inventario/administ
 import { crearConexionPruebas } from "@/pruebas/arnes-bd"
 import { crearAdministracionProductos } from "./administracion"
 import { sembrarCategorias } from "./persistencia"
+import { crearCategoria } from "./alta-categoria"
+import { crearConsultasCatalogo } from "@/lib/modulos/catalogo/consultas"
 
 const entrada = { nombre: "Collar", precio: "1250.50", categoriaCodigo: "collares" }
 const encabezados = new Headers()
@@ -161,6 +163,31 @@ describe("administracion Producto 2.1 sobre PostgreSQL", () => {
     await db().delete(categoria).where(eq(categoria.codigo, "collares"))
     expect(await servicio().crear(encabezados, entrada)).toMatchObject({ estado: "datos_invalidos", errores: { categoriaCodigo: expect.any(String) } })
     expect(await db().select().from(inventario)).toEqual([])
+  })
+
+  it("crea categorías autorizadas una sola vez incluso con concurrencia y las usa en Productos y Catálogo", async () => {
+    const alta = (nombre: unknown) => crearCategoria(db(), exigir, encabezados, nombre)
+    const anonima = crearExigirAdministradora(async () => null)
+    expect(await crearCategoria(db(), anonima, encabezados, "Regalos")).toEqual({ estado: "sesion_requerida" })
+    expect(await alta(" \t ")).toEqual({ estado: "nombre_invalido" })
+    expect(await alta("  AROS  /  PIERCINGS  ")).toEqual({ estado: "duplicada" })
+    expect((await servicio().consultar(encabezados)).categorias).toHaveLength(7)
+
+    const resultados = await Promise.all([alta("Sets   de regalo"), alta("sets DE REGALO")])
+    expect(resultados.filter(r => r.estado === "duplicada")).toHaveLength(1)
+    const resultado = resultados.find(r => r.estado === "ok")
+    if (!resultado) throw new Error("Falta la categoría creada")
+    const { codigo, nombre } = resultado.categoria
+    const id = await crear({ ...entrada, categoriaCodigo: codigo })
+    expect((await servicio().consultar(encabezados)).productos).toMatchObject([{ id, categoriaCodigo: codigo, categoriaNombre: nombre }])
+    expect((await servicio().consultar(encabezados)).categorias).toHaveLength(8)
+
+    const catalogo = crearConsultasCatalogo(db())
+    expect(await catalogo.listar({ categoriaCodigo: codigo })).toEqual([])
+    await db().update(producto).set({ publicado: true, imagenAssetId: "asset", imagenPublicId: "fixture/a",
+      imagenVersionProveedor: "1", imagenUrlSegura: "https://example.test/a.jpg", imagenAncho: 100, imagenAlto: 100, imagenFormato: "jpeg" }).where(eq(producto.id, id))
+    await db().update(inventario).set({ cantidad: 1 }).where(eq(inventario.productoId, id))
+    expect(await catalogo.listar({ categoriaCodigo: codigo })).toMatchObject([{ id, categoriaCodigo: codigo, categoriaNombre: nombre }])
   })
 
   it("consulta los productos reales, incluidos ocultos, sin stock dentro de su DTO", async () => {

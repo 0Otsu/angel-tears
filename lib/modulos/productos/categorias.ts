@@ -1,5 +1,4 @@
-// Lista fija aprobada (decisiones C4 y actualizacion 8). Los codigos son estables;
-// no provienen de los fixtures visuales ni habilitan un CRUD de categorias.
+// Categorías iniciales para bases nuevas y para el dataset de la demo.
 export const CODIGOS_CATEGORIA = [
   "collares",
   "pulseras",
@@ -10,9 +9,10 @@ export const CODIGOS_CATEGORIA = [
   "flores-eternas",
 ] as const
 
-export type CodigoCategoria = (typeof CODIGOS_CATEGORIA)[number]
+export type CodigoCategoria = string
+export type CategoriaProducto = { codigo: CodigoCategoria; nombre: string }
 
-export const CATEGORIAS_INICIALES: readonly { codigo: CodigoCategoria; nombre: string }[] = [
+export const CATEGORIAS_INICIALES: readonly CategoriaProducto[] = [
   { codigo: "collares", nombre: "Collares" },
   { codigo: "pulseras", nombre: "Pulseras" },
   { codigo: "anillos", nombre: "Anillos" },

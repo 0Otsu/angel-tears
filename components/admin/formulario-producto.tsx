@@ -14,6 +14,9 @@ import { normalizarPrecioDecimal } from "@/lib/modulos/productos/validacion"
 import { PanelAdmin, TituloPanel } from "./piezas-admin"
 import { AvisoProductoGuardado } from "./aviso-producto-guardado"
 
+import type { CategoriaProducto } from "@/lib/modulos/productos/categorias"
+import { DialogoNuevaCategoria } from "./dialogo-nueva-categoria"
+
 const campos = [
   { nombre: "nombre", etiqueta: "Nombre", requerido: true, ejemplo: "Ej: Pulsera Olivia" },
   { nombre: "precio", etiqueta: "Precio de venta (ARS)", requerido: true, ejemplo: "Ej: 33000" },
@@ -65,12 +68,15 @@ export function FormularioProducto({ producto, categorias, cancelar, versionProp
   categorias: ConsultaAdministrativa["categorias"]
   cancelar: () => void
   versionPropia?: number
-  alGuardar?: (id: string, datos: Record<NombreCampo, string>) => void
+  alGuardar?: (id: string, datos: Record<NombreCampo, string>, categoria?: CategoriaProducto) => void
   alCambiarOcupado?: (ocupado: boolean) => void
   alCambiarBorrador?: (pendiente: boolean) => void
   accionCancelar?: ReactNode
 }) {
   const [valores, setValores] = useState(() => valoresIniciales(producto))
+  const [categoriasNuevas, setCategoriasNuevas] = useState<CategoriaProducto[]>([])
+  const opcionesCategorias = [...categorias, ...categoriasNuevas.filter(nueva => !categorias.some(c => c.codigo === nueva.codigo))]
+    .sort((a, b) => a.nombre.localeCompare(b.nombre, "es"))
   const [stockInicial, setStockInicial] = useState("0")
   const [guardados, setGuardados] = useState(() => ({ ...valoresIniciales(producto), stockInicial: "0" }))
   const claveAlta = useRef<string | null>(null)
@@ -121,52 +127,81 @@ export function FormularioProducto({ producto, categorias, cancelar, versionProp
         setGuardados({ ...valores, stockInicial })
         if (producto) setVersionEsperada(Math.max(versionEsperada, versionPropia ?? 0) + 1)
         if (producto) {
-          alGuardar?.(respuesta.productoId, valoresEnviados)
+          alGuardar?.(respuesta.productoId, valoresEnviados, opcionesCategorias.find(c => c.codigo === valoresEnviados.categoriaCodigo))
           startTransition(() => router.refresh())
-        } else navegar(() => alGuardar?.(respuesta.productoId, valoresEnviados))
+        } else navegar(() => alGuardar?.(respuesta.productoId, valoresEnviados, opcionesCategorias.find(c => c.codigo === valoresEnviados.categoriaCodigo)))
       }
     } finally { enviando.current = false; ocupar(false) }
+  }
+
+  function campo(nombre: typeof campos[number]["nombre"]) {
+    const campo = campos.find(c => c.nombre === nombre)!
+    const requerido = "requerido" in campo && campo.requerido
+    const Control = campo.nombre === "descripcion" || campo.nombre === "cuidados" ? Textarea : Input
+    return <div key={campo.nombre} className="min-w-0 space-y-2">
+      <Label htmlFor={`producto-${campo.nombre}`}>{campo.etiqueta}{requerido ? " *" : ""}</Label>
+      <Control id={`producto-${campo.nombre}`} name={campo.nombre} value={valores[campo.nombre]} placeholder={campo.ejemplo}
+        onChange={(e) => setValores({ ...valores, [campo.nombre]: e.target.value })}
+        required={requerido} aria-invalid={Boolean(errores[campo.nombre])}
+        aria-describedby={errores[campo.nombre] ? `error-${campo.nombre}` : undefined}
+        inputMode={campo.nombre === "precio" ? "decimal" : undefined} className={Control === Input ? "min-h-11 bg-background" : "h-24 bg-background"} />
+      {errores[campo.nombre] && <p id={`error-${campo.nombre}`} className="text-sm text-destructive">{errores[campo.nombre]}</p>}
+    </div>
   }
 
   return <PanelAdmin>
     <TituloPanel titulo="Datos del producto" />
     <form ref={formularioRef} onSubmit={enviar} noValidate aria-label={producto ? "Editar producto" : "Nuevo producto"} className="space-y-5 px-5 pb-6 lg:px-6">
       {producto && <><input type="hidden" name="id" value={producto.id} /><input type="hidden" name="version" value={Math.max(versionEsperada, versionPropia ?? 0)} /></>}
-      <fieldset disabled={pendiente} className="grid min-w-0 gap-5 sm:grid-cols-2">
-        {campos.map((campo) => {
-          const requerido = "requerido" in campo && campo.requerido
-          const Control = campo.nombre === "descripcion" || campo.nombre === "cuidados" ? Textarea : Input
-          return <div key={campo.nombre} className="min-w-0 space-y-2">
-            <Label htmlFor={`producto-${campo.nombre}`}>{campo.etiqueta}{requerido ? " *" : ""}</Label>
-            <Control id={`producto-${campo.nombre}`} name={campo.nombre} value={valores[campo.nombre]} placeholder={campo.ejemplo}
-              onChange={(e) => setValores({ ...valores, [campo.nombre]: e.target.value })}
-              required={requerido} aria-invalid={Boolean(errores[campo.nombre])}
-              aria-describedby={errores[campo.nombre] ? `error-${campo.nombre}` : undefined}
-              inputMode={campo.nombre === "precio" ? "decimal" : undefined} className={Control === Input ? "min-h-11 bg-background" : "bg-background"} />
-            {errores[campo.nombre] && <p id={`error-${campo.nombre}`} className="text-sm text-destructive">{errores[campo.nombre]}</p>}
-          </div>
-        })}
-        <div className="min-w-0 space-y-2">
-          <Label htmlFor="producto-categoria">Categoría *</Label>
-          <select id="producto-categoria" name="categoriaCodigo" value={valores.categoriaCodigo}
-            onChange={(e) => setValores({ ...valores, categoriaCodigo: e.target.value })} required
-            aria-invalid={Boolean(errores.categoriaCodigo)} aria-describedby={errores.categoriaCodigo ? "error-categoriaCodigo" : undefined}
-            className="h-11 w-full rounded-md border border-border bg-background px-3 text-sm focus-visible:outline-2 focus-visible:outline-primary">
-            <option value="">Elegí una categoría</option>
-            {categorias.map((c) => <option key={c.codigo} value={c.codigo}>{c.nombre}</option>)}
-          </select>
-          {errores.categoriaCodigo && <p id="error-categoriaCodigo" className="text-sm text-destructive">{errores.categoriaCodigo}</p>}
+      <fieldset disabled={pendiente} className="min-w-0 space-y-4">
+        <legend className="mb-3 text-sm font-medium">Información básica</legend>
+        <div className="grid min-w-0 gap-4 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+          {campo("nombre")}
+          {campo("precio")}
         </div>
-        {!producto && <div className="min-w-0 space-y-2">
-          <Label htmlFor="producto-stock-inicial">Stock inicial</Label>
-          <Input id="producto-stock-inicial" name="stockInicial" inputMode="numeric" value={stockInicial}
-            onChange={(e) => setStockInicial(e.target.value)} className="min-h-11 bg-background"
-            aria-invalid={Boolean(errores.stockInicial)}
-            aria-describedby={errores.stockInicial ? "ayuda-stock-inicial error-stock-inicial" : "ayuda-stock-inicial"} />
-          <p id="ayuda-stock-inicial" className="text-sm text-muted-foreground">Indicá cuántas unidades tenés actualmente. Podés dejarlo en cero y modificarlo después.</p>
-          {errores.stockInicial && <p id="error-stock-inicial" className="text-sm text-destructive">{errores.stockInicial}</p>}
-        </div>}
+        <div className="grid min-w-0 gap-4 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+          <div className="min-w-0 space-y-2">
+            <div className="flex flex-wrap items-center justify-between gap-x-2 md:min-h-11">
+              <Label htmlFor="producto-categoria">Categoría *</Label>
+              <DialogoNuevaCategoria deshabilitado={pendiente} alCrear={categoria => {
+                setCategoriasNuevas(prev => [...prev, categoria])
+                setValores(prev => ({ ...prev, categoriaCodigo: categoria.codigo }))
+              }} />
+            </div>
+            <select id="producto-categoria" name="categoriaCodigo" value={valores.categoriaCodigo}
+              onChange={(e) => setValores({ ...valores, categoriaCodigo: e.target.value })} required
+              aria-invalid={Boolean(errores.categoriaCodigo)} aria-describedby={errores.categoriaCodigo ? "error-categoriaCodigo" : undefined}
+              className="h-11 w-full rounded-md border border-border bg-background px-3 text-sm focus-visible:outline-2 focus-visible:outline-primary">
+              <option value="">Elegí una categoría</option>
+              {opcionesCategorias.map((c) => <option key={c.codigo} value={c.codigo}>{c.nombre}</option>)}
+            </select>
+            {errores.categoriaCodigo && <p id="error-categoriaCodigo" className="text-sm text-destructive">{errores.categoriaCodigo}</p>}
+          </div>
+          {!producto && <div className="min-w-0 space-y-2">
+            <Label htmlFor="producto-stock-inicial" className="md:flex md:min-h-11 md:items-center">Stock inicial</Label>
+            <Input id="producto-stock-inicial" name="stockInicial" inputMode="numeric" value={stockInicial}
+              onChange={(e) => setStockInicial(e.target.value)} className="min-h-11 bg-background"
+              aria-invalid={Boolean(errores.stockInicial)}
+              aria-describedby={errores.stockInicial ? "ayuda-stock-inicial error-stock-inicial" : "ayuda-stock-inicial"} />
+            <p id="ayuda-stock-inicial" className="text-sm text-muted-foreground">Indicá cuántas unidades tenés actualmente. Podés dejarlo en cero y modificarlo después.</p>
+            {errores.stockInicial && <p id="error-stock-inicial" className="text-sm text-destructive">{errores.stockInicial}</p>}
+          </div>}
+        </div>
       </fieldset>
+      <div className="border-t border-border/60 pt-4">
+        <fieldset disabled={pendiente} className="min-w-0 space-y-4">
+          <legend className="mb-3 text-sm font-medium">Detalles adicionales (opcional)</legend>
+          <div className="grid min-w-0 gap-4 md:grid-cols-2">
+            {campo("descripcion")}
+            {campo("cuidados")}
+          </div>
+          <div className="grid min-w-0 gap-4 md:grid-cols-3">
+            {campo("material")}
+            {campo("medida")}
+            {campo("color")}
+          </div>
+        </fieldset>
+      </div>
       {resultado.estado === "ok" && <AvisoProductoGuardado key={versionEsperada} texto={producto ? "Cambios guardados." : "Producto creado."} />}
       {mensaje(resultado) && <div role="alert" className="space-y-2 text-sm text-destructive">
         <p>{mensaje(resultado)}</p>
@@ -174,9 +209,9 @@ export function FormularioProducto({ producto, categorias, cancelar, versionProp
         {resultado.estado === "sesion_requerida" && <Link href="/admin/login" className="underline">Iniciar sesión</Link>}
         {(resultado.estado === "conflicto_version" || resultado.estado === "no_encontrado") && <Button type="button" variant="outline" onClick={() => { window.location.reload() }}>Recargar datos</Button>}
       </div>}
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-3 md:justify-end">
         {accionCancelar ?? <Button type="button" variant="outline" className="border-destructive/35 text-destructive hover:bg-destructive/5" disabled={pendiente} onClick={cancelar}>Cancelar</Button>}
-        <PendingButton className="min-h-11" pending={pendiente} pendingLabel="Guardando…" type="submit" disabled={pendiente || categorias.length === 0}>{producto ? "Guardar cambios" : "Guardar y continuar"}</PendingButton>
+        <PendingButton className="min-h-11" pending={pendiente} pendingLabel="Guardando…" type="submit" disabled={pendiente || opcionesCategorias.length === 0}>{producto ? "Guardar cambios" : "Guardar y continuar"}</PendingButton>
       </div>
     </form>
   </PanelAdmin>

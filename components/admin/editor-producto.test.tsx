@@ -13,6 +13,32 @@ vi.mock("./galeria-producto", () => ({ GaleriaProducto: ({ version, alGuardar, a
 const producto: ProductoAdministrativo = { id: "cd12704c-e5a7-4216-b16e-ad6d7ae47490", nombre: "Collar", slug: "collar", precio: "222.00", categoriaCodigo: "collares", categoriaNombre: "Collares", descripcion: null, material: null, medida: null, color: null, cuidados: null, publicado: false, destacado: false, version: 1, tieneImagen: false, imagen: null }
 const categorias = [{ codigo: "collares" as const, nombre: "Collares" }]
 
+const { altaCategoria } = vi.hoisted(() => ({ altaCategoria: vi.fn() }))
+vi.mock("@/app/admin/(panel)/productos/categorias-acciones", () => ({ crearCategoriaAccion: altaCategoria }))
+
+it("conserva el borrador al cancelar o crear una categoría y nunca envía el alta de producto desde el diálogo", async () => {
+  crear.mockClear()
+  altaCategoria.mockResolvedValueOnce({ estado: "ok", categoria: { codigo: "cat-prueba", nombre: "Regalos" } })
+  render(<NuevoProducto categorias={categorias} />)
+  const nombre = screen.getByLabelText<HTMLInputElement>("Nombre *")
+  fireEvent.change(nombre, { target: { value: "Mi borrador" } })
+  const nueva = screen.getByRole("button", { name: "+ Nueva categoría" })
+  fireEvent.click(nueva)
+  let dialogo = screen.getByRole("dialog", { name: "Nueva categoría" })
+  fireEvent.click(within(dialogo).getByRole("button", { name: "Cancelar" }))
+  expect(screen.queryByRole("dialog")).toBeNull()
+  expect(nombre.value).toBe("Mi borrador")
+  fireEvent.click(nueva)
+  dialogo = screen.getByRole("dialog", { name: "Nueva categoría" })
+  fireEvent.change(within(dialogo).getByLabelText("Nombre de la categoría"), { target: { value: "Regalos" } })
+  fireEvent.submit(within(dialogo).getByRole("button", { name: "Crear categoría" }).closest("form")!)
+  await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull())
+  expect(screen.getByLabelText<HTMLSelectElement>("Categoría *").value).toBe("cat-prueba")
+  expect(nombre.value).toBe("Mi borrador")
+  expect(altaCategoria).toHaveBeenCalledWith("Regalos")
+  expect(crear).not.toHaveBeenCalled()
+})
+
 it("alta conserva el stock y la clave tras un error y continúa a Imágenes al confirmar", async () => {
   crear.mockReset()
     .mockResolvedValueOnce({ estado: "datos_invalidos", errores: { stockInicial: "Ingresá un entero." } })

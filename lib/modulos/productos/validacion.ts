@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { CODIGOS_CATEGORIA } from "@/lib/modulos/productos/categorias"
+export const esquemaCodigoCategoria = z.string().min(1).max(68).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Elegí una categoría válida.")
 
 /**
  * Formato de almacenamiento numeric(18,2), no politica comercial de precios. No redondea,
@@ -28,7 +28,7 @@ export const esquemaDatosProducto = z.object({
     }
     return precio
   }),
-  categoriaCodigo: z.enum(CODIGOS_CATEGORIA, { error: "Elegí una categoría de la lista aprobada." }),
+  categoriaCodigo: esquemaCodigoCategoria,
   descripcion: textoOpcional,
   material: textoOpcional,
   medida: textoOpcional,

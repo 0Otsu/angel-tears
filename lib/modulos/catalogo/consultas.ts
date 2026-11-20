@@ -5,7 +5,7 @@ import { z } from "zod"
 import { productoMedia } from "@/lib/infraestructura/esquemas/producto-media"
 import { producto, categoria } from "@/lib/infraestructura/esquemas/producto"
 import { inventario } from "@/lib/infraestructura/esquemas/inventario"
-import { CODIGOS_CATEGORIA } from "@/lib/modulos/productos/categorias"
+import { esquemaCodigoCategoria } from "@/lib/modulos/productos/validacion"
 import type { ProductoPublico } from "./contrato"
 
 const camposPublicos = {
@@ -17,7 +17,7 @@ const camposPublicos = {
   imagenUrl: producto.imagenUrlSegura, imagenAncho: producto.imagenAncho, imagenAlto: producto.imagenAlto,
 }
 const esquemaFiltro = z.object({
-  categoriaCodigo: z.enum(CODIGOS_CATEGORIA).optional(),
+  categoriaCodigo: esquemaCodigoCategoria.optional(),
   destacados: z.boolean().optional(),
   excluirId: z.uuid().optional(),
   limite: z.number().int().min(1).max(100).optional(),
