@@ -8,6 +8,7 @@ export type ProductoAdministrativo = DatosProducto & {
   categoriaNombre: string
   publicado: boolean
   destacado: boolean
+  archivado: boolean
   version: number
   tieneImagen: boolean
   imagen: { urlSegura: string; ancho: number; alto: number; formato?: string } | null

@@ -6,13 +6,15 @@ import type { ConsultaAdministrativa, ResultadoGuardarProducto } from "@/lib/mod
 import { FormularioProducto } from "./formulario-producto"
 import { esquemaProductoAdministrativo, erroresProducto } from "@/lib/modulos/productos/validacion-administrativa"
 
-const { crear, editar, refresh, push } = vi.hoisted(() => ({ crear: vi.fn(), editar: vi.fn(), refresh: vi.fn(), push: vi.fn() }))
+const { crear, editar, publicar, refresh, push } = vi.hoisted(() => ({ crear: vi.fn(), editar: vi.fn(), publicar: vi.fn(), refresh: vi.fn(), push: vi.fn() }))
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh, push }) }))
 vi.mock("@/app/admin/(panel)/productos/acciones", () => ({ crearProductoAccion: crear, editarProductoAccion: editar }))
 
+vi.mock("@/app/admin/(panel)/productos/publicacion-acciones", () => ({ cambiarPublicacionAccion: publicar }))
+
 const consulta: ConsultaAdministrativa = {
   categorias: [{ codigo: "collares", nombre: "Collares" }],
-  productos: [{ id: "cd12704c-e5a7-4216-b16e-ad6d7ae47490", nombre: "Collar real", slug: "collar-real", precio: "1500.50", categoriaCodigo: "collares", categoriaNombre: "Collares", descripcion: "Descripción", material: null, medida: null, color: null, cuidados: null, publicado: false, destacado: false, version: 1, tieneImagen: false, imagen: null }],
+  productos: [{ id: "cd12704c-e5a7-4216-b16e-ad6d7ae47490", nombre: "Collar real", slug: "collar-real", precio: "1500.50", categoriaCodigo: "collares", categoriaNombre: "Collares", descripcion: "Descripción", material: null, medida: null, color: null, cuidados: null, publicado: false, destacado: false, archivado: false, version: 1, tieneImagen: false, imagen: null }],
 }
 const nombre = () => screen.getByLabelText("Nombre *") as HTMLInputElement
 const precio = () => screen.getByLabelText("Precio de venta (ARS) *") as HTMLInputElement
@@ -22,7 +24,7 @@ function completar() {
   fireEvent.change(precio(), { target: { value: "90071992547409.93" } })
   fireEvent.change(screen.getByLabelText("Categoría *"), { target: { value: "collares" } })
 }
-beforeEach(() => { crear.mockReset(); editar.mockReset(); refresh.mockReset(); push.mockReset() })
+beforeEach(() => { crear.mockReset(); editar.mockReset(); publicar.mockReset(); refresh.mockReset(); push.mockReset() })
 
 function servidorConValidacionActual() {
   crear.mockImplementation(async (datos: FormData) => {
@@ -86,6 +88,28 @@ it("edicion comunica decimal normalizado al editor sin dejar un borrador falso",
 })
 
 describe("productos administrativos", () => {
+  it("pide confirmación, envía un solo comando de archivado y permite consultar el producto en Archivados", async () => {
+    const p = consulta.productos[0]
+    let confirmar!: (resultado: { estado: "ok"; version: number; productoId: string; slug: string }) => void
+    publicar.mockReturnValue(new Promise(resolver => { confirmar = resolver }))
+    render(<ProductosAdmin consulta={consulta} />)
+    fireEvent.keyDown(screen.getByRole("button", { name: "Acciones de Collar real" }), { key: "Enter" })
+    fireEvent.click(await screen.findByRole("menuitem", { name: "Eliminar producto" }))
+    const dialogo = await screen.findByRole("dialog", { name: "Eliminar producto" })
+    expect(dialogo.textContent).toContain("Collar real")
+    expect(publicar).not.toHaveBeenCalled()
+    const boton = within(dialogo).getByRole("button", { name: "Eliminar producto" })
+    fireEvent.click(boton)
+    fireEvent.click(boton)
+    expect(publicar).toHaveBeenCalledExactlyOnceWith({ id: p.id, version: p.version, accion: "archivar" })
+    await act(async () => confirmar({ estado: "ok", version: 2, productoId: p.id, slug: p.slug }))
+    expect(screen.getByText("Producto eliminado. Podés consultarlo en Archivados.")).toBeTruthy()
+    expect(screen.queryByRole("heading", { name: "Collar real" })).toBeNull()
+    fireEvent.change(screen.getByLabelText("Estado"), { target: { value: "archivado" } })
+    expect(screen.getByRole("heading", { name: "Collar real" })).toBeTruthy()
+    expect(screen.queryByRole("button", { name: "Acciones de Collar real" })).toBeNull()
+  })
+
   it("consulta y filtra existencias 0/1/2/3/4 sin mezclar publicado u oculto", () => {
     const productos = [0,1,2,3,4,20].map(saldo => ({ ...consulta.productos[0], id: `id-${saldo}`, nombre: `Producto ${saldo}`, publicado: saldo !== 2 }))
     render(<ProductosAdmin consulta={{ ...consulta, productos }} existencias={Object.fromEntries([0,1,2,3,4,20].map(s => [`id-${s}`,s]))} />)

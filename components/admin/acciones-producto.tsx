@@ -13,8 +13,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { AvisoProductoGuardado } from "./aviso-producto-guardado"
 import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog"
 
-type Accion = "publicar" | "ocultar" | "destacar" | "quitar_destacado"
-const etiquetas = { publicar: "Publicando…", ocultar: "Ocultando…", destacar: "Destacando…", quitar_destacado: "Quitando destacado…" }
+type Accion = "publicar" | "ocultar" | "destacar" | "quitar_destacado" | "archivar"
+const etiquetas = { publicar: "Publicando…", ocultar: "Ocultando…", destacar: "Destacando…", quitar_destacado: "Quitando destacado…", archivar: "Eliminando…" }
 export function AccionesProducto({ producto, alGuardar, alNotificar, finalizar = false, disabled = false, enVistaPrevia = false, editarVisible = false, disponible, alEditar, alImagen, accionCancelar }: { producto: ProductoAdministrativo; alGuardar?: (producto: ProductoAdministrativo) => void; alNotificar?: (texto: string) => void; finalizar?: boolean; disabled?: boolean; enVistaPrevia?: boolean; editarVisible?: boolean; disponible?: boolean; alEditar?: () => void; alImagen?: () => void; accionCancelar?: (pendiente: boolean) => ReactNode }) {
   const [operacion, setOperacion] = useState<Accion | null>(null)
   const ejecutando = useRef(false)
@@ -22,6 +22,8 @@ export function AccionesProducto({ producto, alGuardar, alNotificar, finalizar =
   const [error, setError] = useState<Exclude<ResultadoPublicacion["estado"], "ok"> | null>(null)
   const [aviso, notificar] = useState<{ texto: string; numero: number } | null>(null)
   const [confirmacion, confirmar] = useState<{ nombre: string; slug: string } | null>(null)
+  const [confirmarArchivo, mostrarArchivo] = useState(false)
+  const cancelarArchivo = useRef<HTMLButtonElement>(null)
   const botonAccion = useRef<HTMLButtonElement>(null)
   const grupoAcciones = useRef<HTMLDivElement>(null)
   const volver = useRef<HTMLButtonElement>(null)
@@ -37,11 +39,17 @@ export function AccionesProducto({ producto, alGuardar, alNotificar, finalizar =
     try {
       const r = await cambiarPublicacionAccion({ id: actual.id, version: actual.version, accion })
       if (r.estado !== "ok") { setError(r.estado); return }
-      const siguiente = { ...actual, version: r.version, ...(accion === "publicar" || accion === "ocultar" ? { publicado: accion === "publicar" } : { destacado: accion === "destacar" }) }
+      const flags = accion === "archivar"
+        ? { archivado: true, publicado: false, destacado: false }
+        : accion === "publicar" || accion === "ocultar"
+          ? { publicado: accion === "publicar" }
+          : { destacado: accion === "destacar" }
+      const siguiente = { ...actual, version: r.version, ...flags }
+      if (accion === "archivar") mostrarArchivo(false)
       setLocal(siguiente)
       // Al salir no se inicia otra consulta de preview: competiria con la navegacion.
       if (!(finalizar && accion === "ocultar")) alGuardar?.(siguiente)
-      const texto = { publicar: "Producto publicado.", ocultar: "Producto ocultado.", destacar: "Producto destacado.", quitar_destacado: "Se quitó de destacados." }[accion]
+      const texto = { publicar: "Producto publicado.", ocultar: "Producto ocultado.", destacar: "Producto destacado.", quitar_destacado: "Se quitó de destacados.", archivar: "Producto eliminado. Podés consultarlo en Archivados." }[accion]
       if (enVistaPrevia && accion === "publicar" && !actual.publicado) {
         notificar(null)
         confirmar({ nombre: actual.nombre, slug: r.slug })
@@ -71,14 +79,39 @@ export function AccionesProducto({ producto, alGuardar, alNotificar, finalizar =
         <DropdownMenuSeparator />
         <DropdownMenuItem className="min-h-11" onSelect={() => void ejecutar(actual.publicado ? "ocultar" : "publicar")}>{actual.publicado ? "Ocultar" : "Publicar"}</DropdownMenuItem>
         <DropdownMenuItem className="min-h-11" onSelect={() => void ejecutar(actual.destacado ? "quitar_destacado" : "destacar")}>{actual.destacado ? "Quitar destacado" : "Destacar"}</DropdownMenuItem>
+        {!enVistaPrevia && <>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem variant="destructive" className="min-h-11" onSelect={() => { setError(null); mostrarArchivo(true) }}>Eliminar producto</DropdownMenuItem>
+        </>}
       </DropdownMenuContent>
     </DropdownMenu></>}
-    {error && <div className="col-span-3 space-y-2 text-sm"><p role="alert" className="text-destructive">{mensaje}</p>
+    {error && !confirmarArchivo && <div className="col-span-3 space-y-2 text-sm"><p role="alert" className="text-destructive">{mensaje}</p>
       {conflicto && <Button variant="outline" className="min-h-11" onClick={() => window.location.reload()}>Recargar datos</Button>}
       {error === "error_tecnico" && <Button variant="outline" className="min-h-11" disabled={pendiente} onClick={() => { if (ultimaAccion.current) void ejecutar(ultimaAccion.current) }}>Reintentar</Button>}
       {error === "imagen_requerida" && <Button variant="outline" className="min-h-11" onClick={imagenes}>Gestionar imágenes</Button>}
       {error === "sesion_requerida" && <Link href="/admin/login" className="underline">Iniciar sesión</Link>}
     </div>}
+    <Dialog open={confirmarArchivo} onOpenChange={abierto => {
+      if (!abierto && !ejecutando.current) { mostrarArchivo(false); setError(null) }
+    }}>
+      <DialogContent showCloseButton={false} onOpenAutoFocus={evento => {
+        evento.preventDefault()
+        cancelarArchivo.current?.focus()
+      }} onCloseAutoFocus={evento => {
+        evento.preventDefault()
+        botonAccion.current?.focus()
+      }}>
+        <DialogTitle>Eliminar producto</DialogTitle>
+        <DialogDescription className="[overflow-wrap:anywhere]">«{actual.nombre}» saldrá del listado habitual y del catálogo. Podés consultarlo en Archivados. Sus imágenes, existencias e historial se conservan.</DialogDescription>
+        {error && <p role="alert" className="text-sm text-destructive">{mensaje}</p>}
+        <div className="flex flex-wrap justify-end gap-2">
+          <Button ref={cancelarArchivo} type="button" variant="outline" className="min-h-11" disabled={pendiente} onClick={() => { mostrarArchivo(false); setError(null) }}>Cancelar</Button>
+          {conflicto
+            ? <Button type="button" variant="outline" className="min-h-11" onClick={() => window.location.reload()}>Recargar datos</Button>
+            : <PendingButton type="button" variant="destructive" className="min-h-11" pending={operacion === "archivar"} pendingLabel={etiquetas.archivar} disabled={pendiente || error === "sesion_requerida"} onClick={() => void ejecutar("archivar")}>Eliminar producto</PendingButton>}
+        </div>
+      </DialogContent>
+    </Dialog>
     <Dialog open={confirmacion !== null} onOpenChange={abierto => { if (!abierto) confirmar(null) }}>
       <DialogContent showCloseButton={false} className="max-h-[calc(100svh-2rem)] min-w-0 overflow-y-auto rounded-2xl text-center motion-reduce:animate-none" onOpenAutoFocus={evento => { evento.preventDefault(); volver.current?.focus() }} onCloseAutoFocus={evento => {
         evento.preventDefault()

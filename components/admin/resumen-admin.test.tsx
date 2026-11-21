@@ -32,7 +32,7 @@ it.each([["Sin stock",["Producto 0"]],["Pocas unidades",["Producto 3"]],["Total 
  const url=new URL(enlace.getAttribute("href")!,"http://localhost")
  expect(url.pathname).toBe("/admin/productos")
  const filtro=filtroStock(url.searchParams.get("stock"));unmount()
- render(<ProductosAdmin consulta={{categorias:[],productos:filas.map(f=>({id:f.productoId,nombre:f.nombre,slug:f.productoId,precio:"10.00",categoriaCodigo:"anillos",categoriaNombre:"Anillos",publicado:true,destacado:false,version:1,tieneImagen:false,imagen:null,descripcion:null,material:null,medida:null,color:null,cuidados:null}))}} existencias={Object.fromEntries(filas.map(f=>[f.productoId,f.saldo]))} filtroStockInicial={filtro}/>);
+ render(<ProductosAdmin consulta={{categorias:[],productos:filas.map(f=>({id:f.productoId,nombre:f.nombre,slug:f.productoId,precio:"10.00",categoriaCodigo:"anillos",categoriaNombre:"Anillos",publicado:true,destacado:false,archivado:false,version:1,tieneImagen:false,imagen:null,descripcion:null,material:null,medida:null,color:null,cuidados:null}))}} existencias={Object.fromEntries(filas.map(f=>[f.productoId,f.saldo]))} filtroStockInicial={filtro}/>);
  const tabla=screen.getByRole("table",{name:"Productos registrados"})
  expect(within(tabla).getAllByRole("heading").map(h=>h.textContent)).toEqual(esperados)
 })

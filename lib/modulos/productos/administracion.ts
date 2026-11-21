@@ -13,7 +13,7 @@ const camposAdministrativos = {
   categoriaCodigo: producto.categoriaCodigo, categoriaNombre: categoria.nombre,
   descripcion: producto.descripcion, material: producto.material, medida: producto.medida,
   color: producto.color, cuidados: producto.cuidados, publicado: producto.publicado,
-  destacado: producto.destacado, version: producto.version,
+  destacado: producto.destacado, archivado: producto.archivado, version: producto.version,
   tieneImagen: sql<boolean>`${producto.imagenAssetId} IS NOT NULL`,
   imagenUrl: producto.imagenUrlSegura, imagenAncho: producto.imagenAncho, imagenAlto: producto.imagenAlto,
   imagenFormato: producto.imagenFormato,
@@ -32,7 +32,7 @@ export function crearAdministracionProductos(dependencias: {
     const [productos, categorias] = await Promise.all([
       db.select(camposAdministrativos).from(producto)
         .innerJoin(categoria, eq(producto.categoriaCodigo, categoria.codigo))
-        .where(productoId ? eq(producto.id, productoId) : undefined)
+        .where(productoId ? and(eq(producto.id, productoId), eq(producto.archivado, false)) : undefined)
         .orderBy(asc(producto.nombre), asc(producto.id)),
       db.select().from(categoria).orderBy(asc(categoria.nombre)),
     ])
@@ -82,7 +82,7 @@ export function crearAdministracionProductos(dependencias: {
         // Allowlist validada: nunca escribir slug, stock, flags o referencia de imagen.
         const [actualizado] = await tx.update(producto)
           .set({ ...validacion.data, version: version + 1, actualizadoEn: new Date() })
-          .where(and(eq(producto.id, id), eq(producto.version, version)))
+          .where(and(eq(producto.id, id), eq(producto.version, version), eq(producto.archivado, false)))
           .returning({ id: producto.id })
         if (actualizado) return { estado: "ok", productoId: id }
         const [existente] = await tx.select({ id: producto.id }).from(producto).where(eq(producto.id, id))

@@ -71,6 +71,13 @@
       "when": 1795227913398,
       "tag": "0009_horarios-atencion",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1795246064233,
+      "tag": "0010_producto-archivado",
+      "breakpoints": true
     }
   ]
 }

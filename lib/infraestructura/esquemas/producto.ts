@@ -23,6 +23,7 @@ export const producto = pgTable("producto", {
   cuidados: text("cuidados"),
   publicado: boolean("publicado").notNull().default(false),
   destacado: boolean("destacado").notNull().default(false),
+  archivado: boolean("archivado").notNull().default(false),
   version: integer("version").notNull().default(1),
   imagenAssetId: text("imagen_asset_id"),
   imagenPublicId: text("imagen_public_id"),
@@ -53,5 +54,6 @@ export const producto = pgTable("producto", {
       AND ${tabla.imagenAlto} IS NOT NULL AND ${tabla.imagenAlto} > 0
       AND ${tabla.imagenFormato} IS NOT NULL AND ${tabla.imagenFormato} IN ('jpeg', 'png', 'webp'))
   )`),
+  check("producto_archivado_no_visible", sql`NOT ${tabla.archivado} OR (NOT ${tabla.publicado} AND NOT ${tabla.destacado})`),
   check("producto_publicado_con_imagen", sql`NOT ${tabla.publicado} OR ${tabla.imagenAssetId} IS NOT NULL`),
 ])

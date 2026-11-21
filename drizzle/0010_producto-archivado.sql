@@ -1,0 +1,2 @@
+ALTER TABLE "producto" ADD COLUMN "archivado" boolean DEFAULT false NOT NULL;--> statement-breakpoint
+ALTER TABLE "producto" ADD CONSTRAINT "producto_archivado_no_visible" CHECK (NOT "producto"."archivado" OR (NOT "producto"."publicado" AND NOT "producto"."destacado"));

@@ -7,7 +7,7 @@ import { conAdministradora, type ExigirAdministradora } from "@/lib/modulos/aute
 import { esquemaReferenciaEdicion } from "./validacion-administrativa"
 
 const esquemaComando = esquemaReferenciaEdicion.extend({
-  accion: z.enum(["publicar", "ocultar", "destacar", "quitar_destacado"]),
+  accion: z.enum(["publicar", "ocultar", "destacar", "quitar_destacado", "archivar"]),
 }).strict()
 
 export type ResultadoPublicacion =
@@ -35,10 +35,18 @@ export function crearPublicacionProductos({ db, exigir }: { db: NodePgDatabase; 
       return db.transaction(async (tx): Promise<ResultadoPublicacion> => {
         const [actual] = await tx.select().from(producto).where(eq(producto.id, id)).for("update")
         if (!actual) return { estado: "no_encontrado" }
+        if (actual.archivado) {
+          return accion === "archivar"
+            ? { estado: "ok", productoId: id, slug: actual.slug, version: actual.version }
+            : { estado: "no_encontrado" }
+        }
         if (actual.version !== version) return { estado: "conflicto_version" }
         if (accion === "publicar" && !referenciaUtilizable(actual)) return { estado: "imagen_requerida" }
-        const cambio = accion === "publicar" || accion === "ocultar"
-          ? { publicado: accion === "publicar" } : { destacado: accion === "destacar" }
+        const cambio = accion === "archivar"
+          ? { archivado: true, publicado: false, destacado: false }
+          : accion === "publicar" || accion === "ocultar"
+            ? { publicado: accion === "publicar" }
+            : { destacado: accion === "destacar" }
         await tx.update(producto).set({ ...cambio, version: version + 1, actualizadoEn: new Date() }).where(eq(producto.id, id))
         return { estado: "ok", productoId: id, slug: actual.slug, version: version + 1 }
       })

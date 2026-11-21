@@ -116,3 +116,14 @@ El sistema SHALL permitir marcar destacado como booleano sin ranking/campañas y
 #### Scenario: Destacado oculto o agotado
 - **WHEN** un producto destacado se oculta o queda sin stock
 - **THEN** deja de aparecer en Home/listados aunque conserve el flag.
+
+### Requirement: Eliminación lógica de productos
+El sistema SHALL permitir que una administradora archive un producto desde el listado de Productos, conservando su identidad, imágenes, existencias y referencias históricas.
+
+#### Scenario: Confirmar eliminación en el listado
+- **WHEN** una administradora confirma la eliminación con la versión vigente
+- **THEN** el producto pierde su publicación y destacado, desaparece del catálogo y del listado habitual, y se puede consultar con el filtro Archivados.
+
+#### Scenario: Repetir una eliminación
+- **WHEN** una administradora vuelve a archivar el mismo producto
+- **THEN** el sistema confirma el resultado sin una segunda modificación ni cambios en el historial.

@@ -33,7 +33,7 @@ function crearGuardadoImagenProducto({ db, exigir, almacen }: DependenciasImagen
     const validacion = esquemaReferenciaEdicion.safeParse(referencia)
     if (!validacion.success) throw new ErrorImagen("solicitud_invalida", 400)
     const { id, version } = validacion.data
-    const [actual] = await db.select({ version: producto.version, imagen: producto.imagenAssetId, publicId: producto.imagenPublicId }).from(producto).where(eq(producto.id, id))
+    const [actual] = await db.select({ version: producto.version, imagen: producto.imagenAssetId, publicId: producto.imagenPublicId }).from(producto).where(and(eq(producto.id, id), eq(producto.archivado, false)))
     if (!actual) throw new ErrorImagen("producto_inexistente", 404)
     if (!reemplazo && actual.imagen) throw new ErrorImagen("imagen_existente", 409)
     if (reemplazo && !actual.imagen) throw new ErrorImagen("imagen_requerida", 409)

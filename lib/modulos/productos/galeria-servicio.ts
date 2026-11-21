@@ -42,7 +42,7 @@ export function crearGaleriaProductos({ db, exigir, almacen }: { db: NodePgDatab
     if (!entrada.success) throw new ErrorImagen("solicitud_invalida", 400)
     const { id, version } = entrada.data
     const [p] = await db.select().from(producto).where(eq(producto.id, id))
-    if (!p) throw new ErrorImagen("producto_inexistente", 404)
+    if (!p || p.archivado) throw new ErrorImagen("producto_inexistente", 404)
     if (p.version !== version) throw new ErrorImagen("conflicto_version", 409)
     const anteriores = await filas(id)
     const anterior = medioId ? anteriores.find(m => m.id === medioId) : undefined
@@ -55,7 +55,7 @@ export function crearGaleriaProductos({ db, exigir, almacen }: { db: NodePgDatab
       if (imagen.publicId !== publicId) throw new ErrorImagen("error_proveedor", 502)
       await db.transaction(async tx => {
         const [actual] = await tx.select().from(producto).where(eq(producto.id, id)).for("update")
-        if (!actual || actual.version !== version) throw new ErrorImagen("conflicto_version", 409)
+        if (!actual || actual.archivado || actual.version !== version) throw new ErrorImagen("conflicto_version", 409)
         const medios = await tx.select().from(productoMedia).where(eq(productoMedia.productoId, id))
         if (medioId) {
           const [cambiado] = await tx.update(productoMedia).set(imagen).where(and(eq(productoMedia.productoId, id), eq(productoMedia.id, medioId))).returning()
@@ -91,7 +91,7 @@ export function crearGaleriaProductos({ db, exigir, almacen }: { db: NodePgDatab
     let retirado: string | undefined
     await db.transaction(async tx => {
       const [p] = await tx.select().from(producto).where(eq(producto.id, id)).for("update")
-      if (!p) throw new ErrorImagen("producto_inexistente", 404)
+      if (!p || p.archivado) throw new ErrorImagen("producto_inexistente", 404)
       if (p.version !== version) throw new ErrorImagen("conflicto_version", 409)
       const medios = await tx.select().from(productoMedia).where(eq(productoMedia.productoId, id)).orderBy(asc(productoMedia.orden))
       const medio = medios.find(m => m.id === medioId)
