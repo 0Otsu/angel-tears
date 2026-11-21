@@ -4,6 +4,19 @@ Para la reunión, usá la [checklist operativa](REUNION_COMERCIAL.md) y revisá 
 
 Esta guía prepara el lanzamiento con Sofía. El SHA comercial se fija al aprobar el contenido y cerrar la revisión final. Los pasos que crean cuentas, aplican migraciones o publican el sitio quedan para la reunión y requieren su autorización.
 
+## Instalación comercial actual
+
+El proyecto `angel-tears-sofia` pertenece al equipo de Sofía en Netlify. [angeltears.com.ar](https://angeltears.com.ar/) usa Netlify DNS y HTTPS. Producción está pública y los previews están protegidos. Netlify comercial está desvinculado de GitHub. Verificá por separado la integración de Vercel Demo antes de un push. Las secciones de Railway y Cloudflare más abajo registran la propuesta inicial.
+
+1. Preparar un checkout limpio del SHA aprobado en Linux. Usar Node 24.15.0, pnpm 11.25.0 y `pnpm install --frozen-lockfile`. Usar `pnpm build` y `.next` como directorio de publicación, con el adaptador OpenNext de Netlify. El empaquetado en Windows falló al crear enlaces simbólicos.
+2. Autenticar Netlify CLI con acceso al equipo de la tienda. Obtener el ID del proyecto comercial desde su panel y definirlo en `NETLIFY_SITE_ID` para esa sesión. Revisar en Production `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `SITE_URL`, `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `RESEND_API_KEY` y `RESEND_FROM`. Las dos URL usan `https://angeltears.com.ar`. Inyectar los valores protegidos necesarios para el build local mediante el entorno del proceso desde el gestor de secretos. Mantener los valores de ejecución en las variables privadas de Netlify y los secretos fuera de Git y de argumentos visibles. Usar la conexión pooled del rol `angel_tears_app` y las credenciales comerciales.
+3. Para un draft privado, ejecutar `netlify deploy --context production --site "$NETLIFY_SITE_ID"`. Si el draft necesita datos comerciales, proporcionar las variables al despliegue privado mediante un mecanismo seguro. Con el SHA revisado y autorización de publicación, ejecutar `netlify deploy --prod --context production --site "$NETLIFY_SITE_ID"`. Registrar el ID anterior y verificar que el nuevo quede en `READY` con `___netlify-server-handler`, que el panel redirija al login sin sesión y que el catálogo y el sitemap respondan.
+4. Ante un fallo crítico del alojamiento, republicar en **Deploys** la versión anterior compatible y comprobar su origen de Better Auth. El rollback del alojamiento conserva las migraciones y los datos de Neon. [Netlify CLI](https://docs.netlify.com/api-and-cli-guides/cli-guides/get-started-with-cli/#manual-deploys) · [Rollback](https://docs.netlify.com/deploy/manage-deploys/manage-deploys-overview/#rollbacks)
+
+Para una migración comercial, comparar primero el historial real con el journal de Drizzle, verificar la identidad de la base y contar con un respaldo cuya restauración se haya probado. Con la aprobación correspondiente, ejecutar `pnpm db:migrate` desde el SHA revisado usando la conexión directa del rol de mantenimiento. Confirmar el historial final y la integridad de los datos antes de desplegar el código que dependa del nuevo esquema.
+
+Neon comercial tiene aplicadas las migraciones `0000` a `0010`. El respaldo comercial portátil se descifra con la identidad de `age` custodiada por separado. En una base PostgreSQL 18.7 vacía y aislada, usar `age -d -i identidad.txt respaldo.dump.age | pg_restore --exit-on-error --no-owner --no-privileges --dbname=BASE_AISLADA`. Verificar tablas, historial de Drizzle y conteos contra el comprobante cifrado. El dump contiene datos de PostgreSQL y referencias a medios. Las fotos originales se conservan en Cloudinary.
+
 ## Arquitectura y presupuesto
 
 Precios y límites consultados el 20/11/2026. Confirmar los importes en cada checkout antes de autorizar pagos.
