@@ -1,8 +1,8 @@
 # Angel Tears
 
-Angel Tears reúne el catálogo público y la gestión diaria de una tienda de accesorios de Concordia, Entre Ríos. Los clientes pueden consultar productos por WhatsApp o Instagram y concretar la compra en el local. Desde el panel se gestionan productos, existencias y operaciones sin editar el sitio. El proyecto comenzó en Ingeniería de Software II y evolucionó hasta convertirse en la tienda comercial publicada.
+Angel Tears reúne el catálogo público y la gestión diaria de una tienda de accesorios de Concordia, Entre Ríos. Los clientes pueden consultar productos por WhatsApp o Instagram y concretar la compra en el local. Desde el panel se gestionan productos, existencias y operaciones sin editar el sitio. El proyecto comenzó en Ingeniería de Software II y hoy está desplegado en producción para Angel Tears.
 
-[Tienda comercial](https://angeltears.com.ar/) · [Ver la demo académica](https://angel-tears-demo.vercel.app/) · [Arquitectura y decisiones](docs/ARQUITECTURA.md) · [Guía de despliegue comercial](docs/DESPLIEGUE_COMERCIAL.md)
+[Tienda comercial](https://angeltears.com.ar/) · [Arquitectura y decisiones](docs/ARQUITECTURA.md) · [Guía de despliegue comercial](docs/DESPLIEGUE_COMERCIAL.md)
 
 ## Funcionalidades
 
@@ -17,7 +17,7 @@ El sistema es un monolito modular con Next.js App Router, React, TypeScript y Ta
 - **Persistencia.** PostgreSQL guarda productos, inventario, operaciones, configuración y sesiones. Drizzle y `pg` conectan la aplicación con la base, y `drizzle/` contiene las migraciones versionadas. Los cambios de stock se coordinan con las operaciones mediante transacciones, restricciones e idempotencia cuando corresponde.
 - **Acceso administrativo.** Better Auth gestiona sesiones persistidas y la recuperación de contraseña. El alta de la cuenta administradora es controlada y el registro público está deshabilitado. El servidor comprueba la sesión en rutas, acciones y endpoints privados. Resend entrega los enlaces de recuperación, con respuesta neutra y límites persistentes.
 - **Imágenes y catálogo.** Cloudinary almacena las fotos y PostgreSQL conserva las referencias. El archivado retira el producto del catálogo y del listado administrativo habitual y preserva sus existencias e historial.
-- **SEO técnico.** Incluye títulos, descripciones, URL canónicas, Open Graph, `robots.txt`, sitemap y datos estructurados `LocalBusiness` y `Product`. El dominio comercial está verificado en Google Search Console y el sitemap fue enviado. La demo y las rutas administrativas están fuera del alcance de indexación.
+- **SEO técnico.** Incluye títulos, descripciones, URL canónicas, Open Graph, `robots.txt`, sitemap y datos estructurados `LocalBusiness` y `Product`. El dominio comercial está verificado en Google Search Console y el sitemap fue enviado. Las rutas administrativas quedan fuera de la indexación.
 
 ## Puesta en marcha local
 
@@ -43,8 +43,9 @@ Vitest y Testing Library cubren reglas de dominio y componentes. Las pruebas de 
 | Entorno | Datos y operación |
 | --- | --- |
 | Desarrollo y pruebas | Bases locales separadas. Para revisar la aplicación, usá un entorno local con todas las migraciones aplicadas. Usá cuentas de desarrollo separadas si necesitás probar Cloudinary o Resend. |
-| Demo académica | Vercel, PostgreSQL y Cloudinary con datos de muestra. Su preparación y comandos protegidos están en [la guía de la demo](docs/features/DEMO_DEFENSA_2026.md). Sus actualizaciones se coordinan por separado. Antes de un push, verificá en Vercel el estado de la integración con GitHub. |
 | Producción comercial | Netlify con Neon, Cloudinary y Resend comerciales. Usá la [guía operativa](docs/DESPLIEGUE_COMERCIAL.md#instalación-comercial-actual) para el despliegue manual y la recuperación. |
+
+La [guía de la demo académica](docs/features/DEMO_DEFENSA_2026.md) conserva la preparación y la validación de la defensa.
 
 ## Retomar el proyecto
 
