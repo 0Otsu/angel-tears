@@ -6,20 +6,18 @@ export function Hero({ foto }: { foto?: StaticImageData }) {
   return (
     <section className="relative flex min-h-svh items-center overflow-hidden bg-[#e3e1e2] pb-36 pt-32 lg:min-h-screen lg:py-0" aria-labelledby="hero-heading">
       <div aria-hidden="true" className="absolute inset-0">
-        {foto && <>
-          <Image src={foto} alt="" fill preload sizes="100vw" className="object-cover" />
-          <div className="absolute inset-0 bg-white/55" />
-        </>}
-        <div className="absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-background via-background/50 to-transparent" />
+        {foto && <Image src={foto} alt="" fill preload sizes="100vw" className="object-cover object-[54%_center] md:object-[52%_center] lg:object-center" />}
+        <span className="pointer-events-none absolute inset-0 hidden bg-[radial-gradient(ellipse_60%_90%_at_0%_48%,#fff8eaf5_0%,#fff8eae8_32%,#fff8ea99_61%,transparent_100%)] lg:block" />
+        <div className="absolute inset-x-0 bottom-0 h-[18%] bg-linear-to-t from-card to-transparent" />
       </div>
 
       <div className="relative z-10 w-full lg:pt-20">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="mx-auto w-full text-center lg:mx-0 lg:max-w-xl lg:text-left">
-            <span className="mb-6 block text-sm uppercase tracking-normal text-black">ANGEL TEARS · BIJOUTERIE EN CONCORDIA</span>
-            <h1 id="hero-heading" className="mb-6 text-balance font-serif text-5xl font-semibold leading-[1.1] text-black md:text-6xl lg:text-7xl">
-              <span className="block">Accesorios para</span>
-              <span className="block text-[clamp(2.75rem,12.3vw,3.25rem)] leading-[1.1] sm:text-7xl xl:text-8xl">cada versión de vos.</span>
+          <div className="mx-auto w-full text-center lg:mx-0 lg:max-w-xl lg:text-left relative isolate">
+            <div aria-hidden="true" className="pointer-events-none absolute -inset-x-20 -inset-y-24 -z-10 bg-[radial-gradient(ellipse_68%_50%_at_center,#fff8ea_0%,#fff8eae8_34%,#fff8ea99_58%,transparent_100%)] lg:hidden" />
+            <span className="mb-6 block text-sm uppercase tracking-normal text-black">ANGEL TEARS · ACCESORIOS EN CONCORDIA</span>
+            <h1 id="hero-heading" className="mb-6 text-balance font-serif text-[clamp(2.5rem,11vw,3.25rem)] font-semibold leading-[1.1] text-black md:text-6xl lg:text-7xl">
+              Accesorios que acompañan cada versión de vos.
             </h1>
             <p className="mx-auto mb-10 max-w-md text-lg leading-relaxed text-black lg:mx-0">Descubrí aros, collares, pulseras y anillos para todos los días. Encontrá tus favoritos en nuestro catálogo.</p>
             <div className="flex justify-center lg:justify-start">

@@ -28,10 +28,21 @@ describe("datos estructurados veraces", () => {
       telephone: "+5491100000000",
       sameAs: ["https://www.instagram.com/accesorios.prueba/"],
       hasMap: configuracionPrueba.comoLlegar,
-      openingHoursSpecification: {
-        "@type": "OpeningHoursSpecification", dayOfWeek: ["https://schema.org/Monday", "https://schema.org/Saturday"],
-        opens: "09:30:00", closes: "12:15:00",
-      },
+      openingHoursSpecification: [
+        {
+          "@type": "OpeningHoursSpecification", dayOfWeek: ["https://schema.org/Monday", "https://schema.org/Saturday"],
+          opens: "09:30:00", closes: "12:15:00",
+        },
+        {
+          "@type": "OpeningHoursSpecification", dayOfWeek: ["https://schema.org/Monday", "https://schema.org/Saturday"],
+          opens: "16:00:00", closes: "20:00:00",
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          dayOfWeek: ["Tuesday", "Wednesday", "Thursday", "Friday", "Sunday"].map(dia => `https://schema.org/${dia}`),
+          opens: "00:00:00", closes: "00:00:00",
+        },
+      ],
     })
     const json = serializarDatosEstructurados(local)
     expect(json).not.toMatch(/[<>&]/)

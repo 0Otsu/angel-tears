@@ -16,8 +16,8 @@ it("muestra la configuración vigente en el local, el contacto y el pie", () => 
   </>)
 
   expect(screen.getAllByText(/Calle de prueba 123/)).toHaveLength(2)
-  expect(screen.getByText(/Lunes, Sábado/)).toBeTruthy()
-  expect(screen.getByText(/09:30 a 12:15/)).toBeTruthy()
+  expect(screen.getByText("Lunes, Sábado: 09:30 a 12:15 · 16:00 a 20:00")).toBeTruthy()
+  expect(screen.getByText("Martes a viernes, Domingo: Cerrado")).toBeTruthy()
   const local = within(screen.getByRole("region", { name: "Vení a conocer Angel Tears" }))
   expect(local.queryByRole("img")).toBeNull()
   expect(local.getByRole("link", { name: "Cómo llegar" }).getAttribute("href"))
@@ -32,15 +32,18 @@ it("muestra la configuración vigente en el local, el contacto y el pie", () => 
 it("conserva el acceso al catálogo cuando falta la foto del hero", () => {
   const { rerender } = render(<Hero />)
 
-  const hero = within(screen.getByRole("region", { name: /Accesorios para.*cada versión de vos/ }))
+  const hero = within(screen.getByRole("region", { name: /Accesorios que acompañan cada versión de vos/ }))
   expect(hero.getByRole("link", { name: "Ver catálogo" }).getAttribute("href")).toBe("/catalogo")
   expect(hero.queryByRole("img", { hidden: true })).toBeNull()
 
   rerender(<Hero foto={{ src: "/hero-prueba.webp", width: 1920, height: 1080 }} />)
-  const fondo = screen.getByRole("region", { name: /Accesorios para.*cada versión de vos/ })
+  const fondo = screen.getByRole("region", { name: /Accesorios que acompañan cada versión de vos/ })
   expect(fondo.querySelector("img")?.classList.contains("object-cover")).toBe(true)
   expect(fondo.querySelector("img")?.getAttribute("sizes")).toBe("100vw")
-  expect(fondo.querySelector("[aria-hidden=true] > div")?.classList.contains("bg-white/55")).toBe(true)
+  const capas = fondo.querySelectorAll("[aria-hidden=true] > div")
+  expect(capas).toHaveLength(1)
+  expect(capas[0].classList.contains("bottom-0")).toBe(true)
+  expect(capas[0].classList.contains("from-card")).toBe(true)
   expect(within(fondo).getByRole("link", { name: "Ver catálogo" })).toBeTruthy()
 })
 

@@ -1,5 +1,5 @@
 import Image, { type StaticImageData } from "next/image"
-import { NOMBRES_DIAS, type NegocioPublico } from "@/lib/negocio-publico"
+import { describirDias, describirFranjas, type NegocioPublico } from "@/lib/negocio-publico"
 import identidad from "@/components/publico/identidad.module.css"
 import { MapPin, Clock, Wallet, Truck } from "lucide-react"
 
@@ -12,7 +12,9 @@ export function FeatureSection({ negocioPublico, fotoLocal }: {
       ? <>{negocioPublico.direccion}<br />{negocioPublico.referencia && <>{negocioPublico.referencia}<br /></>}{negocioPublico.ciudad}</>
       : "Ubicación no disponible por el momento." },
     { icon: Clock, title: "Horarios", description: negocioPublico
-      ? <>{negocioPublico.diasAtencion.map(dia => NOMBRES_DIAS[dia]).join(", ")}<br />{negocioPublico.apertura} a {negocioPublico.cierre}</>
+      ? negocioPublico.gruposHorarios.map(({ dias, franjas }) =>
+        <span key={dias[0]} className="block">{describirDias(dias)}: {describirFranjas(franjas)}</span>,
+      )
       : "Horarios no disponibles por el momento." },
     { icon: Wallet, title: "Medios de pago", description: <>Efectivo<br />Transferencia</> },
     { icon: Truck, title: "Envíos", description: <>Envíos en Concordia<br />A cargo del cliente</> },
@@ -37,7 +39,7 @@ export function FeatureSection({ negocioPublico, fotoLocal }: {
                 src={fotoLocal.src}
                 alt={fotoLocal.alt}
                 sizes="(min-width: 1280px) 576px, (min-width: 1024px) calc((100vw - 128px) / 2), calc(100vw - 48px)"
-                className="mt-6 aspect-[4/3] w-full rounded-3xl object-cover boty-shadow"
+                className="mt-6 aspect-[4/3] w-full rounded-3xl object-cover object-[50%_73%] boty-shadow"
               />
             )}
           </div>

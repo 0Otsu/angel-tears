@@ -1,14 +1,15 @@
 export const DIAS_SEMANA = ["lunes", "martes", "miercoles", "jueves", "viernes", "sabado", "domingo"] as const
 export type DiaAtencion = typeof DIAS_SEMANA[number]
 
+export type FranjaAtencion = { apertura: string; cierre: string }
+export type HorariosAtencion = Record<DiaAtencion, FranjaAtencion[]>
+
 export type ConfiguracionNegocio = {
   direccion: string
   localidad: string
   provincia: string
   referencia: string
-  diasAtencion: DiaAtencion[]
-  apertura: string
-  cierre: string
+  horarios: HorariosAtencion
   comoLlegar: string
   telefonoWhatsApp: string
   usuarioInstagram: string

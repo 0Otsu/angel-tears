@@ -64,6 +64,13 @@
       "when": 1795143941313,
       "tag": "0008_cuota-recuperacion",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1795227913398,
+      "tag": "0009_horarios-atencion",
+      "breakpoints": true
     }
   ]
 }

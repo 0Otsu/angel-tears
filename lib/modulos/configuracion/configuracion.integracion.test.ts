@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
 import { configuracionNegocio } from "@/lib/infraestructura/esquemas/configuracion-negocio"
 import { crearAuth } from "@/lib/infraestructura/auth-config"
@@ -37,11 +38,42 @@ describe("Configuración del negocio en PostgreSQL", () => {
     expect(await conexion.db.select().from(configuracionNegocio)).toHaveLength(1)
     expect(inicial).toMatchObject({
       direccion: "Entre Ríos 924", localidad: "Concordia",
-      diasAtencion: ["lunes", "martes", "miercoles", "jueves", "viernes"],
-      apertura: "17:00", cierre: "21:00", telefonoWhatsApp: "5493454266760",
+      telefonoWhatsApp: "5493454266760",
+    })
+    const franja = [{ apertura: "17:00", cierre: "21:00" }]
+    expect(inicial.horarios).toEqual({
+      lunes: franja, martes: franja, miercoles: franja, jueves: franja, viernes: franja, sabado: [], domingo: [],
     })
     await expect(conexion.db.insert(configuracionNegocio).values({ ...inicial, id: 2 })).rejects.toThrow()
     expect(await leerConfiguracionNegocio(conexion.db)).toEqual(inicial)
+  })
+
+  it("convierte un horario preexistente sin redondear ni tocar la dirección", async () => {
+    const cliente = await conexion.pool.connect()
+    try {
+      await cliente.query("BEGIN")
+      await cliente.query(`
+        CREATE TEMP TABLE configuracion_negocio (
+          direccion text NOT NULL, dias_atencion text[] NOT NULL, apertura text NOT NULL, cierre text NOT NULL
+        ) ON COMMIT DROP
+      `)
+      await cliente.query("INSERT INTO pg_temp.configuracion_negocio VALUES ($1, $2, $3, $4)", [
+        "Local anterior", ["martes", "sabado"], "08:07", "19:52",
+      ])
+      await cliente.query(readFileSync("drizzle/0009_horarios-atencion.sql", "utf8"))
+      const franja = [{ apertura: "08:07", cierre: "19:52" }]
+      const { rows } = await cliente.query("SELECT * FROM pg_temp.configuracion_negocio")
+      expect(rows).toEqual([{
+        direccion: "Local anterior",
+        horarios: { lunes: [], martes: franja, miercoles: [], jueves: [], viernes: [], sabado: franja, domingo: [] },
+      }])
+    } finally {
+      try {
+        await cliente.query("ROLLBACK")
+      } finally {
+        cliente.release()
+      }
+    }
   })
 
   it("el guard real rechaza una edición sin cookie sin escribir datos", async () => {
@@ -69,8 +101,11 @@ describe("Configuración del negocio en PostgreSQL", () => {
     const guardado = await editarConfiguracionNegocio(conexion.db, exigir, encabezados, configuracionPrueba)
     expect(guardado).toEqual({ estado: "ok", configuracion: configuracionPrueba })
 
-    const resultado = await editarConfiguracionNegocio(conexion.db, exigir, encabezados, { ...configuracionPrueba, direccion: "No guardar", cierre: "01:00" })
-    expect(resultado).toMatchObject({ estado: "datos_invalidos", errores: { cierre: expect.any(Array) } })
+    const resultado = await editarConfiguracionNegocio(conexion.db, exigir, encabezados, {
+      ...configuracionPrueba, direccion: "No guardar",
+      horarios: { ...configuracionPrueba.horarios, lunes: [{ apertura: "09:30", cierre: "01:00" }] },
+    })
+    expect(resultado).toMatchObject({ estado: "datos_invalidos", errores: { horarios: expect.any(Array) } })
     const persistida = await leerConfiguracionNegocio(conexion.db)
     expect(persistida).toEqual(configuracionPrueba)
     expect(await conexion.db.select().from(configuracionNegocio)).toHaveLength(1)
@@ -82,7 +117,10 @@ describe("Configuración del negocio en PostgreSQL", () => {
       address: { streetAddress: "Calle de prueba 123, Local 2" },
       telephone: "+5491100000000",
       sameAs: [publico.instagram],
-      openingHoursSpecification: { opens: "09:30:00", closes: "12:15:00", dayOfWeek: ["https://schema.org/Monday", "https://schema.org/Saturday"] },
+      openingHoursSpecification: expect.arrayContaining([
+        expect.objectContaining({ opens: "09:30:00", closes: "12:15:00", dayOfWeek: ["https://schema.org/Monday", "https://schema.org/Saturday"] }),
+        expect.objectContaining({ opens: "16:00:00", closes: "20:00:00", dayOfWeek: ["https://schema.org/Monday", "https://schema.org/Saturday"] }),
+      ]),
     })
   })
 })

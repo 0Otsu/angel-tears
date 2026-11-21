@@ -7,10 +7,15 @@ import { exigirAdministradora } from "@/lib/modulos/autenticacion/exigir-adminis
 import { editarConfiguracionNegocio } from "@/lib/modulos/configuracion/administracion"
 import type { ConfiguracionNegocio, ResultadoConfiguracion } from "@/lib/modulos/configuracion/contrato"
 
-const campos: (keyof Omit<ConfiguracionNegocio, "diasAtencion">)[] = [
-  "direccion", "localidad", "provincia", "referencia", "apertura", "cierre",
+const campos: (keyof Omit<ConfiguracionNegocio, "horarios">)[] = [
+  "direccion", "localidad", "provincia", "referencia",
   "comoLlegar", "telefonoWhatsApp", "usuarioInstagram",
 ]
+
+function leerHorarios(valor: FormDataEntryValue | null): unknown {
+  if (typeof valor !== "string" || valor.length > 4096) return null
+  try { return JSON.parse(valor) } catch { return null }
+}
 
 export async function guardarConfiguracionAccion(
   _anterior: ResultadoConfiguracion | null, formulario: FormData,
@@ -18,7 +23,7 @@ export async function guardarConfiguracionAccion(
   try {
     const entrada = {
       ...Object.fromEntries(campos.map((campo) => [campo, formulario.get(campo)])),
-      diasAtencion: formulario.getAll("diasAtencion"),
+      horarios: leerHorarios(formulario.get("horarios")),
     }
     const resultado = await editarConfiguracionNegocio(obtenerDb(), exigirAdministradora, await headers(), entrada)
     if (resultado.estado === "ok") {

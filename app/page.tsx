@@ -1,4 +1,6 @@
 import type { StaticImageData } from "next/image"
+import fotoHero from "@/public/images/local/hero.webp"
+import fotoFachada from "@/public/images/local/interior.webp"
 import { obtenerNegocioPublico } from "@/lib/modulos/configuracion/aplicacion"
 import { Header } from "@/components/boty/header"
 import { Hero } from "@/components/boty/hero"
@@ -12,12 +14,15 @@ import { metadataPublica } from "@/lib/modulos/catalogo/metadata-publica"
 import { datosLocal, serializarDatosEstructurados } from "@/lib/modulos/catalogo/datos-estructurados"
 
 // Fotos comerciales opcionales. Agregar solo originales autorizados; ver la guía de despliegue.
-const fotosInicio: { hero?: StaticImageData; interior?: { src: StaticImageData; alt: string } } = {}
+const fotosInicio: { hero?: StaticImageData; interior?: { src: StaticImageData; alt: string } } = {
+  hero: fotoHero,
+  interior: { src: fotoFachada, alt: "Fachada del edificio de Angel Tears, con el acceso en la puerta central" },
+}
 
 export const dynamic = "force-dynamic"
 export async function generateMetadata() {
   const negocioPublico = await obtenerNegocioPublico()
-  const titulo = negocioPublico ? `Bijouterie en ${negocioPublico.ciudad}` : "Bijouterie y accesorios"
+  const titulo = negocioPublico ? `Accesorios en ${negocioPublico.ciudad}` : "Accesorios"
   const descripcion = "Conocé los aros, collares, pulseras, anillos y otros accesorios de Angel Tears. Visitá nuestro local o consultanos por WhatsApp."
   return { ...metadataPublica(titulo, descripcion, "/"), title: { absolute: `${titulo} | Angel Tears` } }
 }

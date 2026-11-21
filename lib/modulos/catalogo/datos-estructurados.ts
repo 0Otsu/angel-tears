@@ -45,11 +45,12 @@ export function datosLocal(negocioPublico: NegocioPublico, origen = leerOrigenIn
       addressRegion: negocioPublico.provincia,
       addressCountry: "AR",
     },
-    openingHoursSpecification: {
-      "@type": "OpeningHoursSpecification",
-      dayOfWeek: negocioPublico.diasAtencion.map(dia => `https://schema.org/${diasSchema[dia]}`),
-      opens: `${negocioPublico.apertura}:00`,
-      closes: `${negocioPublico.cierre}:00`,
-    },
+    openingHoursSpecification: negocioPublico.gruposHorarios.flatMap(({ dias, franjas }) => {
+      const dayOfWeek = dias.map(dia => `https://schema.org/${diasSchema[dia]}`)
+      const intervalos = franjas.length ? franjas : [{ apertura: "00:00", cierre: "00:00" }]
+      return intervalos.map(({ apertura, cierre }) => ({
+        "@type": "OpeningHoursSpecification", dayOfWeek, opens: `${apertura}:00`, closes: `${cierre}:00`,
+      }))
+    }),
   }
 }

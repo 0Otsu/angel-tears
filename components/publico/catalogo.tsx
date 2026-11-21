@@ -36,8 +36,8 @@ export function Catalogo({ productos, negocioPublico }: { productos: ProductoPub
         <div className="mx-auto max-w-7xl">
           <div className="max-w-2xl">
             <span className="mb-4 block text-sm uppercase tracking-[0.3em] text-primary">Catálogo</span>
-            <h1 className="mb-5 font-serif text-5xl leading-tight text-foreground md:text-6xl">Catálogo de bijouterie y accesorios</h1>
-            <p className="max-w-xl text-lg leading-relaxed text-muted-foreground">Explorá nuestros aros, piercings, collares, pulseras, anillos y más. Filtrá por categoría y descubrí los productos disponibles.</p>
+            <h1 className="mb-5 font-serif text-5xl leading-tight text-foreground md:text-6xl">Catálogo de accesorios</h1>
+            <p className="max-w-xl text-lg leading-relaxed text-muted-foreground">Explorá nuestros aros, collares, pulseras, anillos y más.</p>
           </div>
         </div>
       </section>
